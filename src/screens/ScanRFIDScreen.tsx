@@ -11,14 +11,14 @@ import {
   Alert,
   ToastAndroid,
 } from 'react-native';
-import {
-  ZebraEvent,
-  ZebraEventEmitter,
-  connectToDevice,
-  getAllDevices,
-  type ZebraResultPayload,
-  type ZebraRfidResultPayload,
-} from 'react-native-zebra-rfid-barcode';
+// import {
+//   ZebraEvent,
+//   ZebraEventEmitter,
+//   connectToDevice,
+//   getAllDevices,
+//   type ZebraResultPayload,
+//   type ZebraRfidResultPayload,
+// } from 'react-native-zebra-rfid-barcode';
 import logoRfid from '../assets/images/rfid.png'; // Adjust the path as necessary
 import logoQrcode from '../assets/images/qrcode.png'; // Adjust the path as necessary
 import {useFocusEffect} from '@react-navigation/native';
@@ -89,48 +89,48 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
   //   };
   // }, []);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      getListRfidDevices();
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     getListRfidDevices();
 
-      const barcodeEvent = ZebraEventEmitter.addListener(
-        ZebraEvent.ON_BARCODE,
-        (e: ZebraResultPayload) => {
-          handleBarcodeEvent(e.data);
-        },
-      );
+  //     const barcodeEvent = ZebraEventEmitter.addListener(
+  //       ZebraEvent.ON_BARCODE,
+  //       (e: ZebraResultPayload) => {
+  //         handleBarcodeEvent(e.data);
+  //       },
+  //     );
 
-      const rfidEvent = ZebraEventEmitter.addListener(
-        ZebraEvent.ON_RFID,
-        (e: ZebraRfidResultPayload) => {
-          handleRfidEvent(e.data);
-        },
-      );
+  //     const rfidEvent = ZebraEventEmitter.addListener(
+  //       ZebraEvent.ON_RFID,
+  //       (e: ZebraRfidResultPayload) => {
+  //         handleRfidEvent(e.data);
+  //       },
+  //     );
 
-      const deviceConnectEvent = ZebraEventEmitter.addListener(
-        ZebraEvent.ON_DEVICE_CONNECTED,
-        (e: ZebraResultPayload) => {
-          ToastAndroid.show(e.data, ToastAndroid.SHORT);
-          setConnectedDevice(e.data);
-        },
-      );
+  //     const deviceConnectEvent = ZebraEventEmitter.addListener(
+  //       ZebraEvent.ON_DEVICE_CONNECTED,
+  //       (e: ZebraResultPayload) => {
+  //         ToastAndroid.show(e.data, ToastAndroid.SHORT);
+  //         setConnectedDevice(e.data);
+  //       },
+  //     );
 
-      // Clean up listeners when screen is unfocused
-      return () => {
-        barcodeEvent.remove();
-        rfidEvent.remove();
-        deviceConnectEvent.remove();
-      };
-    }, []),
-  );
+  //     // Clean up listeners when screen is unfocused
+  //     return () => {
+  //       barcodeEvent.remove();
+  //       rfidEvent.remove();
+  //       deviceConnectEvent.remove();
+  //     };
+  //   }, []),
+  // );
 
-  useEffect(() => {
-    if (onDevicesChange) onDevicesChange(listDevices);
-  }, [listDevices, onDevicesChange]);
+  // useEffect(() => {
+  //   if (onDevicesChange) onDevicesChange(listDevices);
+  // }, [listDevices, onDevicesChange]);
 
-  useEffect(() => {
-    if (onScanBarcode) onScanBarcode(listBarcodes);
-  }, [listBarcodes, onScanBarcode]);
+  // useEffect(() => {
+  //   if (onScanBarcode) onScanBarcode(listBarcodes);
+  // }, [listBarcodes, onScanBarcode]);
 
   // useEffect(() => {
   //   if (onScanRfid) onScanRfid(listRfid);
@@ -139,31 +139,31 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
   //   }
   // }, [listRfid, onScanRfid, autoNavigate, onAutoNavigate]);
 
-  useEffect(() => {
-    if (autoNavigate && onAutoNavigate) {
-      if (mode === 'rfid' && listRfid.length > 0) {
-        onAutoNavigate(listRfid);
-      } else if (mode === 'qrcode' && listBarcodes.length > 0) {
-        onAutoNavigate(listBarcodes);
-      } else if (mode === 'multi') {
-        if (listRfid.length > 0) {
-          onAutoNavigate(listRfid);
-        } else if (listBarcodes.length > 0) {
-          onAutoNavigate(listBarcodes);
-        }
-      }
-    }
-  }, [listRfid, listBarcodes, mode, autoNavigate, onAutoNavigate]);
+  // useEffect(() => {
+  //   if (autoNavigate && onAutoNavigate) {
+  //     if (mode === 'rfid' && listRfid.length > 0) {
+  //       onAutoNavigate(listRfid);
+  //     } else if (mode === 'qrcode' && listBarcodes.length > 0) {
+  //       onAutoNavigate(listBarcodes);
+  //     } else if (mode === 'multi') {
+  //       if (listRfid.length > 0) {
+  //         onAutoNavigate(listRfid);
+  //       } else if (listBarcodes.length > 0) {
+  //         onAutoNavigate(listBarcodes);
+  //       }
+  //     }
+  //   }
+  // }, [listRfid, listBarcodes, mode, autoNavigate, onAutoNavigate]);
 
-  useEffect(() => {
-    const deviceConnectEvent = ZebraEventEmitter.addListener(
-      ZebraEvent.ON_DEVICE_CONNECTED,
-      (e: ZebraResultPayload) => {
-        ToastAndroid.show(e.data, ToastAndroid.SHORT);
-        setConnectedDevice(e.data); // Track connected device
-      },
-    );
-  }, []);
+  // useEffect(() => {
+  //   const deviceConnectEvent = ZebraEventEmitter.addListener(
+  //     ZebraEvent.ON_DEVICE_CONNECTED,
+  //     (e: ZebraResultPayload) => {
+  //       ToastAndroid.show(e.data, ToastAndroid.SHORT);
+  //       setConnectedDevice(e.data); // Track connected device
+  //     },
+  //   );
+  // }, []);
 
   // const handleRfidEvent = useCallback(
   //   debounce((newData: string[]) => {
@@ -278,6 +278,10 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
         <Text style={styles.promptText}>{promptText}</Text>
       </View>
       {/* showw list */}
+      <TouchableOpacity
+        onPress={() => onAutoNavigate && onAutoNavigate(['123989898'])}>
+        <Text>NEXT</Text>
+      </TouchableOpacity>
       {showBarcodes && (
         <View>
           <Text>Barcodes: {listBarcodes.length}</Text>

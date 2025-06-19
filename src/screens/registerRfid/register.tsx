@@ -11,14 +11,14 @@ import {
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation} from '@react-navigation/native';
-import {
-  ZebraEvent,
-  ZebraEventEmitter,
-  connectToDevice,
-  getAllDevices,
-  type ZebraResultPayload,
-  type ZebraRfidResultPayload,
-} from 'react-native-zebra-rfid-barcode';
+// import {
+//   ZebraEvent,
+//   ZebraEventEmitter,
+//   connectToDevice,
+//   getAllDevices,
+//   type ZebraResultPayload,
+//   type ZebraRfidResultPayload,
+// } from 'react-native-zebra-rfid-barcode';
 import {debounce} from 'lodash';
 
 const dummyRfids = ['4C5071020190000000081386', '4C5071020190000000081350'];
@@ -31,66 +31,66 @@ const AddRfidScreen = () => {
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([]);
-  useEffect(() => {
-    getListRfidDevices();
+  // useEffect(() => {
+  //   getListRfidDevices();
 
-    const barcodeEvent = ZebraEventEmitter.addListener(
-      ZebraEvent.ON_BARCODE,
-      (e: ZebraResultPayload) => {
-        handleBarcodeEvent(e.data);
-      },
-    );
+  //   const barcodeEvent = ZebraEventEmitter.addListener(
+  //     ZebraEvent.ON_BARCODE,
+  //     (e: ZebraResultPayload) => {
+  //       handleBarcodeEvent(e.data);
+  //     },
+  //   );
 
-    const rfidEvent = ZebraEventEmitter.addListener(
-      ZebraEvent.ON_RFID,
-      (e: ZebraRfidResultPayload) => {
-        handleRfidEvent(e.data);
-      },
-    );
+  //   const rfidEvent = ZebraEventEmitter.addListener(
+  //     ZebraEvent.ON_RFID,
+  //     (e: ZebraRfidResultPayload) => {
+  //       handleRfidEvent(e.data);
+  //     },
+  //   );
 
-    const deviceConnectEvent = ZebraEventEmitter.addListener(
-      ZebraEvent.ON_DEVICE_CONNECTED,
-      (e: ZebraResultPayload) => {
-        console.log(e.data); // "Connect successfully" || "Connect failed"
-        // Alert.alert(e.data);
-        ToastAndroid.show(e.data, ToastAndroid.SHORT);
-      },
-    );
+  //   const deviceConnectEvent = ZebraEventEmitter.addListener(
+  //     ZebraEvent.ON_DEVICE_CONNECTED,
+  //     (e: ZebraResultPayload) => {
+  //       console.log(e.data); // "Connect successfully" || "Connect failed"
+  //       // Alert.alert(e.data);
+  //       ToastAndroid.show(e.data, ToastAndroid.SHORT);
+  //     },
+  //   );
 
-    return () => {
-      barcodeEvent.remove();
-      rfidEvent.remove();
-      deviceConnectEvent.remove();
-    };
-  }, []);
+  //   return () => {
+  //     barcodeEvent.remove();
+  //     rfidEvent.remove();
+  //     deviceConnectEvent.remove();
+  //   };
+  // }, []);
 
-  const handleRfidEvent = useCallback(
-    debounce((newData: string[]) => {
-      setListRfid(pre => {
-        // Prevent duplicates
-        const set = new Set(pre);
-        newData.forEach(item => set.add(item));
-        return Array.from(set);
-      });
-    }, 200),
-    [],
-  );
+  // const handleRfidEvent = useCallback(
+  //   debounce((newData: string[]) => {
+  //     setListRfid(pre => {
+  //       // Prevent duplicates
+  //       const set = new Set(pre);
+  //       newData.forEach(item => set.add(item));
+  //       return Array.from(set);
+  //     });
+  //   }, 200),
+  //   [],
+  // );
 
-  const handleBarcodeEvent = useCallback(
-    debounce((newData: string) => {
-      setListBarcodes(pre => {
-        // Prevent duplicates
-        if (pre.includes(newData)) return pre;
-        return [...pre, newData];
-      });
-    }, 200),
-    [],
-  );
+  // const handleBarcodeEvent = useCallback(
+  //   debounce((newData: string) => {
+  //     setListBarcodes(pre => {
+  //       // Prevent duplicates
+  //       if (pre.includes(newData)) return pre;
+  //       return [...pre, newData];
+  //     });
+  //   }, 200),
+  //   [],
+  // );
 
-  const getListRfidDevices = async () => {
-    const listDevices = await getAllDevices();
-    setListDevices(listDevices);
-  };
+  // const getListRfidDevices = async () => {
+  //   const listDevices = await getAllDevices();
+  //   setListDevices(listDevices);
+  // };
 
   const handleRegisterNew = () => {
     // TODO: Implement register new RFID logic

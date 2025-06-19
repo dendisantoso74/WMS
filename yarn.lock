@@ -6349,11 +6349,6 @@ react-native-vector-icons@^10.2.0:
     prop-types "^15.7.2"
     yargs "^16.1.1"
 
-react-native-zebra-rfid-barcode@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.npmjs.org/react-native-zebra-rfid-barcode/-/react-native-zebra-rfid-barcode-0.1.4.tgz"
-  integrity sha512-cywHjHsY4fTganiLHEJkN5bEzDVh93wCmLTuXUnK6wBUM0+qeV8nNJ0XM/fVZwTIktgU0et+yYqQOJIrsS9cSw==
-
 react-native@*, "react-native@^0.0.0-0 || >=0.65 <1.0", react-native@>=0.41.2, react-native@>=0.59, react-native@0.74.1:
   version "0.74.1"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.74.1.tgz"
