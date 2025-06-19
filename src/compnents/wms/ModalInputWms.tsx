@@ -1,0 +1,169 @@
+import React, {useState} from 'react';
+import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+
+type ModalInputWmsProps = {
+  visible: boolean;
+  material: string;
+  orderQty: string | number;
+  remainingQty: string | number;
+  total?: number;
+  onClose: () => void;
+  onReceive: (total: number) => void;
+};
+
+const ModalInputWms: React.FC<ModalInputWmsProps> = ({
+  visible,
+  material,
+  orderQty,
+  remainingQty,
+  total = 1,
+  onClose,
+  onReceive,
+}) => {
+  const [count, setCount] = useState(total);
+
+  const handleDecrease = () => {
+    if (count > 1) setCount(count - 1);
+  };
+
+  const handleIncrease = () => {
+    setCount(count + 1);
+  };
+
+  const handleReceive = () => {
+    onReceive(count);
+    onClose();
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Material</Text>
+              <Text style={styles.value} numberOfLines={1}>
+                {material}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Order Qty</Text>
+              <Text style={styles.value}>{orderQty}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Remaining Qty</Text>
+              <Text style={styles.value}>{remainingQty}</Text>
+            </View>
+          </View>
+          <View style={styles.counterRow}>
+            <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
+              <Text style={styles.circleBtnText}>-</Text>
+            </TouchableOpacity>
+            <View style={styles.countBox}>
+              <Text style={styles.countText}>{count}</Text>
+            </View>
+            <TouchableOpacity style={styles.circleBtn} onPress={handleIncrease}>
+              <Text style={styles.circleBtnText}>+</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.receiveBtn} onPress={handleReceive}>
+            <Text style={styles.receiveBtnText}>Receive Material</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(30,30,30,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    width: 320,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    overflow: 'hidden',
+    paddingBottom: 24,
+  },
+  header: {
+    backgroundColor: '#285a8d',
+    padding: 16,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+    alignItems: 'center',
+  },
+  label: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  value: {
+    color: '#fff',
+    fontSize: 15,
+    maxWidth: 160,
+    textAlign: 'right',
+  },
+  counterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 24,
+  },
+  circleBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#e7eaf3',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circleBtnText: {
+    fontSize: 28,
+    color: '#285a8d',
+    fontWeight: 'bold',
+  },
+  countBox: {
+    minWidth: 80,
+    borderWidth: 1,
+    borderColor: '#b0b0b0',
+    borderRadius: 8,
+    marginHorizontal: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 8,
+  },
+  countText: {
+    fontSize: 28,
+    color: '#222',
+    fontWeight: '500',
+  },
+  receiveBtn: {
+    backgroundColor: '#285aee',
+    borderRadius: 8,
+    marginHorizontal: 40,
+    marginTop: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  receiveBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+});
+
+export default ModalInputWms;
