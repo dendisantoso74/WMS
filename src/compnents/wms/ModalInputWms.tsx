@@ -1,5 +1,12 @@
 import React, {useState} from 'react';
-import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+} from 'react-native';
 
 type ModalInputWmsProps = {
   visible: boolean;
@@ -7,6 +14,7 @@ type ModalInputWmsProps = {
   orderQty: string | number;
   remainingQty: string | number;
   total?: number;
+  orderunit?: string;
   onClose: () => void;
   onReceive: (total: number) => void;
 };
@@ -17,6 +25,7 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
   orderQty,
   remainingQty,
   total = 1,
+  orderunit,
   onClose,
   onReceive,
 }) => {
@@ -28,6 +37,12 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
 
   const handleIncrease = () => {
     setCount(count + 1);
+  };
+
+  const handleInputChange = (text: string) => {
+    // Only allow numbers, fallback to 1 if empty or invalid
+    const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
+    setCount(isNaN(num) ? 1 : num);
   };
 
   const handleReceive = () => {
@@ -52,11 +67,15 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Order Qty</Text>
-              <Text style={styles.value}>{orderQty}</Text>
+              <Text style={styles.value}>
+                {orderQty} {orderunit ? orderunit : ''}
+              </Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Remaining Qty</Text>
-              <Text style={styles.value}>{remainingQty}</Text>
+              <Text style={styles.value}>
+                {remainingQty} {orderunit ? orderunit : ''}
+              </Text>
             </View>
           </View>
           <View style={styles.counterRow}>
@@ -64,7 +83,14 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
               <Text style={styles.circleBtnText}>-</Text>
             </TouchableOpacity>
             <View style={styles.countBox}>
-              <Text style={styles.countText}>{count}</Text>
+              <TextInput
+                style={styles.countText}
+                value={count.toString()}
+                onChangeText={handleInputChange}
+                keyboardType="numeric"
+                textAlign="center"
+                maxLength={6}
+              />
             </View>
             <TouchableOpacity style={styles.circleBtn} onPress={handleIncrease}>
               <Text style={styles.circleBtnText}>+</Text>
@@ -113,7 +139,7 @@ const styles = StyleSheet.create({
   value: {
     color: '#fff',
     fontSize: 15,
-    maxWidth: 160,
+    maxWidth: 200,
     textAlign: 'right',
   },
   counterRow: {
@@ -150,6 +176,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: '#222',
     fontWeight: '500',
+    padding: 0,
   },
   receiveBtn: {
     backgroundColor: '#285aee',

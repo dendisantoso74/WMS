@@ -25,20 +25,35 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
   const [loading, setLoading] = useState(false);
 
+  // useEffect(() => {
+  //   const getData = async () => {
+  //     try {
+  //       const value = await AsyncStorage.getItem('user');
+
+  //       if (value !== null) {
+  //         // chec expired token
+  //         if (isExpired(JSON.parse(value).exp)) {
+  //           clearAllData();
+  //           setIsAuthenticated(false);
+  //         } else {
+  //           setIsAuthenticated(true);
+  //           setUser(value);
+  //         }
+  //       }
+  //     } catch (e) {
+  //       // error reading value
+  //       console.error(e);
+  //     }
+  //   };
+  //   getData();
+  // }, [setIsAuthenticated, setUser]);
+
   useEffect(() => {
     const getData = async () => {
       try {
         const value = await AsyncStorage.getItem('user');
-
         if (value !== null) {
-          // chec expired token
-          if (isExpired(JSON.parse(value).exp)) {
-            clearAllData();
-            setIsAuthenticated(false);
-          } else {
-            setIsAuthenticated(true);
-            setUser(value);
-          }
+          setIsAuthenticated(true);
         }
       } catch (e) {
         // error reading value
@@ -58,25 +73,33 @@ const LoginScreen = () => {
       const formData = new URLSearchParams();
       formData.append('username', username);
       formData.append('password', password);
+      console.log('formData', btoa(`${username}:${password}`));
+
       authService
-        .login(formData.toString())
+        .login(username, password)
         .then(res => {
-          storeData('userToken', res.access_token);
-          decode(res.access_token, '', {
-            skipValidation: true,
-          })
-            .then(decodeRes => {
-              storeData('user', JSON.stringify(decodeRes.payload));
-              setUser(JSON.stringify(decodeRes.payload));
-            }) // already an object. read below, exp key note
-            .catch(err => console.log('error', err));
+          // storeData('userToken', res.access_token);
+          // decode(res.access_token, '', {
+          //   skipValidation: true,
+          // })
+          //   .then(decodeRes => {
+          //     storeData('user', JSON.stringify(decodeRes.payload));
+          //     setUser(JSON.stringify(decodeRes.payload));
+          //   }) // already an object. read below, exp key note
+          //   .catch(err => console.log('error', err));
+          console.log('berhasil login', res);
+          storeData('user', username);
+          storeData('site', 'TJB56');
+          storeData('org', 'BJS');
 
           setIsAuthenticated(true);
         })
         .catch(err => {
           setIsAuthenticated(false);
 
-          Alert.alert('Error', err?.detail || err);
+          // Alert.alert('Error', err?.detail || err);
+          console.log('error login', err);
+
           setLoading(false);
         });
     } else {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,22 +10,88 @@ import Icon from '../compnents/Icon';
 import {useNavigation} from '@react-navigation/native';
 import MenuCard from '../compnents/MenuCard';
 import {StyleSheet} from 'react-native';
+import {getPersonByLoginId} from '../services/user';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeWMSScreen = () => {
   const navigation = useNavigation<any>();
+  const [userData, setUserData] = React.useState(null);
+  const [site, setSite] = React.useState<string | null>(null);
+  const [org, setOrg] = React.useState<string | null>(null);
+  const [user, setUser] = React.useState<string | null>(null);
+
+  useEffect(() => {
+    // This is where you can add any setup code, like fetching user data
+    // or initializing services.
+    getPersonByLoginId(user).then(res => {
+      // Handle the response from getPersonByLoginId;
+      console.log('User Data:', res.member[0]);
+      setUserData(res.member[0]);
+    });
+  }, [user]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const siteAsync = await AsyncStorage.getItem('site');
+        const orgAsync = await AsyncStorage.getItem('org');
+        const userAsync = await AsyncStorage.getItem('user');
+        console.log('asyn name', userAsync);
+        setUser(userAsync);
+        setSite(siteAsync);
+        setOrg(orgAsync);
+      } catch (error) {
+        console.error('Error fetching data from AsyncStorage:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView contentContainerStyle={{paddingBottom: 24}}>
         {/* Header Section */}
         <View className="px-2 pt-6 pb-4 bg-white">
-          <Text className="text-xl font-bold text-gray-900">
-            Welcome Back, User Name
-          </Text>
+          {userData ? (
+            <>
+              <Text className="text-xl font-bold text-gray-900">
+                Welcome Back,{' '}
+                {userData?.firstname
+                  ? userData?.firstname
+                  : userData?.displayname}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text className="text-xl font-bold text-gray-900">
+                Welcome Back,{' '}
+                <View className="w-20 h-4 mb-2 bg-gray-200 rounded-md animate-pulse" />
+              </Text>
+            </>
+          )}
+
           <View className="flex-row items-center justify-between mt-2">
             <View>
               <Text className="text-base text-gray-700">
-                Site: TJB56 <Text className="font-bold">Org: BJS</Text>
+                Site:{' '}
+                {site ? (
+                  site
+                ) : (
+                  <>
+                    <View className="w-20 h-3 mb-2 bg-gray-200 rounded-md animate-pulse" />
+                  </>
+                )}{' '}
+                <Text className="font-bold">
+                  Org:{' '}
+                  {org ? (
+                    org
+                  ) : (
+                    <>
+                      <View className="w-20 h-3 mb-2 bg-gray-200 rounded-md animate-pulse" />
+                    </>
+                  )}
+                </Text>
               </Text>
             </View>
             <TouchableOpacity

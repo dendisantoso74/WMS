@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,13 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
+  Alert,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
+import {ScanPo} from '../../services/materialRecive';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -24,27 +26,57 @@ const MaterialReceiveDetailScreen = () => {
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
+  const [datas, setDatas] = useState([]);
+  const [selectedData, setSelectedData] = useState<string | null>(null);
 
   const handleReceive = () => {
     setModalVisible(true);
   };
 
-  const renderItem = ({item}: {item: string}) => (
-    <View style={styles.rfidCard}>
+  useEffect(() => {
+    ScanPo(listrfid[listrfid.length - 1]).then((res: any) => {
+      console.log('RFIDs fetched successfully:', res.member.length);
+      if (res.member.length === 0) {
+        navigation.goBack();
+        Alert.alert(
+          'No Data',
+          'No data found for this PO number.',
+          // [{text: 'OK', onPress: () => navigation.goBack()}],
+          // {cancelable: false},
+        );
+      }
+      setDatas(res.member[0].poline);
+    });
+  }, []);
+
+  const renderItem = item => (
+    <TouchableOpacity
+      onPress={() => {
+        setModalVisible(true);
+        setSelectedData(item.item.polinenum);
+      }}
+      style={styles.rfidCard}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
-        <Text className="font-bold">TR02-FOM</Text>
-        <Text className="font-bold">FIBER OPTIC 100 Meter</Text>
+        <Text className="font-bold">{item.item.itemnum}</Text>
+        <Text className="font-bold" style={[styles.maxWidthFullMinus8]}>
+          {item.item.description}
+        </Text>
         <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3 text-lg font-bold">NEW</Text>
+          <Text className="w-1/3 ml-3 text-lg font-bold">
+            {item.item.conditioncode}
+          </Text>
           <Text className="w-1/2 text-right">Order / Receive</Text>
         </View>
         <View className="flex-row justify-between">
           <Text className="w-1/3 ml-3"></Text>
-          <Text className="w-1/2 text-right">3.0 roll / 0.0 roll</Text>
+          <Text className="w-1/2 text-right">
+            {item.item.orderqty} {item.item.orderunit} / {item.item.orderqty}{' '}
+            {item.item.orderunit}
+          </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -63,9 +95,9 @@ const MaterialReceiveDetailScreen = () => {
         onChangeText={setSearch}
       />
       <FlatList
-        data={rfids}
+        data={datas}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={item => item.polinenum}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
@@ -80,9 +112,18 @@ const MaterialReceiveDetailScreen = () => {
 
       <ModalInputWms
         visible={modalVisible}
-        material="FIBER OPTIC 24 CORE"
-        orderQty="3.0 ROLL"
-        remainingQty="3.0 ROLL"
+        material={
+          datas.find(item => item.polinenum === selectedData)?.description || ''
+        }
+        orderQty={
+          datas.find(item => item.polinenum === selectedData)?.orderqty || ''
+        }
+        orderunit={
+          datas.find(item => item.polinenum === selectedData)?.orderunit || ''
+        }
+        remainingQty={
+          datas.find(item => item.polinenum === selectedData)?.orderqty || ''
+        }
         total={3}
         onClose={() => setModalVisible(false)}
         onReceive={handleReceive}
@@ -177,6 +218,10 @@ const styles = StyleSheet.create({
     // marginBottom: 4,
     marginTop: 6,
     marginHorizontal: 8,
+  },
+  maxWidthFullMinus8: {
+    maxWidth: 300,
+    // marginRight: 8,
   },
 });
 

@@ -1,5 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React from 'react';
 import {View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import {storeData} from '../utils/store';
+import {useNavigation} from '@react-navigation/native';
 
 const DATA = [
   {id: '1', name: 'TJB56', position: 'BJS'},
@@ -7,8 +10,20 @@ const DATA = [
 ];
 
 const ChangeSiteScreen = () => {
+  const navigation = useNavigation<any>();
+  const handlePress = async item => {
+    storeData('site', item.name);
+    storeData('org', item.position);
+
+    navigation.navigate('HomeWMS');
+  };
+
   const renderItem = ({item}: {item: (typeof DATA)[0]}) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity
+      onPress={() => {
+        handlePress(item);
+      }}
+      style={styles.card}>
       <View className="flex-row ">
         <Text>Site</Text>
         <Text style={styles.name}>: {item.name}</Text>
