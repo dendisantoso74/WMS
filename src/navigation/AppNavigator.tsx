@@ -22,6 +22,16 @@ import TagInfoScreen from '../screens/TagInfo';
 import TagInfoDetailScreen from '../screens/TagInfo/detail';
 import MaterialReceiveDetailScreen from '../screens/MaterialReceive/detail';
 import MaterialReceiveScreen from '../screens/MaterialReceive';
+import InspectionScreen from '../screens/Inspection';
+import InspectionReceivingScreen from '../screens/Inspection/detail';
+import InspectionReceivingApproveScreen from '../screens/Inspection/inspect';
+import TagScreen from '../screens/Tag';
+import TagDetailScreen from '../screens/Tag/detail';
+import TagInspectScreen from '../screens/Tag/inspect';
+import TransferInstructionScreen from '../screens/OpenTransferIntuction';
+import TransferInstructionAssignScreen from '../screens/OpenTransferIntuction/detail';
+import MyTransferInstructionScreen from '../screens/MyTransferInstruction';
+import MyTransferInstructionScanScreen from '../screens/MyTransferInstruction/detail';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -135,6 +145,24 @@ const AppNavigator = () => {
           />
           <Stack.Screen name="ScanCamera" component={ScanScreen} />
           <Stack.Screen name="ChangeSiteScreen" component={ChangeSiteScreen} />
+          {/* Open Transfer Instruction*/}
+          <Stack.Screen
+            name="Transfer Instruction"
+            component={TransferInstructionScreen}
+          />
+          <Stack.Screen
+            name="Transfer Instruction Assign"
+            component={TransferInstructionAssignScreen}
+          />
+          {/* My Transfer Instruction*/}
+          <Stack.Screen
+            name="My Transfer Instruction"
+            component={MyTransferInstructionScreen}
+          />
+          <Stack.Screen
+            name="My Transfer Instruction Scan"
+            component={MyTransferInstructionScanScreen}
+          />
           {/* Register RFID Menu */}
           <Stack.Screen name="RegisterRFID" component={RegisterRfidScreen} />
           <Stack.Screen name="AddRFID" component={AddRfidScreen} />
@@ -153,13 +181,25 @@ const AppNavigator = () => {
             name="Material Receive Detail"
             component={MaterialReceiveDetailScreen}
           />
+          {/* inspection menu */}
+          <Stack.Screen name="Inspection" component={InspectionScreen} />
+          <Stack.Screen
+            name="InspectionReceivingPO"
+            component={InspectionReceivingScreen}
+          />
+          <Stack.Screen
+            name="InspectionReceivingPOApprove"
+            component={InspectionReceivingApproveScreen}
+          />
+
+          {/* Tag Menu */}
+          <Stack.Screen name="Po to Tag" component={TagScreen} />
+          <Stack.Screen name="Po Detail" component={TagDetailScreen} />
+          <Stack.Screen name="Item to Tag" component={TagInspectScreen} />
 
           {/* Tag Info Menu */}
           <Stack.Screen name="TagInfo" component={TagInfoScreen} />
-          <Stack.Screen
-            name="Tag Info Detail"
-            component={TagInfoDetailScreen}
-          />
+          <Stack.Screen name="TagInfoDetail" component={TagInfoDetailScreen} />
 
           <Stack.Screen
             name="List"
