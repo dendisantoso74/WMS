@@ -22,6 +22,7 @@ import TagInfoScreen from '../screens/TagInfo';
 import TagInfoDetailScreen from '../screens/TagInfo/detail';
 import MaterialReceiveDetailScreen from '../screens/MaterialReceive/detail';
 import MaterialReceiveScreen from '../screens/MaterialReceive';
+import OptionsScreen from '../screens/OptionsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -115,7 +116,12 @@ const AppNavigator = () => {
   const {isAuthenticated} = useAppContext();
 
   return (
-    <Stack.Navigator screenOptions={{headerShown: true}}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerStyle: {backgroundColor: '#2f5589'}, // <-- Set header background color
+        headerTintColor: '#fff', // <-- Set header text/icon color
+      }}>
       {isAuthenticated ? (
         <>
           {/* <Stack.Screen
@@ -126,7 +132,30 @@ const AppNavigator = () => {
           <Stack.Screen
             name="HomeWMS"
             component={HomeWMSScreen}
-            options={{headerBackVisible: false}}
+            // options={{headerBackVisible: false}}
+            options={({navigation}) => ({
+              headerTitle: 'Warehouse Home', // Custom title
+              // headerTitleAlign: 'center',
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Options')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="settings"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+              headerBackVisible: false,
+              // You can also add headerLeft if needed
+              // headerLeft: () => (
+              //   <TouchableOpacity onPress={() => navigation.goBack()} style={{marginLeft: 16}}>
+              //     <Icon library="Feather" name="arrow-left" size={24} color="#3674B5" />
+              //   </TouchableOpacity>
+              // ),
+            })}
           />
           <Stack.Screen
             name="ScanRFIDScreen"
@@ -167,6 +196,7 @@ const AppNavigator = () => {
             options={{headerShown: false}}
           />
           <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="Options" component={OptionsScreen} />
         </>
       ) : (
         <Stack.Screen

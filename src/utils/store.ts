@@ -53,3 +53,13 @@ export const clearDataLogout = async () => {
     console.error(`Error clearing data for keys "${keys.join(', ')}":`, error);
   }
 };
+
+export const getData = async (key: StorageKeyTypes): Promise<string | null> => {
+  try {
+    const value = await AsyncStorage.getItem(key);
+    return value;
+  } catch (e) {
+    console.error(`Error getting data for key "${key}":`, e);
+    return null;
+  }
+};

@@ -1,3 +1,4 @@
+import {getData} from '../utils/store';
 import api from './api';
 
 export const getPersonByLoginId = async (loginId: string) => {
@@ -14,8 +15,14 @@ export const getPersonByLoginId = async (loginId: string) => {
 };
 
 export const ScanPo = async (id: string) => {
+  const site = await getData('site');
+  console.log('ScanPo id', id);
+  console.log('get data async site ', site);
+
   const url =
-    '/maximo/oslc/os/WMS_MXRECEIPT?savedQuery=PO:POREV&oslc.select=ponum,status,poid,orderdate,vendor,siteid,orgid,revisionnum,poline{itemnum,description,orderqty,orderunit,wmsissueunit,conversion,polinenum,conditioncode},wms_matrectrans{itemnum,description,receiptquantity,rejectqty,wmsmatrectransid,orderunit,polinenum,positeid,orgid}&oslc.where=siteid="BJPHO" and poline.linetype="ITEM" and ponum="' +
+    '/maximo/oslc/os/WMS_MXRECEIPT?savedQuery=PO:POREV&oslc.select=ponum,status,poid,orderdate,vendor,siteid,orgid,revisionnum,poline{itemnum,description,orderqty,orderunit,wmsissueunit,conversion,polinenum,conditioncode},wms_matrectrans{itemnum,description,receiptquantity,rejectqty,wmsmatrectransid,orderunit,polinenum,positeid,orgid}&oslc.where=siteid="' +
+    site +
+    '" and poline.linetype="ITEM" and ponum="' +
     id +
     '"&lean=1';
   try {
