@@ -2,9 +2,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Config from 'react-native-config';
 
+export const getApiUrl = async (): Promise<string | null> => {
+  try {
+    const url = await AsyncStorage.getItem('apiUrl');
+    console.log('getApiUrl', url);
+
+    return url;
+  } catch (e) {
+    console.error('Error getting apiurl from AsyncStorage:', e);
+    return null;
+  }
+};
+
 // Konfigurasi utama Axios
 const api = axios.create({
-  baseURL: Config.API_URL, // Ganti dengan base URL API kamu
+  // baseURL: Config.API_URL, // Ganti dengan base URL API kamu
   timeout: 10000, // Timeout request (dalam ms)
 });
 
@@ -50,6 +62,18 @@ api.interceptors.response.use(
     // console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error.response?.data || error.message);
   },
+);
+
+// Interceptor to set baseURL dynamically from AsyncStorage
+api.interceptors.request.use(
+  async config => {
+    const apiUrl = await getApiUrl();
+    if (apiUrl) {
+      config.baseURL = apiUrl;
+    }
+    return config;
+  },
+  error => Promise.reject(error),
 );
 
 export default api;

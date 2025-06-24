@@ -23,6 +23,7 @@ import TagInfoDetailScreen from '../screens/TagInfo/detail';
 import MaterialReceiveDetailScreen from '../screens/MaterialReceive/detail';
 import MaterialReceiveScreen from '../screens/MaterialReceive';
 import OptionsScreen from '../screens/OptionsScreen';
+import ServerAddressScreen from '../screens/ServerAddressScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -199,12 +200,19 @@ const AppNavigator = () => {
           <Stack.Screen name="Options" component={OptionsScreen} />
         </>
       ) : (
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{headerShown: false}}
-          // initialParams={{setIsAuthenticated}}
-        />
+        <>
+          <Stack.Screen
+            name="ServerAddress"
+            component={ServerAddressScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{headerShown: false}}
+            // initialParams={{setIsAuthenticated}}
+          />
+        </>
         // <BottomTabNavigator/>
       )}
     </Stack.Navigator>
