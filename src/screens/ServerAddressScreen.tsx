@@ -61,10 +61,10 @@ const ServerAddressScreen = () => {
         /> */}
       </View>
       <View style={styles.container}>
-        {/* <Image
-          source={require('../assets/images/qrcode.png')}
+        <Image
+          source={require('../assets/images/icon3.png')}
           style={styles.logo}
-        /> */}
+        />
         <View style={styles.card}>
           <Text style={styles.title}>Server Address</Text>
           <View style={styles.inputWrap}>
@@ -123,8 +123,8 @@ const styles = StyleSheet.create({
     // backgroundColor: 'red',
   },
   logo: {
-    width: 160,
-    height: 120,
+    width: 200,
+    height: 140,
     marginBottom: 24,
     alignSelf: 'center',
   },

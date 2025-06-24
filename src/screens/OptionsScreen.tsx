@@ -69,7 +69,7 @@ const OptionsScreen = () => {
 
       {/* Change Site */}
       <Text style={styles.sectionTitle}>User</Text>
-      <TouchableOpacity style={styles.menuRow} onPress={handleChangeSite}>
+      <TouchableOpacity style={styles.menuRow} onPress={() => {}}>
         <Text style={styles.menuText}>{user}</Text>
         {/* <Icon name="chevron-right" size={24} color="#888" /> */}
       </TouchableOpacity>
