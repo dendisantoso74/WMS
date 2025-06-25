@@ -119,14 +119,14 @@ const OptionsScreen = () => {
         />
       </View>
       <Text className="text-center">Version {Config.VERSION}</Text>
-      {/* <View style={styles.buttonContainer}>
+      <View style={styles.buttonContainer}>
         <ButtonApp
           color="primary"
           label="Chgane address"
           size="large"
-          onPress={() => navigation.navigate('ServerAddress')}
+          onPress={() => navigation.navigate('Example')}
         />
-      </View> */}
+      </View>
 
       <ModalApp
         visible={isModalVisible}

@@ -24,6 +24,7 @@ import MaterialReceiveDetailScreen from '../screens/MaterialReceive/detail';
 import MaterialReceiveScreen from '../screens/MaterialReceive';
 import OptionsScreen from '../screens/OptionsScreen';
 import ServerAddressScreen from '../screens/ServerAddressScreen';
+import Example from '../screens/Example';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -198,6 +199,7 @@ const AppNavigator = () => {
           />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Options" component={OptionsScreen} />
+          <Stack.Screen name="Example" component={Example} />
         </>
       ) : (
         <>
