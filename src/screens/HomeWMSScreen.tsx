@@ -116,6 +116,7 @@ const HomeWMSScreen = () => {
           {/* Top Row */}
           <View className="flex-row gap-2 space-x-3">
             <MenuCard
+              onPress={() => navigation.navigate('Material Issue Scan')}
               className="px-3"
               title="Material Issue"
               // count={0}
@@ -131,7 +132,8 @@ const HomeWMSScreen = () => {
           <View className="flex-row space-x-3" style={styles.shadowCard}>
             <TouchableOpacity
               className="w-1/2 bg-blue-400 shadow"
-              style={styles.roundedCard}>
+              style={styles.roundedCard}
+              onPress={() => navigation.navigate('Material Return Scan')}>
               <View className="py-3">
                 <View className="flex-row justify-between px-4 mb-3">
                   <Icon library="Feather" name="home" color="white" size={24} />
@@ -144,7 +146,9 @@ const HomeWMSScreen = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex-1 bg-white shadow rounded-xl">
+            <TouchableOpacity
+              className="flex-1 bg-white shadow rounded-xl"
+              onPress={() => navigation.navigate('Scan WO Number')}>
               <View className="py-3">
                 <View className="flex-row justify-center px-4 mb-3">
                   <Icon library="Feather" name="tag" size={24} />
