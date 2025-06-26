@@ -24,6 +24,16 @@ import MaterialReceiveDetailScreen from '../screens/MaterialReceive/detail';
 import MaterialReceiveScreen from '../screens/MaterialReceive';
 import OptionsScreen from '../screens/OptionsScreen';
 import ServerAddressScreen from '../screens/ServerAddressScreen';
+import InspectionScreen from '../screens/Inspection';
+import InspectionReceivingScreen from '../screens/Inspection/detail';
+import InspectionReceivingApproveScreen from '../screens/Inspection/inspect';
+import TagScreen from '../screens/Tag';
+import TagDetailScreen from '../screens/Tag/detail';
+import TagInspectScreen from '../screens/Tag/inspect';
+import TransferInstructionScreen from '../screens/OpenTransferIntuction';
+import TransferInstructionAssignScreen from '../screens/OpenTransferIntuction/detail';
+import MyTransferInstructionScreen from '../screens/MyTransferInstruction';
+import MyTransferInstructionScanScreen from '../screens/MyTransferInstruction/detail';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -190,6 +200,40 @@ const AppNavigator = () => {
             name="Tag Info Detail"
             component={TagInfoDetailScreen}
           />
+          {/* Open Transfer Instruction*/}
+          <Stack.Screen
+            name="Transfer Instruction"
+            component={TransferInstructionScreen}
+          />
+          <Stack.Screen
+            name="Transfer Instruction Assign"
+            component={TransferInstructionAssignScreen}
+          />
+          {/* My Transfer Instruction*/}
+          <Stack.Screen
+            name="My Transfer Instruction"
+            component={MyTransferInstructionScreen}
+          />
+          <Stack.Screen
+            name="My Transfer Instruction Scan"
+            component={MyTransferInstructionScanScreen}
+          />
+
+          {/* inspection menu */}
+          <Stack.Screen name="Inspection" component={InspectionScreen} />
+          <Stack.Screen
+            name="InspectionReceivingPO"
+            component={InspectionReceivingScreen}
+          />
+          <Stack.Screen
+            name="InspectionReceivingPOApprove"
+            component={InspectionReceivingApproveScreen}
+          />
+
+          {/* Tag Menu */}
+          <Stack.Screen name="Po to Tag" component={TagScreen} />
+          <Stack.Screen name="Po Detail" component={TagDetailScreen} />
+          <Stack.Screen name="Item to Tag" component={TagInspectScreen} />
 
           <Stack.Screen
             name="List"

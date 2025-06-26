@@ -106,6 +106,7 @@ const HomeWMSScreen = () => {
           {/* Top Row */}
           <View className="flex-row gap-2 space-x-3">
             <MenuCard
+              onPress={() => navigation.navigate('Transfer Instruction')}
               title="Open Transfer Instruction"
               count={0}
               icon="arrow-up-right"
@@ -113,6 +114,7 @@ const HomeWMSScreen = () => {
               textColor="text-white"
             />
             <MenuCard
+              onPress={() => navigation.navigate('My Transfer Instruction')}
               title="My Transfer Instruction"
               count={0}
               icon="file-text"
@@ -146,7 +148,9 @@ const HomeWMSScreen = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex-1 bg-white shadow">
+            <TouchableOpacity
+              className="flex-1 bg-white shadow"
+              onPress={() => navigation.navigate('Inspection')}>
               <View className="py-3">
                 <View className="flex-row justify-center px-4 mb-3">
                   <Icon library="Feather" name="check" size={24} />
@@ -158,7 +162,9 @@ const HomeWMSScreen = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex-1 bg-white shadow rounded-xl">
+            <TouchableOpacity
+              className="flex-1 bg-white shadow rounded-xl"
+              onPress={() => navigation.navigate('Po to Tag')}>
               <View className="py-3">
                 <View className="flex-row justify-between px-4 mb-3">
                   <Icon library="Feather" name="tag" size={24} />
