@@ -14,7 +14,7 @@ import Icon from '../../compnents/Icon';
 
 const dummyRfids = ['00000000000000000000'];
 
-const MyTransferInstructionScanScreen = () => {
+const PutawayScanWoScreen = () => {
   const navigation = useNavigation<any>();
 
   const [rfids, setRfids] = useState(dummyRfids);
@@ -23,17 +23,12 @@ const MyTransferInstructionScanScreen = () => {
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() => navigation.navigate('My Transfer Instruction Submit')}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-col justify-start">
-          <Text className="font-bold">Bin : MS-A1L-$-3-2-1</Text>
-          <Text className="font-bold">
-            TRO2-FO24M / FIBER OPTIC 24 CORE 100meters
-          </Text>
-          <Text className="font-bold">TI Qty : 100.0 Meter</Text>
-          <Text className="font-bold">Putaway Qty : 0 METER</Text>
-          <Text className="font-bold">Condition Code : NEW</Text>
+      onPress={() => navigation.navigate('Put Away Material')}>
+      <View>
+        <View className="my-2">
+          <Text className="font-bold px-4">WO - 2649</Text>
+          <Text className="px-4">UAT Transaction Punch List Test 003</Text>
+          <Text className="px-4">12-Nov-2020 15:12</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -41,22 +36,10 @@ const MyTransferInstructionScanScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className="flex-row p-2 bg-blue-400">
-        <View className="flex-col justify-start">
-          <Text className="font-bold text-white">PO Number</Text>
-          <Text className="font-bold text-white">PO Date</Text>
-          <Text className="font-bold text-white">TI Number</Text>
-        </View>
-        <View className="px-10 flex-col justify-start">
-          <Text className="font-bold text-white">2176</Text>
-          <Text className="font-bold text-white">12-Nov-2020 13:16</Text>
-          <Text className="font-bold text-white">2191</Text>
-        </View>
-      </View>
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Enter Material Code or Material Name"
+          placeholder="Enter PO Number"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
@@ -169,4 +152,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyTransferInstructionScanScreen;
+export default PutawayScanWoScreen;

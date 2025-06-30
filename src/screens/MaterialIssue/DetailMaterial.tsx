@@ -7,68 +7,52 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
-  ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import ModalInputWms from '../../compnents/wms/ModalInputWms';
 
 const dummyRfids = ['00000000000000000000'];
 
-const MyTransferInstructionScanScreen = () => {
+const DetailMaterialScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
 
+  const [rfids, setRfids] = useState(dummyRfids);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleReceive = () => {
+    setModalVisible(true);
+  };
+
   const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      onPress={() => navigation.navigate('My Transfer Instruction Submit')}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-col justify-start">
-          <Text className="font-bold">Bin : MS-A1L-$-3-2-1</Text>
-          <Text className="font-bold">
-            TRO2-FO24M / FIBER OPTIC 24 CORE 100meters
-          </Text>
-          <Text className="font-bold">TI Qty : 100.0 Meter</Text>
-          <Text className="font-bold">Putaway Qty : 0 METER</Text>
-          <Text className="font-bold">Condition Code : NEW</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+    <View className="items-end ">
+      <TouchableOpacity
+        className="items-center justify-center border  border-blue-500 w-16 h-8  bg-blue-500 rounded"
+        onPress={() => navigation.navigate('Pick Item', {rfid: item})}>
+        <Icon library="Feather" name="plus" size={15} color="white"></Icon>
+      </TouchableOpacity>
+    </View>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="flex-row p-2 bg-blue-400">
-        <View className="flex-col justify-start">
-          <Text className="font-bold text-white">PO Number</Text>
-          <Text className="font-bold text-white">PO Date</Text>
-          <Text className="font-bold text-white">TI Number</Text>
+        <View>
+          <Text className="font-bold text-white">Material</Text>
+          <Text className="font-bold text-white">Reserve Qty</Text>
         </View>
-        <View className="px-10 flex-col justify-start">
-          <Text className="font-bold text-white">2176</Text>
-          <Text className="font-bold text-white">12-Nov-2020 13:16</Text>
-          <Text className="font-bold text-white">2191</Text>
+        <View>
+          <Text className="ml-10 font-bold text-white">
+            FIBER OPTIC 24 CORE 100meters
+          </Text>
+          <Text className="ml-10 font-bold text-white">1500 METER</Text>
         </View>
       </View>
-      <View style={styles.filterContainer}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Enter Material Code or Material Name"
-          placeholderTextColor="#b0b0b0"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
-        />
-      </View>
+
       <FlatList
         data={rfids}
         renderItem={renderItem}
@@ -76,6 +60,14 @@ const MyTransferInstructionScanScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
+      <View style={styles.buttonContainer}>
+        <ButtonApp
+          label="Back"
+          onPress={() => navigation.navigate('')}
+          size="large"
+          color="primary"
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -169,4 +161,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyTransferInstructionScanScreen;
+export default DetailMaterialScreen;

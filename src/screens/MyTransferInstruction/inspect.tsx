@@ -11,10 +11,11 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import ButtonApp from '../../compnents/ButtonApp';
 
 const dummyRfids = ['00000000000000000000'];
 
-const MyTransferInstructionScanScreen = () => {
+const MyTransferInstructionSubmitScreen = () => {
   const navigation = useNavigation<any>();
 
   const [rfids, setRfids] = useState(dummyRfids);
@@ -25,15 +26,17 @@ const MyTransferInstructionScanScreen = () => {
       style={styles.rfidCard}
       onPress={() => navigation.navigate('My Transfer Instruction Submit')}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
+      <View className="my-2 flex-row">
         <View className="flex-col justify-start">
-          <Text className="font-bold">Bin : MS-A1L-$-3-2-1</Text>
-          <Text className="font-bold">
-            TRO2-FO24M / FIBER OPTIC 24 CORE 100meters
-          </Text>
-          <Text className="font-bold">TI Qty : 100.0 Meter</Text>
-          <Text className="font-bold">Putaway Qty : 0 METER</Text>
-          <Text className="font-bold">Condition Code : NEW</Text>
+          <Text className="">Serial Number:30458094809485</Text>
+          <Text className="">TRO2-FO24M / FIBER OPTIC 24 CORE 100meters</Text>
+          <Text className="">TI Qty : 100.0 Meter</Text>
+          <Text className="">Putaway Qty : 0 METER</Text>
+        </View>
+        <View>
+          <View className="border border-red-500 rounded-full bg-red-500">
+            <Icon library="Feather" name="x" size={15} color="white"></Icon>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -43,32 +46,18 @@ const MyTransferInstructionScanScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <View className="flex-row p-2 bg-blue-400">
         <View className="flex-col justify-start">
-          <Text className="font-bold text-white">PO Number</Text>
-          <Text className="font-bold text-white">PO Date</Text>
-          <Text className="font-bold text-white">TI Number</Text>
+          <Text className="font-bold text-white">Bin</Text>
         </View>
         <View className="px-10 flex-col justify-start">
-          <Text className="font-bold text-white">2176</Text>
-          <Text className="font-bold text-white">12-Nov-2020 13:16</Text>
-          <Text className="font-bold text-white">2191</Text>
+          <Text className="font-bold text-white">MS-A1L-4-4-2-1</Text>
         </View>
       </View>
-      <View style={styles.filterContainer}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Enter Material Code or Material Name"
-          placeholderTextColor="#b0b0b0"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
-        />
+      <View className="bg-blue-200 px-2 py-2">
+        <Text className="font-bold text-blue-600">
+          Information : This is smartscan, please scan on material tag
+        </Text>
       </View>
+      <View style={styles.filterContainer}></View>
       <FlatList
         data={rfids}
         renderItem={renderItem}
@@ -76,6 +65,14 @@ const MyTransferInstructionScanScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
+      <View style={styles.buttonContainer}>
+        <ButtonApp
+          label="SUBMIT"
+          size="large"
+          color="primary"
+          onPress={() => navigation.navigate('InspectionReceivingPOApprove')}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -169,4 +166,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyTransferInstructionScanScreen;
+export default MyTransferInstructionSubmitScreen;

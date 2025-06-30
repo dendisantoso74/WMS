@@ -7,68 +7,69 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
-  ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import ModalInputWms from '../../compnents/wms/ModalInputWms';
 
 const dummyRfids = ['00000000000000000000'];
 
-const MyTransferInstructionScanScreen = () => {
+const MaterialIssueInspectScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {listrfid} = route.params;
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
 
+  const [rfids, setRfids] = useState(dummyRfids);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleReceive = () => {
+    setModalVisible(true);
+  };
+
   const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      onPress={() => navigation.navigate('My Transfer Instruction Submit')}>
+    <View style={styles.rfidCard}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
-        <View className="flex-col justify-start">
-          <Text className="font-bold">Bin : MS-A1L-$-3-2-1</Text>
-          <Text className="font-bold">
-            TRO2-FO24M / FIBER OPTIC 24 CORE 100meters
-          </Text>
-          <Text className="font-bold">TI Qty : 100.0 Meter</Text>
-          <Text className="font-bold">Putaway Qty : 0 METER</Text>
-          <Text className="font-bold">Condition Code : NEW</Text>
+        <View className="flex-row justify-between">
+          <Text className="font-bold">TR02-FOM</Text>
+          <Text className="">Reserved : 150.0 METER</Text>
+        </View>
+
+        <Text className="font-bold">FIBER OPTIC 100 Meter</Text>
+        <View className="flex-row justify-between">
+          <Text className="w-1/3 ml-3 text-lg font-bold">NEW</Text>
+          <Text className="w-1/2 text-right">Order / Receive</Text>
+        </View>
+        <View className="flex-row justify-between">
+          <Text className="w-1/3 ml-3"></Text>
+          <Text className="w-1/2 text-right">3.0 roll / 0.0 roll</Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="flex-row p-2 bg-blue-400">
-        <View className="flex-col justify-start">
-          <Text className="font-bold text-white">PO Number</Text>
-          <Text className="font-bold text-white">PO Date</Text>
-          <Text className="font-bold text-white">TI Number</Text>
+        <View>
+          <Text className="font-bold text-white">WO Number</Text>
+          <Text className="font-bold text-white">WO Date</Text>
         </View>
-        <View className="px-10 flex-col justify-start">
-          <Text className="font-bold text-white">2176</Text>
-          <Text className="font-bold text-white">12-Nov-2020 13:16</Text>
-          <Text className="font-bold text-white">2191</Text>
+        <View>
+          <Text className="ml-10 font-bold text-white">2176</Text>
+          <Text className="ml-10 font-bold text-white">12-Nov-2020 10:00</Text>
         </View>
       </View>
-      <View style={styles.filterContainer}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Enter Material Code or Material Name"
-          placeholderTextColor="#b0b0b0"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
-        />
-      </View>
+      <TextInput
+        style={styles.filterInput}
+        placeholder="Enter Material Code or Material Name"
+        placeholderTextColor="#b0b0b0"
+        value={search}
+        onChangeText={setSearch}
+      />
       <FlatList
         data={rfids}
         renderItem={renderItem}
@@ -76,6 +77,14 @@ const MyTransferInstructionScanScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
+      <View style={styles.buttonContainer}>
+        <ButtonApp
+          label="PUT TO STAGE"
+          onPress={() => navigation.navigate('Detail Material Issue')}
+          size="large"
+          color="primary"
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -169,4 +178,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyTransferInstructionScanScreen;
+export default MaterialIssueInspectScreen;

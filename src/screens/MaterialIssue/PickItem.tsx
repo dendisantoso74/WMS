@@ -11,62 +11,93 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import ButtonApp from '../../compnents/ButtonApp';
 
 const dummyRfids = ['00000000000000000000'];
 
-const MyTransferInstructionScanScreen = () => {
+const PickItemScreen = () => {
   const navigation = useNavigation<any>();
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
 
   const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      onPress={() => navigation.navigate('My Transfer Instruction Submit')}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-col justify-start">
-          <Text className="font-bold">Bin : MS-A1L-$-3-2-1</Text>
-          <Text className="font-bold">
-            TRO2-FO24M / FIBER OPTIC 24 CORE 100meters
-          </Text>
-          <Text className="font-bold">TI Qty : 100.0 Meter</Text>
-          <Text className="font-bold">Putaway Qty : 0 METER</Text>
-          <Text className="font-bold">Condition Code : NEW</Text>
+    <View className="flex-col ">
+      <View className="flex-row w-full mt-2 ">
+        <Text className="w-1/2 font-bold">Item Name</Text>
+        <Text className="font-bold">TRO2-FO24M</Text>
+      </View>
+      <View className="flex-row w-full mt-5">
+        <Text className="w-1/2 font-bold">Condition Code</Text>
+        <Text className="font-bold">BROKEN</Text>
+      </View>
+      <View className="flex-row w-full mt-5">
+        <Text className="w-1/2 font-bold">Issue Unit</Text>
+        <Text className="font-bold">METER</Text>
+      </View>
+      <View className="flex-row w-full mt-5 items-center">
+        <Text className="w-1/2 font-bold">Stored Qty</Text>
+        <View className=" flex-row items-center">
+          <TextInput
+            className="w-24 text-center"
+            style={styles.filterInput}
+            placeholder="0"
+            placeholderTextColor="#b0b0b0"
+            value={search}
+            onChangeText={setSearch}
+          />
+          <Text className="font-bold">METER</Text>
         </View>
       </View>
-    </TouchableOpacity>
+      <View className="flex-row w-full mt-5 items-center">
+        <Text className="w-1/2 font-bold">Pick Qty</Text>
+        <View className=" flex-row items-center">
+          <TextInput
+            className="w-24 text-center"
+            style={styles.filterInput}
+            placeholder="0"
+            placeholderTextColor="#b0b0b0"
+            value={search}
+            onChangeText={setSearch}
+          />
+          <Text className="font-bold">METER</Text>
+        </View>
+      </View>
+
+      <View className="flex-row w-full mt-5 items-center">
+        <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
+        <View className="bg-gray-200 w-1/2 py-2">
+          <Text className="font-bold text-center ">MS-A1L-4-2-2-1</Text>
+        </View>
+      </View>
+      <View className="flex-row w-full mt-5 items-center">
+        <Text className="w-1/2 font-bold">User Type</Text>
+        <View className="bg-gray-200 w-1/2 py-2">
+          <Text className="font-bold text-center ">ISSUE</Text>
+        </View>
+      </View>
+    </View>
   );
+
+  // <Text>Item Name</Text>
+  //       <Text>Condition Code</Text>
+  //       <Text>Issue Unit</Text>
+  //       <Text>Stored Qty</Text>
+  //       <Text>Pick Qty</Text>
+  //       <Text>Bin</Text>
+  //       <Text>Suggestion Bin</Text>
+  //       <Text>User Type</Text>
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className="flex-row p-2 bg-blue-400">
-        <View className="flex-col justify-start">
-          <Text className="font-bold text-white">PO Number</Text>
-          <Text className="font-bold text-white">PO Date</Text>
-          <Text className="font-bold text-white">TI Number</Text>
-        </View>
-        <View className="px-10 flex-col justify-start">
-          <Text className="font-bold text-white">2176</Text>
-          <Text className="font-bold text-white">12-Nov-2020 13:16</Text>
-          <Text className="font-bold text-white">2191</Text>
-        </View>
-      </View>
+      <Text className="font-bold ml-4 mt-3">Serial Number</Text>
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Enter Material Code or Material Name"
+          placeholder="Serial Number"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
-        />
-        <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
       <FlatList
@@ -76,6 +107,14 @@ const MyTransferInstructionScanScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
+      <View style={styles.buttonContainer}>
+        <ButtonApp
+          label="ADD"
+          size="large"
+          color="primary"
+          onPress={() => navigation.navigate('Detail Wo')}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -169,4 +208,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyTransferInstructionScanScreen;
+export default PickItemScreen;

@@ -34,6 +34,19 @@ import TransferInstructionScreen from '../screens/OpenTransferIntuction';
 import TransferInstructionAssignScreen from '../screens/OpenTransferIntuction/detail';
 import MyTransferInstructionScreen from '../screens/MyTransferInstruction';
 import MyTransferInstructionScanScreen from '../screens/MyTransferInstruction/detail';
+import MyTransferInstructionSubmitScreen from '../screens/MyTransferInstruction/inspect';
+import PutawayScanWoScreen from '../screens/Putaway';
+import PutawayMaterialScreen from '../screens/Putaway/detail';
+import ScanMaterialPutawayScreen from '../screens/Putaway/inspect';
+import MaterialIssueScanScreen from '../screens/MaterialIssue';
+import MaterialIssueInspectScreen from '../screens/MaterialIssue/inspect';
+import DetailMaterialScreen from '../screens/MaterialIssue/DetailMaterial';
+import PickItemScreen from '../screens/MaterialIssue/PickItem';
+import DetailWoScreen from '../screens/MaterialIssue/DetailWo';
+import MaterialReturnScanScreen from '../screens/MaterialReturn';
+import MaterialReturnDetailScreen from '../screens/MaterialReturn/detail';
+import DetailMaterialReturnScreen from '../screens/MaterialReturn/inspect';
+import DetailWoMaterialReturnScreen from '../screens/MaterialReturn/detailwo';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -217,6 +230,56 @@ const AppNavigator = () => {
           <Stack.Screen
             name="My Transfer Instruction Scan"
             component={MyTransferInstructionScanScreen}
+          />
+
+          <Stack.Screen
+            name="My Transfer Instruction Submit"
+            component={MyTransferInstructionSubmitScreen}
+          />
+
+          {/*Putaway*/}
+          <Stack.Screen name="Scan WO Number" component={PutawayScanWoScreen} />
+          <Stack.Screen
+            name="Put Away Material"
+            component={PutawayMaterialScreen}
+          />
+          <Stack.Screen
+            name="Scan Material"
+            component={ScanMaterialPutawayScreen}
+          />
+
+          {/* Material Issue Menu */}
+          <Stack.Screen
+            name="Material Issue Scan"
+            component={MaterialIssueScanScreen}
+          />
+          <Stack.Screen
+            name="Material Issue Inspect"
+            component={MaterialIssueInspectScreen}
+          />
+          <Stack.Screen
+            name="Detail Material Issue"
+            component={DetailMaterialScreen}
+          />
+          <Stack.Screen name="Pick Item" component={PickItemScreen} />
+          <Stack.Screen name="Detail Wo" component={DetailWoScreen} />
+
+          {/* Material Return */}
+          <Stack.Screen
+            name="Material Return Scan"
+            component={MaterialReturnScanScreen}
+          />
+          <Stack.Screen
+            name="Material Return Detail"
+            component={MaterialReturnDetailScreen}
+          />
+          <Stack.Screen
+            name="Detail Material"
+            component={DetailMaterialReturnScreen}
+          />
+          <Stack.Screen
+            name="Detail Wo Material Return"
+            component={DetailWoMaterialReturnScreen}
           />
 
           {/* inspection menu */}
