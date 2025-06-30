@@ -234,6 +234,7 @@ const HomeWMSScreen = () => {
           {/* Top Row */}
           <View className="flex-row gap-2 space-x-3">
             <MenuCard
+              onPress={() => navigation.navigate('Stock Opname List')}
               className="px-3"
               title="Stock Opname"
               count={0}
@@ -325,6 +326,7 @@ const HomeWMSScreen = () => {
               icon="move"
               color="bg-green-400"
               textColor="text-white"
+              onPress={() => navigation.navigate('Material Movement')}
             />
           </View>
         </View>

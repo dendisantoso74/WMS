@@ -15,66 +15,40 @@ import ButtonApp from '../../compnents/ButtonApp';
 
 const dummyRfids = ['00000000000000000000'];
 
-const InspectionReceivingScreen = () => {
+const MovementSmartScanScreen = () => {
   const navigation = useNavigation<any>();
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
 
-  const renderItem = ({item}: {item: string}) => (
-    <View
-      style={styles.rfidCard}
-      // onPress={() => navigation.navigate('Inspection Receiving Detail')}
-    >
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-row justify-between">
-          <Text className="font-bold">TR02-FOM</Text>
-          <Text className="font-semibold">Order : 3.0 ROLL</Text>
-        </View>
-
-        <Text className="font-bold">FIBER OPTIC 100 Meter</Text>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3 text-lg font-bold">NEW</Text>
-          <Text className="w-1/2 text-right">Order / Receive</Text>
-        </View>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3"></Text>
-          <Text className="w-1/2 text-right">3.0 roll / 0.0 roll</Text>
-        </View>
-      </View>
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className="flex-row p-2 bg-blue-400">
-        <Text className="font-bold text-white">PO Number</Text>
-        <Text className="ml-10 font-bold text-white">2176</Text>
+      <View className="bg-blue-400 p-2">
+        <Text className="text-white text-center">To Bin : MS-A1L-4-3-3-2</Text>
       </View>
-      <View style={styles.filterContainer}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Enter Material Code or Material Name"
-          placeholderTextColor="#b0b0b0"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
-        />
+
+      <View className="bg-blue-200 px-2 py-2 ">
+        <View className="mr-3 flex-row items-center gap-3">
+          <Text className="font-bold text-blue-600">
+            Information : This is smartscan, please scan on material tag
+          </Text>
+        </View>
       </View>
+      <View style={styles.filterContainer}></View>
       <FlatList
         data={rfids}
-        renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
+      <View style={styles.buttonContainer}>
+        <ButtonApp
+          label="Move"
+          size="large"
+          color="primary"
+          onPress={() => navigation.navigate('Movement Page')}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -168,4 +142,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InspectionReceivingScreen;
+export default MovementSmartScanScreen;
