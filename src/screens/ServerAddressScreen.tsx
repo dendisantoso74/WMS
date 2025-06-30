@@ -14,12 +14,29 @@ import Icon from '../compnents/Icon';
 import ButtonApp from '../compnents/ButtonApp';
 import {storeData} from '../utils/store';
 import {useNavigation} from '@react-navigation/native';
+import {useAppContext} from '../context/AppContext';
 
 const ServerAddressScreen = () => {
   const navigation = useNavigation<any>();
+  const {setUser, setIsAuthenticated} = useAppContext();
 
   const [address, setAddress] = useState('http://192.168.77.43:9080');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const value = await AsyncStorage.getItem('user');
+        if (value !== null) {
+          setIsAuthenticated(true);
+        }
+      } catch (e) {
+        // error reading value
+        console.error(e);
+      }
+    };
+    getData();
+  }, [setIsAuthenticated, setUser]);
 
   useEffect(() => {
     const fetchAddress = async () => {
