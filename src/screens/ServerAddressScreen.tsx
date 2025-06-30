@@ -61,10 +61,10 @@ const ServerAddressScreen = () => {
         /> */}
       </View>
       <View style={styles.container}>
-        <Image
+        {/* <Image
           source={require('../assets/images/icon3.png')}
           style={styles.logo}
-        />
+        /> */}
         <View style={styles.card}>
           <Text style={styles.title}>Server Address</Text>
           <View style={styles.inputWrap}>

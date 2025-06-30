@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,36 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  Alert,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {ScanPo} from '../../services/materialRecive';
+import {tagInfo} from '../../services/tagInfo';
 
 const TagInfoDetailScreen = () => {
+  const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {listrfid} = route.params;
+
+  const [datas, setDatas] = useState([]);
+
+  useEffect(() => {
+    tagInfo(listrfid[listrfid.length - 1]).then((res: any) => {
+      console.log('infooooo successfully:', res.member);
+      if (res.member.length === 0) {
+        navigation.goBack();
+        Alert.alert(
+          'No Data',
+          'No data found for this PO number.',
+          // [{text: 'OK', onPress: () => navigation.goBack()}],
+          // {cancelable: false},
+        );
+      }
+      setDatas(res.member[0]);
+    });
+  }, []);
+
   // Dummy data for preview
   const tagCode = 'E2000020340A0144042071E8';
   const serialNumber = '3070657A5C9BE8CF69108DC3';
@@ -31,7 +57,7 @@ const TagInfoDetailScreen = () => {
             <Text style={styles.label}>Tag Code</Text>
             <TextInput
               style={[styles.input, styles.disabledInput]}
-              value={tagCode}
+              value={datas?.tagcode || ''}
               editable={false}
               placeholder="Tag Code"
               placeholderTextColor="#b0b0b0"
@@ -39,7 +65,7 @@ const TagInfoDetailScreen = () => {
             <Text style={styles.label}>Serial Number</Text>
             <TextInput
               style={[styles.input, styles.disabledInput]}
-              value={serialNumber}
+              value={datas?.tagcode || ''}
               editable={false}
               placeholder="Serial Number"
               placeholderTextColor="#b0b0b0"
@@ -68,6 +94,17 @@ const TagInfoDetailScreen = () => {
               <Text style={styles.infoLabel}>Location</Text>
               <Text style={styles.infoValue}>{bin}</Text>
             </View>
+            {/* tag Asign to bin */}
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Zone</Text>
+              <Text style={styles.infoValue}>{bin}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Area</Text>
+              <Text style={styles.infoValue}>{bin}</Text>
+            </View>
+            {/* tag Asign to bin */}
+
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Condition Code</Text>
               <View style={styles.conditionBox}>
