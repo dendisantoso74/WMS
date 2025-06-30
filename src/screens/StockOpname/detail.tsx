@@ -15,59 +15,34 @@ import ButtonApp from '../../compnents/ButtonApp';
 
 const dummyRfids = ['00000000000000000000'];
 
-const InspectionReceivingScreen = () => {
+const DetailStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
 
   const renderItem = ({item}: {item: string}) => (
-    <View
+    <TouchableOpacity
       style={styles.rfidCard}
-      // onPress={() => navigation.navigate('Inspection Receiving Detail')}
-    >
+      onPress={() => navigation.navigate('Detail Bin Stock Opname')}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
-        <View className="flex-row justify-between">
-          <Text className="font-bold">TR02-FOM</Text>
-          <Text className="font-semibold">Order : 3.0 ROLL</Text>
-        </View>
-
-        <Text className="font-bold">FIBER OPTIC 100 Meter</Text>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3 text-lg font-bold">NEW</Text>
-          <Text className="w-1/2 text-right">Order / Receive</Text>
-        </View>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3"></Text>
-          <Text className="w-1/2 text-right">3.0 roll / 0.0 roll</Text>
+        <View className="flex-col justify-start">
+          <Text className="font-bold">MS-A1L-4-3-2-1</Text>
+          <Text className="font-bold">MS-A1</Text>
+          <Text className="font-bold">MS-AREA</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className="flex-row p-2 bg-blue-400">
-        <Text className="font-bold text-white">PO Number</Text>
-        <Text className="ml-10 font-bold text-white">2176</Text>
+      <View className=" p-2 bg-blue-400 flex-col">
+        <Text className="text-white">PHYSICAL STOCK TAKING DECEMBER 2020</Text>
+        <Text className="text-white">12-Nov-2020 13:16</Text>
       </View>
-      <View style={styles.filterContainer}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Enter Material Code or Material Name"
-          placeholderTextColor="#b0b0b0"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
-        />
-      </View>
+
       <FlatList
         data={rfids}
         renderItem={renderItem}
@@ -75,6 +50,9 @@ const InspectionReceivingScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
+      <View style={styles.buttonContainer}>
+        <ButtonApp label="Done" size="large" color="primary" />
+      </View>
     </SafeAreaView>
   );
 };
@@ -168,4 +146,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InspectionReceivingScreen;
+export default DetailStockOpnameScreen;

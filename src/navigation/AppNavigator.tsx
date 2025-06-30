@@ -46,6 +46,14 @@ import MaterialReturnScanScreen from '../screens/MaterialReturn';
 import MaterialReturnDetailScreen from '../screens/MaterialReturn/detail';
 import DetailMaterialReturnScreen from '../screens/MaterialReturn/inspect';
 import DetailWoMaterialReturnScreen from '../screens/MaterialReturn/detailwo';
+import StockOpnameListScreen from '../screens/StockOpname';
+import DetailStockOpnameScreen from '../screens/StockOpname/detail';
+import DetaliBinStockOpnameScreen from '../screens/StockOpname/inspect';
+import DetailMaterialStockOpnameScreen from '../screens/StockOpname/detailmaterial';
+import MaterialMovementScreen from '../screens/MaterialMovement';
+import MaterialMovementScanScreen from '../screens/MaterialMovement/detail';
+import MovementSmartScanScreen from '../screens/MaterialMovement/inspect';
+import MovementPageScreen from '../screens/MaterialMovement/Movementpage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -230,6 +238,37 @@ const AppNavigator = () => {
             name="Detail Wo Material Return"
             component={DetailWoMaterialReturnScreen}
           />
+          {/* Stock Opname */}
+          <Stack.Screen
+            name="Stock Opname List"
+            component={StockOpnameListScreen}
+          />
+          <Stack.Screen
+            name="Detail Stock Opname"
+            component={DetailStockOpnameScreen}
+          />
+          <Stack.Screen
+            name="Detail Bin Stock Opname"
+            component={DetaliBinStockOpnameScreen}
+          />
+          <Stack.Screen
+            name="Detail Material Stock Opname"
+            component={DetailMaterialStockOpnameScreen}
+          />
+          {/* Material Movement */}
+          <Stack.Screen
+            name="Material Movement"
+            component={MaterialMovementScreen}
+          />
+          <Stack.Screen
+            name="Material Movement Scan"
+            component={MaterialMovementScanScreen}
+          />
+          <Stack.Screen
+            name="Movement Smart Scan"
+            component={MovementSmartScanScreen}
+          />
+          <Stack.Screen name="Movement Page" component={MovementPageScreen} />
 
           {/* Register RFID Menu */}
           <Stack.Screen name="RegisterRFID" component={RegisterRfidScreen} />

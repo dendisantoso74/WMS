@@ -15,59 +15,67 @@ import ButtonApp from '../../compnents/ButtonApp';
 
 const dummyRfids = ['00000000000000000000'];
 
-const InspectionReceivingScreen = () => {
+const DetaliBinStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
 
   const renderItem = ({item}: {item: string}) => (
-    <View
+    <TouchableOpacity
       style={styles.rfidCard}
-      // onPress={() => navigation.navigate('Inspection Receiving Detail')}
-    >
+      onPress={() => navigation.navigate('Detail Material Stock Opname')}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-row justify-between">
-          <Text className="font-bold">TR02-FOM</Text>
-          <Text className="font-semibold">Order : 3.0 ROLL</Text>
-        </View>
-
-        <Text className="font-bold">FIBER OPTIC 100 Meter</Text>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3 text-lg font-bold">NEW</Text>
-          <Text className="w-1/2 text-right">Order / Receive</Text>
-        </View>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3"></Text>
-          <Text className="w-1/2 text-right">3.0 roll / 0.0 roll</Text>
+      <View className="my-2 flex-row">
+        <View className="flex-col justify-start">
+          <Text className="font-bold">
+            TRO2-FO24M / FIBER OPTIC 24 CORE 100meters
+          </Text>
+          <Text className="font-bold">30458094809485</Text>
+          <View className="flex-row gap-5">
+            <View className="flex-col">
+              <Text>Current Balance</Text>
+              <Text>Physical Count</Text>
+              <Text>Condition code</Text>
+            </View>
+            <View className="flex-col">
+              <Text>100 meter</Text>
+              <Text>100 meter</Text>
+              <Text>REPAIRED</Text>
+            </View>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className="flex-row p-2 bg-blue-400">
-        <Text className="font-bold text-white">PO Number</Text>
-        <Text className="ml-10 font-bold text-white">2176</Text>
+      <View className="bg-blue-400 p-2">
+        <View className="flex-row gap-16">
+          <View className="flex-col justify-start">
+            <Text className="font-bold text-white">Bin</Text>
+            <Text className="font-bold text-white">Zone</Text>
+            <Text className="font-bold text-white">Area</Text>
+          </View>
+          <View className=" flex-col justify-start">
+            <Text className="font-bold text-white">MS-A1L-4-4-2-1</Text>
+            <Text className="font-bold text-white">MS-A1</Text>
+            <Text className="font-bold text-white">MS-AREA</Text>
+          </View>
+        </View>
+        <Text className="text-white">0 Items scanned of 1</Text>
       </View>
-      <View style={styles.filterContainer}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Enter Material Code or Material Name"
-          placeholderTextColor="#b0b0b0"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
-        />
+
+      <View className="bg-blue-200 px-2 py-2 ">
+        <View className="mr-3 flex-row items-center gap-3">
+          <Icon library="Feather" name="info" size={15} color="blue" />
+          <Text className="font-bold text-blue-600">
+            Scan device to material, then the serial number will be shown
+          </Text>
+        </View>
       </View>
+      <View style={styles.filterContainer}></View>
       <FlatList
         data={rfids}
         renderItem={renderItem}
@@ -75,6 +83,9 @@ const InspectionReceivingScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
+      <View style={styles.buttonContainer}>
+        <ButtonApp label="SAVE" size="large" color="primary" />
+      </View>
     </SafeAreaView>
   );
 };
@@ -168,4 +179,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InspectionReceivingScreen;
+export default DetaliBinStockOpnameScreen;
