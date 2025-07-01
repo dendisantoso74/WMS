@@ -50,7 +50,7 @@ const DetailMaterialReturnScreen = () => {
   };
 
   const renderItem = ({item}: {item: string}) => (
-    <View className="flex-col w-full px-4">
+    <View className="flex-col w-full px-2 pr-2">
       <View className="flex-row items-center ">
         <Text className="font-bold w-1/3">Return Qty</Text>
         <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
@@ -81,9 +81,7 @@ const DetailMaterialReturnScreen = () => {
       </View>
     </View>
   );
-  // <Text className="font-bold ">Suggestion Bin</Text>
-  // <Text className="font-bold">Return Qty</Text>
-  // <Text className="font-bold">Condition Code</Text>
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="flex-row p-2 bg-blue-400">

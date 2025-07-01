@@ -22,10 +22,9 @@ const InspectionReceivingScreen = () => {
   const [search, setSearch] = useState('');
 
   const renderItem = ({item}: {item: string}) => (
-    <View
+    <TouchableOpacity
       style={styles.rfidCard}
-      // onPress={() => navigation.navigate('Inspection Receiving Detail')}
-    >
+      onPress={() => navigation.navigate('InspectionReceivingPOApprove')}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
         <View className="flex-row justify-between">
@@ -43,7 +42,7 @@ const InspectionReceivingScreen = () => {
           <Text className="w-1/2 text-right">3.0 roll / 0.0 roll</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

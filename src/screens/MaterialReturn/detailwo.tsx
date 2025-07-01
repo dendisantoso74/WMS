@@ -77,7 +77,7 @@ const DetailWoMaterialReturnScreen = () => {
       />
       <View style={styles.buttonContainer}>
         <ButtonApp
-          label="Return"
+          label="RETURN"
           // onPress={() => navigation.navigate('')}
           size="large"
           color="primary"

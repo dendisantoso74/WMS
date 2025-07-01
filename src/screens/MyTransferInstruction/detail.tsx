@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 const dummyRfids = ['00000000000000000000'];
 
