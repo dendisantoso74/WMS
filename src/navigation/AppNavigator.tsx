@@ -229,6 +229,7 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Transfer Instruction Assign"
             component={TransferInstructionAssignScreen}
+            options={{title: 'Transfer Instruction'}}
           />
           {/* My Transfer Instruction*/}
           <Stack.Screen
@@ -238,11 +239,13 @@ const AppNavigator = () => {
           <Stack.Screen
             name="My Transfer Instruction Scan"
             component={MyTransferInstructionScanScreen}
+            options={{title: 'My Transfer Instruction'}}
           />
 
           <Stack.Screen
             name="My Transfer Instruction Submit"
             component={MyTransferInstructionSubmitScreen}
+            options={{title: 'My Transfer Instruction'}}
           />
 
           {/*Putaway*/}
@@ -260,14 +263,17 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Material Issue Scan"
             component={MaterialIssueScanScreen}
+            options={{title: 'Scan WO Number'}}
           />
           <Stack.Screen
             name="Material Issue Inspect"
             component={MaterialIssueInspectScreen}
+            options={{title: 'Detail WO'}}
           />
           <Stack.Screen
             name="Detail Material Issue"
             component={DetailMaterialScreen}
+            options={{title: 'Detail Material'}}
           />
           <Stack.Screen name="Pick Item" component={PickItemScreen} />
           <Stack.Screen name="Detail Wo" component={DetailWoScreen} />
@@ -276,10 +282,12 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Material Return Scan"
             component={MaterialReturnScanScreen}
+            options={{title: 'Scan WO Number'}}
           />
           <Stack.Screen
             name="Material Return Detail"
             component={MaterialReturnDetailScreen}
+            options={{title: 'Detail WO'}}
           />
           <Stack.Screen
             name="Detail Material"
@@ -288,12 +296,14 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Detail Wo Material Return"
             component={DetailWoMaterialReturnScreen}
+            options={{title: 'Detail WO'}}
           />
 
           {/* Stock Opname */}
           <Stack.Screen
             name="Stock Opname List"
             component={StockOpnameListScreen}
+            options={{title: 'Stock Opname'}}
           />
           <Stack.Screen
             name="Detail Stock Opname"
@@ -302,10 +312,12 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Detail Bin Stock Opname"
             component={DetaliBinStockOpnameScreen}
+            options={{title: 'Detail Bin'}}
           />
           <Stack.Screen
             name="Detail Material Stock Opname"
             component={DetailMaterialStockOpnameScreen}
+            options={{title: 'Detail Material'}}
           />
           {/* Material Movement */}
           <Stack.Screen
@@ -315,22 +327,34 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Material Movement Scan"
             component={MaterialMovementScanScreen}
+            options={{title: 'Material Movement'}}
           />
           <Stack.Screen
             name="Movement Smart Scan"
             component={MovementSmartScanScreen}
+            options={{title: 'Material Movement'}}
           />
-          <Stack.Screen name="Movement Page" component={MovementPageScreen} />
+          <Stack.Screen
+            name="Movement Page"
+            component={MovementPageScreen}
+            options={{title: 'Material Movement'}}
+          />
 
           {/* inspection menu */}
-          <Stack.Screen name="Inspection" component={InspectionScreen} />
+          <Stack.Screen
+            name="Inspection"
+            component={InspectionScreen}
+            options={{title: 'PO to Inspect'}}
+          />
           <Stack.Screen
             name="InspectionReceivingPO"
             component={InspectionReceivingScreen}
+            options={{title: 'Inspection Receiving PO'}}
           />
           <Stack.Screen
             name="InspectionReceivingPOApprove"
             component={InspectionReceivingApproveScreen}
+            options={{title: 'Receiving PO'}}
           />
 
           {/* Tag Menu */}

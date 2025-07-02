@@ -66,12 +66,7 @@ const MyTransferInstructionSubmitScreen = () => {
         style={styles.list}
       />
       <View style={styles.buttonContainer}>
-        <ButtonApp
-          label="SUBMIT"
-          size="large"
-          color="primary"
-          onPress={() => navigation.navigate('InspectionReceivingPOApprove')}
-        />
+        <ButtonApp label="SUBMIT" size="large" color="primary" />
       </View>
     </SafeAreaView>
   );

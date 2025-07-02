@@ -43,7 +43,7 @@ const MovementSmartScanScreen = () => {
       />
       <View style={styles.buttonContainer}>
         <ButtonApp
-          label="Move"
+          label="MOVE"
           size="large"
           color="primary"
           onPress={() => navigation.navigate('Movement Page')}
