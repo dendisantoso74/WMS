@@ -13,7 +13,10 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
-import {ScanPo} from '../../services/materialRecive';
+import {ReceivePo, ScanPo} from '../../services/materialRecive';
+import {set} from 'lodash';
+import ModalApp from '../../compnents/ModalApp';
+import {getData} from '../../utils/store';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -26,58 +29,128 @@ const MaterialReceiveDetailScreen = () => {
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfirmVisible, setModalConfirmVisible] = useState(false);
+
   const [datas, setDatas] = useState([]);
   const [selectedData, setSelectedData] = useState<string | null>(null);
+  const [poline, setPoline] = useState([]);
+  const [wmsMatrectrans, setWmsMatrectrans] = useState([]);
+  const [tempQuantity, setTempQuantity] = useState(0);
 
-  const handleReceive = () => {
-    setModalVisible(true);
+  const handleReceive = (quantity: number) => {
+    setTempQuantity(quantity);
+    setModalVisible(false);
+  };
+
+  const handleConfirmReceiveAll = async () => {
+    const polineChanges = {
+      inspected: 0,
+      orderunit: 'PCS',
+      orgid: 'BJS',
+      polinenum: 1,
+      ponum: 'PO-BJS-21-1251-EMT',
+      porevisionnum: 2,
+      receiptquantity: 1,
+      siteid: 'TJB56',
+    };
+    const res = await ReceivePo([polineChanges]);
+
+    if (res.error) {
+      Alert.alert('Error', res.error);
+      return;
+    }
+    console.log('ReceivePo response:', res);
+    // after submit successfully
+    Alert.alert('Material received');
+    setModalConfirmVisible(false);
+    // navigation.goBack();
   };
 
   useEffect(() => {
-    ScanPo(listrfid[listrfid.length - 1]).then((res: any) => {
-      console.log('RFIDs fetched successfully:', res.member.length);
-      if (res.member.length === 0) {
-        navigation.goBack();
-        Alert.alert(
-          'No Data',
-          'No data found for this PO number.',
-          // [{text: 'OK', onPress: () => navigation.goBack()}],
-          // {cancelable: false},
-        );
-      }
-      setDatas(res.member[0].poline);
-    });
+    const fetchData = async () => {
+      const site = await getData('site');
+
+      ScanPo(listrfid[listrfid.length - 1]).then((res: any) => {
+        console.log('RFIDs fetched successfully:', res.member);
+        if (res.member.length === 0) {
+          navigation.goBack();
+          Alert.alert(
+            'Information',
+            `${listrfid[listrfid.length - 1]} Not Found at site: ${site} `,
+            // [{text: 'OK', onPress: () => navigation.goBack()}],
+            // {cancelable: false},
+          );
+        }
+        setDatas(res.member[0]);
+        setPoline(res.member[0].poline);
+        setWmsMatrectrans(res.member[0].wms_matrectrans);
+      });
+    };
+
+    fetchData();
   }, []);
 
-  const renderItem = item => (
-    <TouchableOpacity
-      onPress={() => {
-        setModalVisible(true);
-        setSelectedData(item.item.polinenum);
-      }}
-      style={styles.rfidCard}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <Text className="font-bold">{item.item.itemnum}</Text>
-        <Text className="font-bold" style={[styles.maxWidthFullMinus8]}>
-          {item.item.description}
-        </Text>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3 text-lg font-bold">
-            {item.item.conditioncode}
+  // Helper: check if all items are fully received (all sideBarColor would be green)
+  const allReceived =
+    poline.length > 0 &&
+    poline.every(item => {
+      const matchedTrans = wmsMatrectrans.find(
+        trans => trans.itemnum === item.itemnum,
+      );
+      const orderQty = matchedTrans?.receiptquantity ?? 0;
+      return orderQty === item.orderqty;
+    });
+
+  // Filter poline based on search input (material code or material name)
+  const filteredPoline = poline.filter(item => {
+    const code = item.itemnum?.toLowerCase() ?? '';
+    const name = item.description?.toLowerCase() ?? '';
+    const searchText = search.toLowerCase();
+    return code.includes(searchText) || name.includes(searchText);
+  });
+
+  const renderItem = item => {
+    // Find the matching wmsMatrectrans entry by itemnum
+    const matchedTrans = wmsMatrectrans.find(
+      trans => trans.itemnum === item.item.itemnum,
+    );
+    // Use orderqty from wmsMatrectrans if available, otherwise fallback to poline
+    const receiptQty = matchedTrans?.receiptquantity ?? 0;
+
+    // Set sidebar color: green if fully received, otherwise gray
+    const sideBarColor = receiptQty === item.item.orderqty ? '#A4DD00' : 'gray';
+
+    return (
+      <TouchableOpacity
+        disabled={item.item.orderqty === receiptQty}
+        onPress={() => {
+          setModalVisible(true);
+          setSelectedData(item.item.polinenum);
+        }}
+        style={styles.rfidCard}>
+        <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
+        <View className="my-2">
+          <Text className="font-bold">{item.item.itemnum}</Text>
+          <Text className="font-bold" style={[styles.maxWidthFullMinus8]}>
+            {item.item.description}
           </Text>
-          <Text className="w-1/2 text-right">Order / Receive</Text>
+          <View className="flex-row justify-between">
+            <Text className="w-1/3 ml-3 text-lg font-bold">
+              {item.item.conditioncode}
+            </Text>
+            <Text className="w-1/2 text-right">Order / Receive</Text>
+          </View>
+          <View className="flex-row justify-between">
+            <Text className="w-1/3 ml-3"></Text>
+            <Text className="w-1/2 text-right">
+              {item.item.orderqty} {item.item.orderunit} / {receiptQty}{' '}
+              {item.item.orderunit}
+            </Text>
+          </View>
         </View>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3"></Text>
-          <Text className="w-1/2 text-right">
-            {item.item.orderqty} {item.item.orderunit} / {item.item.orderqty}{' '}
-            {item.item.orderunit}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -94,39 +167,57 @@ const MaterialReceiveDetailScreen = () => {
         value={search}
         onChangeText={setSearch}
       />
-      <FlatList
-        data={datas}
-        renderItem={renderItem}
-        keyExtractor={item => item.polinenum}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+      {filteredPoline.length === 0 ? (
+        <View style={{alignItems: 'center', marginTop: 40}}>
+          <Text style={{color: '#888', fontSize: 16}}>No data found</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredPoline}
+          renderItem={renderItem}
+          keyExtractor={item => item.polinenum}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+        />
+      )}
+      {/* {!allReceived && ( */}
       <View style={styles.buttonContainer}>
         <ButtonApp
           label="RECEIVE"
-          onPress={handleReceive}
+          onPress={() => setModalConfirmVisible(true)}
           size="large"
           color="primary"
         />
       </View>
+      {/* )} */}
 
       <ModalInputWms
         visible={modalVisible}
         material={
-          datas.find(item => item.polinenum === selectedData)?.description || ''
+          poline.find(item => item.polinenum === selectedData)?.description ||
+          ''
         }
         orderQty={
-          datas.find(item => item.polinenum === selectedData)?.orderqty || ''
+          poline.find(item => item.polinenum === selectedData)?.orderqty || ''
         }
         orderunit={
-          datas.find(item => item.polinenum === selectedData)?.orderunit || ''
+          poline.find(item => item.polinenum === selectedData)?.orderunit || ''
         }
         remainingQty={
-          datas.find(item => item.polinenum === selectedData)?.orderqty || ''
+          poline.find(item => item.polinenum === selectedData)?.orderqty || ''
         }
         total={3}
         onClose={() => setModalVisible(false)}
         onReceive={handleReceive}
+      />
+
+      <ModalApp
+        visible={modalConfirmVisible}
+        title="Receive Material"
+        content={`Do you want to update the receiving?`}
+        type="confirmation"
+        onClose={() => setModalConfirmVisible(false)}
+        onConfirm={() => handleConfirmReceiveAll()}
       />
     </SafeAreaView>
   );
