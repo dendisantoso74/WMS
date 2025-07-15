@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import {ListPoWINSP} from '../../services/materialRecive';
+import {formatDateTime} from '../../utils/helpers';
+import Loading from '../../compnents/Loading';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -19,21 +22,62 @@ const InspectionScreen = () => {
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [datas, setDatas] = useState<any[]>([]); // Adjust type as needed
+  const [filteredData, setFilteredData] = useState<any[]>([]); // Store filtered data for display
+  const [isLoading, setIsloading] = useState(true);
+
+  const fetchPOWINSP = async () => {
+    setIsloading(true);
+    // Replace with actual data fetching logic
+    const res = await ListPoWINSP();
+    console.log('inspect RFIDs fetched:', res);
+    const data = res.member || [];
+    setDatas(data);
+    setFilteredData(data);
+    if (res.member) {
+      setIsloading(false);
+    }
+  };
+  useEffect(() => {
+    fetchPOWINSP();
+  }, []);
+
+  const handleSearch = (text: string) => {
+    setSearch(text);
+    if (text.trim() === '') {
+      setFilteredData(datas);
+    } else {
+      // Filter the list based on the search text
+      const filtered = datas.filter(item =>
+        item.ponum.toLowerCase().includes(text.toLowerCase()),
+      );
+      setFilteredData(filtered);
+      if (filtered.length === 0) {
+        ToastAndroid.show('No items found', ToastAndroid.SHORT);
+      }
+    }
+  };
 
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() => navigation.navigate('InspectionReceivingPO')}>
+      onPress={() =>
+        navigation.navigate('InspectionReceivingPO', {
+          ponum: item.ponum,
+          item: item,
+        })
+      }>
       <View>
         <View className="my-2">
-          <Text className="font-bold px-4">PO - 1140</Text>
-          <Text className="font-semibold px-4">KUKEN</Text>
-          <Text className="px-4">15-Jul-2020 15:12</Text>
+          <Text className="px-4 font-bold">PO : {item?.ponum}</Text>
+          <Text className="px-4 font-semibold">Vendor : {item?.vendor}</Text>
+          <Text className="px-4">
+            Date : {item.statusdate ? formatDateTime(item.statusdate) : ''}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
   );
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.filterContainer}>
@@ -42,7 +86,7 @@ const InspectionScreen = () => {
           placeholder="Enter PO Number"
           placeholderTextColor="#b0b0b0"
           value={search}
-          onChangeText={setSearch}
+          onChangeText={e => handleSearch(e)}
         />
         <Icon
           library="Feather"
@@ -52,13 +96,17 @@ const InspectionScreen = () => {
           style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
-      <FlatList
-        data={rfids}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+      {isLoading ? (
+        <Loading visible={true} text="Loading..." />
+      ) : (
+        <FlatList
+          data={filteredData}
+          renderItem={renderItem}
+          keyExtractor={item => item.poid}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+        />
+      )}
     </SafeAreaView>
   );
 };

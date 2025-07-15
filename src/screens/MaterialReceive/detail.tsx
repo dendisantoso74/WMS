@@ -17,6 +17,7 @@ import {ReceivePo, ScanPo} from '../../services/materialRecive';
 import {set} from 'lodash';
 import ModalApp from '../../compnents/ModalApp';
 import {getData} from '../../utils/store';
+import {getReceiptQuantityByPoline} from '../../utils/helpers';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -37,9 +38,37 @@ const MaterialReceiveDetailScreen = () => {
   const [wmsMatrectrans, setWmsMatrectrans] = useState([]);
   const [tempQuantity, setTempQuantity] = useState(0);
 
-  const handleReceive = (quantity: number) => {
-    setTempQuantity(quantity);
+  const handleReceive = (quantity: number, item: any) => {
+    console.log('Temp Quantity:', quantity, 'Poline:', item);
+    ReceivePo([
+      {
+        // Assuming ReceivePo expects an array of poline changes
+        inspected: 0,
+        orderunit: item.orderunit,
+        orgid: 'BJS',
+        polinenum: item.polinenum,
+        ponum: listrfid[listrfid.length - 1],
+        porevisionnum: 0,
+        receiptquantity: quantity,
+        siteid: 'TJB56',
+      },
+    ])
+      .then(res => {
+        if (res.error) {
+          Alert.alert('Error', res.error);
+        } else {
+          console.log('ReceivePo response:', res);
+          Alert.alert('Material received');
+          setModalVisible(false);
+          // navigation.goBack();
+        }
+      })
+      .catch(err => {
+        console.error('Error in ReceivePo:', err);
+        Alert.alert('Error', 'Failed to receive material');
+      });
     setModalVisible(false);
+    setTempQuantity(quantity);
   };
 
   const handleConfirmReceiveAll = async () => {
@@ -88,13 +117,13 @@ const MaterialReceiveDetailScreen = () => {
     };
 
     fetchData();
-  }, []);
+  }, [modalVisible, tempQuantity]);
 
   // Helper: check if all items are fully received (all sideBarColor would be green)
   const allReceived =
-    poline.length > 0 &&
+    poline?.length > 0 &&
     poline.every(item => {
-      const matchedTrans = wmsMatrectrans.find(
+      const matchedTrans = wmsMatrectrans?.find(
         trans => trans.itemnum === item.itemnum,
       );
       const orderQty = matchedTrans?.receiptquantity ?? 0;
@@ -102,7 +131,7 @@ const MaterialReceiveDetailScreen = () => {
     });
 
   // Filter poline based on search input (material code or material name)
-  const filteredPoline = poline.filter(item => {
+  const filteredPoline = poline?.filter(item => {
     const code = item.itemnum?.toLowerCase() ?? '';
     const name = item.description?.toLowerCase() ?? '';
     const searchText = search.toLowerCase();
@@ -111,12 +140,14 @@ const MaterialReceiveDetailScreen = () => {
 
   const renderItem = item => {
     // Find the matching wmsMatrectrans entry by itemnum
-    const matchedTrans = wmsMatrectrans.find(
+    const matchedTrans = wmsMatrectrans?.find(
       trans => trans.itemnum === item.item.itemnum,
     );
-    // Use orderqty from wmsMatrectrans if available, otherwise fallback to poline
-    const receiptQty = matchedTrans?.receiptquantity ?? 0;
-
+    // Sum receiptquantity for all entries with the same polinenum
+    const receiptQty = getReceiptQuantityByPoline(
+      wmsMatrectrans,
+      item.item.polinenum,
+    );
     // Set sidebar color: green if fully received, otherwise gray
     const sideBarColor = receiptQty === item.item.orderqty ? '#A4DD00' : 'gray';
 
@@ -204,11 +235,17 @@ const MaterialReceiveDetailScreen = () => {
           poline.find(item => item.polinenum === selectedData)?.orderunit || ''
         }
         remainingQty={
-          poline.find(item => item.polinenum === selectedData)?.orderqty || ''
+          poline.find(item => item.polinenum === selectedData)?.orderqty -
+            getReceiptQuantityByPoline(wmsMatrectrans, selectedData) || ''
         }
         total={3}
         onClose={() => setModalVisible(false)}
-        onReceive={handleReceive}
+        onReceive={e =>
+          handleReceive(
+            e,
+            poline.find(item => item.polinenum === selectedData),
+          )
+        }
       />
 
       <ModalApp

@@ -18,6 +18,8 @@ const dummyRfids = ['00000000000000000000'];
 const DetailMaterialScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
+  const {item} = route.params;
+  console.log('RFIDs from params:', item);
 
   const [search, setSearch] = useState('');
 
@@ -31,8 +33,8 @@ const DetailMaterialScreen = () => {
   const renderItem = ({item}: {item: string}) => (
     <View className="items-end ">
       <TouchableOpacity
-        className="items-center justify-center border  border-blue-500 w-16 h-8  bg-blue-500 rounded"
-        onPress={() => navigation.navigate('Pick Item', {rfid: item})}>
+        className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
+        onPress={() => navigation.navigate('Pick Item', {item: item})}>
         <Icon library="Feather" name="plus" size={15} color="white"></Icon>
       </TouchableOpacity>
     </View>
@@ -47,23 +49,33 @@ const DetailMaterialScreen = () => {
         </View>
         <View>
           <Text className="ml-10 font-bold text-white">
-            FIBER OPTIC 24 CORE 100meters
+            {item.invuseline[0].description}
           </Text>
-          <Text className="ml-10 font-bold text-white">1500 METER</Text>
+          <Text className="ml-10 font-bold text-white">
+            {item.invuseline[0].quantity} {item.invuseline[0].wms_unit}
+          </Text>
         </View>
       </View>
 
-      <FlatList
+      <View className="items-end ">
+        <TouchableOpacity
+          className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
+          onPress={() => navigation.navigate('Pick Item', {item: item})}>
+          <Icon library="Feather" name="plus" size={15} color="white"></Icon>
+        </TouchableOpacity>
+      </View>
+
+      {/* <FlatList
         data={rfids}
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}
         style={styles.list}
-      />
+      /> */}
       <View style={styles.buttonContainer}>
         <ButtonApp
           label="Back"
-          onPress={() => navigation.navigate('')}
+          onPress={() => navigation.goBack()}
           size="large"
           color="primary"
         />

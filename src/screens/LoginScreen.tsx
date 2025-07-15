@@ -89,6 +89,8 @@ const LoginScreen = () => {
           //   .catch(err => console.log('error', err));
           console.log('berhasil login', res);
           storeData('user', username);
+          storeData('MAXuser', res.member[0]?.maxuser[0]?.userid);
+
           storeData('site', 'TJB56');
           storeData('org', 'BJS');
 

@@ -33,19 +33,26 @@ export const ListRejectCode = async () => {
     '/maxrest/oslc/os/mxdomain/_V01TX0lOU1BSRUpFQ1RDT0RF/alndomainvalue?lean=1&oslc.select=value';
   try {
     const response = await api.get(url);
-    return response.data;
+    // Map API response to {label, value} format
+    const data = Array.isArray(response.data.member)
+      ? response.data.member.map((item: any) => ({
+          label: item.value,
+          value: item.value,
+        }))
+      : [];
+    return data;
   } catch (error) {
     throw error;
   }
 };
 
-export const ListPoWINSP = async (id: string) => {
+export const ListPoWINSP = async () => {
   const site = await getData('site');
 
-  const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&oslc.select=poid,ponum,vendor,orderdate,status,revisionnum,orgid,siteid,wms_matrectrans{issuetype,rowstamp,receiptquantity,itemnum,description,polinenum,packingslipnum,orderunit,issueunit,quantity,wms_matrectransid,conditioncode,status,rejectqty,acceptqty}&oslc.where=siteid=${site} and ponum=${id}`;
+  const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&oslc.select=*&savedQuery=PO:POREV&oslc.where=siteid="${site}" and status="APPR" and receipts!="COMPLETE" and ponum="${site === 'TJB56' ? '%25BJS%25' : '%25BJS%25'}"`;
   try {
-    const response = await api.get(url);
-    return response.data;
+    const res = await api.get(url);
+    return res.data;
   } catch (error) {
     throw error;
   }
@@ -103,6 +110,8 @@ export const assignInspectPo = async (poid: string, assignedTo: string) => {
 export const inspectPo = async (payload: any) => {
   const url = '/maximo/oslc/os/MXRECEIPT?lean=1';
   try {
+    console.log('Inspect Po response:', url);
+
     const response = await api.post(url, payload, {
       headers: {
         'x-method-override': 'SYNC',
@@ -110,14 +119,18 @@ export const inspectPo = async (payload: any) => {
         'Content-Type': 'application/json',
       },
     });
+
     return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-export const listPoWtag = async (siteId: string, poNum: string) => {
-  const url = `/maximo/oslc/os/WMS_MXWTAG?lean=1&oslc.select=poid,ponum,siteid,orgid,vendor,orderdate,wms_serializeditem&oslc.where=wms_tagsiteid="${siteId}" and receipts!="NONE" and wms_serializeditem.serialnumber!="*" and wms_serializeditem.tagcode!="*" and status="APPR" and ponum="%${poNum}%"`;
+export const scanPoWtag = async (poNum: string) => {
+  const site = await getData('site');
+  // const url = `/maximo/oslc/os/WMS_MXWTAG?lean=1&oslc.select=poid,ponum,siteid,orgid,vendor,orderdate,wms_serializeditem&oslc.where=wms_tagsiteid="${site}" and receipts!="NONE" and wms_serializeditem.serialnumber!="*" and wms_serializeditem.tagcode!="*" and status="APPR" and ponum="${poNum}"`;
+
+  const url = `/maximo/oslc/os/WMS_MXWTAG?lean=1&oslc.select=*&oslc.where=ponum="${poNum}" and status="APPR"`;
   try {
     const response = await api.get(url);
     return response.data;
@@ -170,10 +183,8 @@ export const listRfid = async (siteId: string) => {
   }
 };
 
-export const checkSerialNumber = async (
-  siteId: string,
-  serialNumber: string,
-) => {
+export const checkSerialNumber = async (serialNumber: string) => {
+  const siteId = await getData('site');
   const url = `/maxrest/oslc/script/WMS_CHECKSERIALNUMBER?siteid=${siteId}&serialnumber=${serialNumber}`;
   try {
     const response = await api.get(url);

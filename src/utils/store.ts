@@ -40,6 +40,7 @@ export const clearDataLogout = async () => {
   const keys = [
     'userToken',
     'user',
+    'MAXuser',
     'my-key',
     'unitLevel',
     'totalUnitArea',

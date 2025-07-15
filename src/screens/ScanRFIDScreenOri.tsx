@@ -1,12 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import debounce from 'lodash/debounce';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {
   ZebraEvent,
   ZebraEventEmitter,
@@ -28,21 +22,21 @@ export default function App() {
       ZebraEvent.ON_BARCODE,
       (e: ZebraResultPayload) => {
         handleBarcodeEvent(e.data);
-      }
+      },
     );
 
     const rfidEvent = ZebraEventEmitter.addListener(
       ZebraEvent.ON_RFID,
       (e: ZebraRfidResultPayload) => {
         handleRfidEvent(e.data);
-      }
+      },
     );
 
     const deviceConnectEvent = ZebraEventEmitter.addListener(
       ZebraEvent.ON_DEVICE_CONNECTED,
       (e: ZebraResultPayload) => {
         console.log(e.data); // "Connect successfully" || "Connect failed"
-      }
+      },
     );
 
     return () => {
@@ -54,16 +48,16 @@ export default function App() {
 
   const handleRfidEvent = useCallback(
     debounce((newData: string[]) => {
-      setListRfid((pre) => [...pre, ...newData]);
+      setListRfid(pre => [...pre, ...newData]);
     }, 200),
-    []
+    [],
   );
 
   const handleBarcodeEvent = useCallback(
     debounce((newData: string) => {
-      setListBarcodes((pre) => [...pre, newData]);
+      setListBarcodes(pre => [...pre, newData]);
     }, 200),
-    []
+    [],
   );
 
   const getListRfidDevices = async () => {
@@ -76,22 +70,18 @@ export default function App() {
       <View
         style={{
           maxHeight: 200,
-        }}
-      >
-        {console.log(" halooo haloo log ")
-        }
+        }}>
         <Text style={[styles.text, styles.title]}>
           Devices: {listDevices.length}
         </Text>
         <FlatList
-          style={{ backgroundColor: '#FEF3C7' }}
+          style={{backgroundColor: '#FEF3C7'}}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           data={listDevices}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <TouchableOpacity
               onPress={() => connectToDevice(item)}
-              style={styles.item}
-            >
+              style={styles.item}>
               <Text style={styles.text}>{item}</Text>
             </TouchableOpacity>
           )}
@@ -103,10 +93,10 @@ export default function App() {
           Barcodes: {listBarcodes.length}
         </Text>
         <FlatList
-          style={{ backgroundColor: '#DCFCE7' }}
+          style={{backgroundColor: '#DCFCE7'}}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           data={listBarcodes}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <View style={styles.item}>
               <Text style={styles.text}>{item}</Text>
             </View>
@@ -119,10 +109,10 @@ export default function App() {
           RFIDs: {listRfid.length}
         </Text>
         <FlatList
-          style={{ backgroundColor: '#E0F2FE', marginBottom: 10 }}
+          style={{backgroundColor: '#E0F2FE', marginBottom: 10}}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           data={listRfid}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <View style={styles.item}>
               <Text style={styles.text}>{item}</Text>
             </View>

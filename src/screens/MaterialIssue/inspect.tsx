@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,12 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
+import {getWorkOrderDetails} from '../../services/materialIssue';
+import {set} from 'lodash';
+import {formatDateTime} from '../../utils/helpers';
+import {WoDetail} from '../../utils/types';
 
-const dummyRfids = ['00000000000000000000'];
+const dummyRfids = [''];
 
 const MaterialIssueInspectScreen = () => {
   const navigation = useNavigation<any>();
@@ -24,31 +28,68 @@ const MaterialIssueInspectScreen = () => {
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
+  const [datas, setDatas] = useState<WoDetail[]>([]); // <-- Use WoDetail[] type
+  const [invUse, setInvUse] = useState([]); // <-- Use WoDetail[] type
 
   const handleReceive = () => {
     setModalVisible(true);
   };
 
+  useEffect(() => {
+    if (listrfid) {
+      setRfids(listrfid);
+    }
+    console.log('RFIDs from params:', listrfid);
+    //fetchwo
+    getWorkOrderDetails(listrfid)
+      .then(res => {
+        if (res.error) {
+          console.error('Error fetching work order details:', res.error);
+        } else {
+          setDatas(res.member);
+          setInvUse(res.member[0].invuse);
+          console.log('Work order details:', res.member);
+          // Process the work order details as needed
+        }
+      })
+      .catch(err => {
+        console.error('Error in getWorkOrderDetails:', err);
+      });
+  }, [listrfid]);
+
   const renderItem = ({item}: {item: string}) => (
-    <View style={styles.rfidCard}>
+    <TouchableOpacity
+      onPress={() => navigation.navigate('Detail Material Issue', {item: item})}
+      style={styles.rfidCard}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
         <View className="flex-row justify-between">
-          <Text className="font-bold">TR02-FOM</Text>
-          <Text className="">Reserved : 150.0 METER</Text>
+          <Text className="font-bold">{item.invuseline[0].itemnum}</Text>
+          <Text className="">
+            Reserved : {item.invuseline[0].quantity}{' '}
+            {item.invuseline[0].wms_unit}
+          </Text>
         </View>
 
-        <Text className="font-bold">FIBER OPTIC 100 Meter</Text>
+        <Text className="font-bold max-w-64">
+          {item.invuseline[0].description}
+        </Text>
         <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3 text-lg font-bold">NEW</Text>
+          <Text className="w-1/3 ml-3 text-lg font-bold">
+            {item.invuseline[0].toconditioncode}
+          </Text>
           <Text className="w-1/2 text-right">Order / Receive</Text>
         </View>
         <View className="flex-row justify-between">
           <Text className="w-1/3 ml-3"></Text>
-          <Text className="w-1/2 text-right">3.0 roll / 0.0 roll</Text>
+          <Text className="w-1/2 text-right">
+            {' '}
+            - {item.invuseline[0].wms_unit} / {}
+            {item.invuseline[0].receivedqty} {item.invuseline[0].wms_unit}
+          </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -59,8 +100,10 @@ const MaterialIssueInspectScreen = () => {
           <Text className="font-bold text-white">WO Date</Text>
         </View>
         <View>
-          <Text className="ml-10 font-bold text-white">2176</Text>
-          <Text className="ml-10 font-bold text-white">12-Nov-2020 10:00</Text>
+          <Text className="ml-10 font-bold text-white">{datas[0]?.wonum}</Text>
+          <Text className="ml-10 font-bold text-white">
+            {formatDateTime(datas[0]?.statusdate || '')}
+          </Text>
         </View>
       </View>
       <TextInput
@@ -71,7 +114,7 @@ const MaterialIssueInspectScreen = () => {
         onChangeText={setSearch}
       />
       <FlatList
-        data={rfids}
+        data={invUse}
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}

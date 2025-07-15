@@ -69,6 +69,7 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<string | null>(null);
+  const [inputId, setInputId] = useState<string>('PO-BJS-25-1673-MMT');
 
   const pan = useRef(
     new Animated.ValueXY({x: 0, y: SCREEN_HEIGHT - 50}),
@@ -414,14 +415,20 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
                     backgroundColor: '#fafafa',
                   }}
                   placeholderTextColor="#aaa"
+                  value={inputId}
+                  onChangeText={text => setInputId(text)}
+                  returnKeyType="done" // or "go", "next", "search", etc.
+                  onSubmitEditing={() => {
+                    onAutoNavigate && onAutoNavigate([inputId]);
+                  }}
                 />
 
                 <TouchableOpacity
                   style={styles.closeButton}
                   onPress={() => {
-                    onAutoNavigate && onAutoNavigate(['PO-BJS-25-1673-MMT']); // Example hardcoded data, changes soon
+                    onAutoNavigate && onAutoNavigate([inputId]); // Example hardcoded data, changes soon
                   }}>
-                  <Text style={styles.closeButtonText}>Close Sheet</Text>
+                  <Text style={styles.closeButtonText}>Input</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>

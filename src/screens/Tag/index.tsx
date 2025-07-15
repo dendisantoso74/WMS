@@ -11,53 +11,23 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
-
-const dummyRfids = ['00000000000000000000'];
+import ScanRFIDScreen from '../ScanRFIDScreen';
 
 const TagScreen = () => {
   const navigation = useNavigation<any>();
 
-  const [rfids, setRfids] = useState(dummyRfids);
-  const [search, setSearch] = useState('');
-
-  const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      onPress={() => navigation.navigate('Po Detail')}>
-      <View>
-        <View className="my-2">
-          <Text className="font-bold px-4">PO - 1631</Text>
-          <Text className="font-semibold px-4">IPWR</Text>
-          <Text className="px-4">15-Jul-2020 15:12</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.filterContainer}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Enter PO Number"
-          placeholderTextColor="#b0b0b0"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
-        />
-      </View>
-      <FlatList
-        data={rfids}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
+      {/* <Text>Material Receive SCREEN</Text> */}
+      <ScanRFIDScreen
+        onScanRfid={rfids => console.log('RFIDs:', rfids)}
+        onScanBarcode={barcodes => console.log('Barcodes:', barcodes)}
+        onDevicesChange={devices => console.log('Devices:', devices)}
+        autoNavigate={true}
+        mode="qrcode"
+        onAutoNavigate={rfids =>
+          navigation.navigate('Po Detail', {listrfid: rfids})
+        }
       />
     </SafeAreaView>
   );

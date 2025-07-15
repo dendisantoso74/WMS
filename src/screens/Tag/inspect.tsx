@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,48 +8,237 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import ModalApp from '../../compnents/ModalApp';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  connectToDevice,
+  getAllDevices,
+  type ZebraResultPayload,
+  type ZebraRfidResultPayload,
+} from 'react-native-zebra-rfid-barcode';
+import {debounce} from 'lodash';
+import {
+  generateSerialNumber,
+  getAvailableSerialNumber,
+} from '../../utils/helpers';
+import {checkSerialNumber, taggingPo} from '../../services/materialRecive';
 
-const dummyRfids = ['00000000000000000000'];
-
+const dummyRfids = [
+  '00000000000000000000',
+  '11111111111111111111',
+  '22222222222222222222',
+  '33333333333333333333',
+  '44444444444444444444',
+];
 const TagInspectScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {item} = route.params;
+  console.log('RFIDs from params:', item);
 
   const [rfids, setRfids] = useState(dummyRfids);
+  const [modalTag, setModalTag] = useState(false);
+  const [selectTag, setSelectTag] = useState('');
+  const [serialGenerate, setSerialGenerate] = useState<string>('');
+
+  // RFID SCANNER
+  const [listDevices, setListDevices] = useState<string[]>([]);
+  const [listBarcodes, setListBarcodes] = useState<string[]>([]);
+  const [listRfid, setListRfid] = useState<string[]>([]);
+
+  useEffect(() => {
+    getListRfidDevices();
+
+    const barcodeEvent = ZebraEventEmitter.addListener(
+      ZebraEvent.ON_BARCODE,
+      (e: ZebraResultPayload) => {
+        handleBarcodeEvent(e.data);
+      },
+    );
+
+    const rfidEvent = ZebraEventEmitter.addListener(
+      ZebraEvent.ON_RFID,
+      (e: ZebraRfidResultPayload) => {
+        handleRfidEvent(e.data);
+      },
+    );
+
+    const deviceConnectEvent = ZebraEventEmitter.addListener(
+      ZebraEvent.ON_DEVICE_CONNECTED,
+      (e: ZebraResultPayload) => {
+        console.log(e.data); // "Connect successfully" || "Connect failed"
+      },
+    );
+
+    return () => {
+      barcodeEvent.remove();
+      rfidEvent.remove();
+      deviceConnectEvent.remove();
+    };
+  }, []);
+
+  const handleRfidEvent = useCallback(
+    debounce((newData: string[]) => {
+      setListRfid(prev => {
+        // Merge and remove duplicates
+        const merged = [...prev, ...newData];
+        return Array.from(new Set(merged));
+      });
+    }, 200),
+    [],
+  );
+
+  const handleBarcodeEvent = useCallback(
+    debounce((newData: string) => {
+      setListBarcodes(pre => [...pre, newData]);
+    }, 200),
+    [],
+  );
+
+  const getListRfidDevices = async () => {
+    const listDevices = await getAllDevices();
+    setListDevices(listDevices);
+  };
 
   const renderItem = ({item}: {item: string}) => (
-    <SafeAreaView style={styles.rfidCard}>
-      <View className="my-2">
-        <Text className="font-bold px-4 text-red-600">PO - 1631</Text>
-        <Text className="font-semibold px-4">IPWR</Text>
-        <Text className="px-4">15-Jul-2020 15:12</Text>
-      </View>
-    </SafeAreaView>
+    <TouchableOpacity
+      onPress={() => {
+        setModalTag(true), setSelectTag(item);
+      }}
+      className="w-full">
+      <Text className="w-full px-2 py-4 mb-1 border rounded-sm border-stone-200">
+        {item}
+      </Text>
+    </TouchableOpacity>
   );
+
+  const checkSN = async () => {
+    const serialNumber = await generateSerialNumber();
+    console.log('Generated Serial Number:', serialNumber);
+    checkSerialNumber(serialNumber).then((res: any) => {
+      console.log('Check Serial Number Response:', res.status);
+      if (res.status === 'AVAILABLE') {
+        console.log('Serial Number is available:', serialNumber);
+      }
+    });
+    // return serialNumber;
+    setSerialGenerate(serialNumber);
+  };
+
+  const handleOnConfirm = async (id: string, tag: string, sn: string) => {
+    setModalTag(false);
+    if (tag) {
+      // navigation.navigate('Po Detail', {
+      //   item: item,
+      //   tag: tag,
+      // });
+      console.log('Selected Tag:', tag, 'Serial Number:', sn, 'Item:', id);
+
+      await taggingPo(id, sn, tag).then((res: any) => {
+        console.log('Tagging Response:', res);
+      });
+
+      // Alert.alert('Success', `Tag ${tag} selected`);
+      // navigation.goBack();
+    } else {
+      ToastAndroid.show('Please select a tag', ToastAndroid.SHORT);
+    }
+  };
+
+  useEffect(() => {
+    checkSN();
+  }, [listRfid]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="flex-col p-2 bg-blue-400">
-        <View className="flex-row justify-start items-start">
+        <View className="flex-row items-start justify-start">
           <Text className="font-bold text-white">Material</Text>
-          <Text className="ml-10 font-light w-64 text-white">
-            TRO2-FO24M / FIBER OPTIC 24 CORE 100 Meters
+          <Text className="w-64 ml-10 font-light text-white">
+            {item.itemnum} / {item.description}
           </Text>
         </View>
-        <View className="flex-row justify-start items-start">
+        <View className="flex-row items-start justify-start">
           <Text className="font-bold text-white">Serial</Text>
-          <Text className="font-bold text-white"></Text>
+          <Text className="w-64 ml-10 font-bold text-white">
+            {item.serialnumber ? item.serialnumber : serialGenerate}
+          </Text>
         </View>
-        <View className="flex-row justify-start items-start">
+        <View className="flex-row items-start justify-start">
           <Text className="font-bold text-white">Unit Order</Text>
-          <Text className="ml-10 font-light w-64 text-white">1.0 ROLL</Text>
+          <Text className="w-64 ml-10 font-light text-white">
+            {item.qtystored} {item.unitstored}
+          </Text>
         </View>
       </View>
-      <View className="items-center">
-        <Text className="font-bold">Available RFID Tags</Text>
+
+      {/* section rfid scanner */}
+      <View
+        style={{
+          maxHeight: 200,
+          borderWidth: 1,
+          borderColor: '#ccc',
+          marginVertical: 8,
+          // marginHorizontal: 4,
+          // borderRadius: 8,
+        }}>
+        <Text style={[styles.text, styles.title]}>
+          Devices Scanner: {listDevices.length}
+        </Text>
+        <FlatList
+          style={{backgroundColor: '#FEF3C7'}}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          data={listDevices}
+          renderItem={({item}) => (
+            <TouchableOpacity
+              onPress={() => connectToDevice(item)}
+              style={styles.item}>
+              <Text style={styles.text}>{item}</Text>
+            </TouchableOpacity>
+          )}
+        />
       </View>
+      {/* end Section RFID scanner */}
+
+      <Text className="my-2 font-bold text-center text-gray-400">
+        Available RFID Tags
+      </Text>
+      <View className="">
+        {listRfid.length > 0 ? (
+          <FlatList
+            data={listRfid}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            // contentContainerStyle={styles.listContent}
+            // style={styles.list}
+          />
+        ) : (
+          <Text className="text-center text-gray-200">
+            Scan RFID tags first
+          </Text>
+        )}
+      </View>
+      <ModalApp
+        content={`Do you want to use this tag? ${selectTag}`}
+        onConfirm={() => {
+          handleOnConfirm(
+            item.wms_serializeditemid,
+            selectTag,
+            item?.serialnumber ? item?.serialnumber : serialGenerate,
+          );
+        }}
+        visible={modalTag}
+        title="Information"
+        type="confirmation"
+        onClose={() => {
+          setModalTag(false);
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -85,11 +274,14 @@ const styles = StyleSheet.create({
     marginRight: 40, // To center title visually
   },
   list: {
-    flex: 1,
+    // flex: 1,
+    borderWidth: 1,
   },
   listContent: {
     padding: 12,
     paddingBottom: 80,
+    borderWidth: 2,
+    width: '100%',
   },
   rfidCard: {
     flexDirection: 'row',
@@ -140,6 +332,21 @@ const styles = StyleSheet.create({
     // marginBottom: 4,
     marginTop: 6,
     marginHorizontal: 8,
+  },
+  // rfid
+  text: {
+    color: '#333',
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    // marginVertical: 5,
+  },
+  item: {
+    // height: ,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
   },
 });
 

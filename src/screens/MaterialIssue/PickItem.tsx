@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,75 +9,96 @@ import {
   TextInput,
   ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
+import {findSugestBin} from '../../services/materialIssue';
+import {set} from 'lodash';
 
 const dummyRfids = ['00000000000000000000'];
 
 const PickItemScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {item} = route.params;
+
+  console.log('RFIDs from params:', item);
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [suggestedBin, setSuggestedBin] = useState([]);
 
-  const renderItem = ({item}: {item: string}) => (
-    <View className="flex-col ">
-      <View className="flex-row w-full mt-2 ">
-        <Text className="w-1/2 font-bold">Item Name</Text>
-        <Text className="font-bold">TRO2-FO24M</Text>
-      </View>
-      <View className="flex-row w-full mt-5">
-        <Text className="w-1/2 font-bold">Condition Code</Text>
-        <Text className="font-bold">BROKEN</Text>
-      </View>
-      <View className="flex-row w-full mt-5">
-        <Text className="w-1/2 font-bold">Issue Unit</Text>
-        <Text className="font-bold">METER</Text>
-      </View>
-      <View className="flex-row w-full mt-5 items-center">
-        <Text className="w-1/2 font-bold">Stored Qty</Text>
-        <View className=" flex-row items-center">
-          <TextInput
-            className="w-24 text-center"
-            style={styles.filterInput}
-            placeholder="0"
-            placeholderTextColor="#b0b0b0"
-            value={search}
-            onChangeText={setSearch}
-          />
-          <Text className="font-bold">METER</Text>
-        </View>
-      </View>
-      <View className="flex-row w-full mt-5 items-center">
-        <Text className="w-1/2 font-bold">Pick Qty</Text>
-        <View className=" flex-row items-center">
-          <TextInput
-            className="w-24 text-center"
-            style={styles.filterInput}
-            placeholder="0"
-            placeholderTextColor="#b0b0b0"
-            value={search}
-            onChangeText={setSearch}
-          />
-          <Text className="font-bold">METER</Text>
-        </View>
-      </View>
+  useEffect(() => {
+    //find sugestion bin
+    const findbin = async () => {
+      const res = await findSugestBin(
+        item.invuseline[0].itemnum,
+        item.invuseline[0].fromstoreloc,
+      );
+      setSuggestedBin(res.member[0]);
+      console.log('Suggested Bin:', res.member[0]);
+    };
 
-      <View className="flex-row w-full mt-5 items-center">
-        <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
-        <View className="bg-gray-200 w-1/2 py-2">
-          <Text className="font-bold text-center ">MS-A1L-4-2-2-1</Text>
-        </View>
-      </View>
-      <View className="flex-row w-full mt-5 items-center">
-        <Text className="w-1/2 font-bold">User Type</Text>
-        <View className="bg-gray-200 w-1/2 py-2">
-          <Text className="font-bold text-center ">ISSUE</Text>
-        </View>
-      </View>
-    </View>
-  );
+    findbin();
+  }, [item]);
+
+  // const renderItem = ({item}: {item: string}) => (
+  //   <View className="flex-col ">
+  //     <View className="flex-row w-full mt-2 ">
+  //       <Text className="w-1/2 font-bold">Item Name</Text>
+  //       <Text className="font-bold">{item?.invuseline[0].description}</Text>
+  //     </View>
+  //     <View className="flex-row w-full mt-5">
+  //       <Text className="w-1/2 font-bold">Condition Code</Text>
+  //       <Text className="font-bold">BROKEN</Text>
+  //     </View>
+  //     <View className="flex-row w-full mt-5">
+  //       <Text className="w-1/2 font-bold">Issue Unit</Text>
+  //       <Text className="font-bold">METER</Text>
+  //     </View>
+  //     <View className="flex-row items-center w-full mt-5">
+  //       <Text className="w-1/2 font-bold">Stored Qty</Text>
+  //       <View className="flex-row items-center ">
+  //         <TextInput
+  //           className="w-24 text-center"
+  //           style={styles.filterInput}
+  //           placeholder="0"
+  //           placeholderTextColor="#b0b0b0"
+  //           value={search}
+  //           onChangeText={setSearch}
+  //         />
+  //         <Text className="font-bold">METER</Text>
+  //       </View>
+  //     </View>
+  //     <View className="flex-row items-center w-full mt-5">
+  //       <Text className="w-1/2 font-bold">Pick Qty</Text>
+  //       <View className="flex-row items-center ">
+  //         <TextInput
+  //           className="w-24 text-center"
+  //           style={styles.filterInput}
+  //           placeholder="0"
+  //           placeholderTextColor="#b0b0b0"
+  //           value={search}
+  //           onChangeText={setSearch}
+  //         />
+  //         <Text className="font-bold">METER</Text>
+  //       </View>
+  //     </View>
+
+  //     <View className="flex-row items-center w-full mt-5">
+  //       <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
+  //       <View className="w-1/2 py-2 bg-gray-200">
+  //         <Text className="font-bold text-center ">MS-A1L-4-2-2-1</Text>
+  //       </View>
+  //     </View>
+  //     <View className="flex-row items-center w-full mt-5">
+  //       <Text className="w-1/2 font-bold">User Type</Text>
+  //       <View className="w-1/2 py-2 bg-gray-200">
+  //         <Text className="font-bold text-center ">ISSUE</Text>
+  //       </View>
+  //     </View>
+  //   </View>
+  // );
 
   // <Text>Item Name</Text>
   //       <Text>Condition Code</Text>
@@ -90,7 +111,7 @@ const PickItemScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Text className="font-bold ml-4 mt-3">Serial Number</Text>
+      <Text className="mt-3 ml-4 font-bold">Serial Number</Text>
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
@@ -100,13 +121,82 @@ const PickItemScreen = () => {
           onChangeText={setSearch}
         />
       </View>
-      <FlatList
+      {/* <FlatList
         data={rfids}
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}
         style={styles.list}
-      />
+      /> */}
+
+      <View className="flex-col ">
+        <View className="flex-row w-full mt-2 ">
+          <Text className="w-1/2 font-bold">Item Name</Text>
+          <Text className="font-bold">{item?.invuseline[0].description}</Text>
+        </View>
+        <View className="flex-row w-full mt-5">
+          <Text className="w-1/2 font-bold">Condition Code</Text>
+          <Text className="font-bold">BROKEN</Text>
+        </View>
+        <View className="flex-row w-full mt-5">
+          <Text className="w-1/2 font-bold">Issue Unit</Text>
+          <Text className="font-bold">{item?.invuseline[0].wms_unit}</Text>
+        </View>
+        <View className="flex-row items-center w-full mt-5">
+          <Text className="w-1/2 font-bold">Stored Qty</Text>
+          <View className="flex-row items-center ">
+            <TextInput
+              className="w-24 text-center"
+              style={styles.filterInput}
+              placeholder="0"
+              placeholderTextColor="#b0b0b0"
+              value={search}
+              onChangeText={setSearch}
+            />
+            <Text className="font-bold">{item?.invuseline[0].wms_unit}</Text>
+          </View>
+        </View>
+        <View className="flex-row items-center w-full mt-5">
+          <Text className="w-1/2 font-bold">Pick Qty</Text>
+          <View className="flex-row items-center ">
+            <TextInput
+              className="w-24 text-center"
+              style={styles.filterInput}
+              placeholder="0"
+              placeholderTextColor="#b0b0b0"
+              value={search}
+              onChangeText={setSearch}
+            />
+            <Text className="font-bold">{item?.invuseline[0].wms_unit}</Text>
+          </View>
+        </View>
+
+        <View className="flex-row items-center w-full mt-5">
+          <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
+          <View className="w-1/2 py-2 ">
+            <Text className="font-bold text-center ">
+              {item?.invuseline[0].frombin}
+            </Text>
+          </View>
+        </View>
+
+        <View className="flex-row items-center w-full mt-5">
+          <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
+          <View className="w-1/2 py-2 bg-gray-200">
+            <Text className="font-bold text-center ">
+              {suggestedBin.binnum}
+            </Text>
+          </View>
+        </View>
+        <View className="flex-row items-center w-full mt-5">
+          <Text className="w-1/2 font-bold">User Type</Text>
+          <View className="w-1/2 py-2 bg-gray-200">
+            <Text className="font-bold text-center ">
+              {item?.invuseline[0].wms_usetype}
+            </Text>
+          </View>
+        </View>
+      </View>
       <View style={styles.buttonContainer}>
         <ButtonApp
           label="ADD"

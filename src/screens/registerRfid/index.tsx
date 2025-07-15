@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,46 +10,89 @@ import {
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation} from '@react-navigation/native';
-
-const dummyRfids = [
-  '4C5071020190000000081386',
-  '4C5071020190000000081350',
-  '4C5071020190000000081531',
-  '4C5071020190000000081423',
-  '4C5071020190000000081541',
-  '4C5071020190000000081438',
-];
+import {getListRfid} from '../../services/registerRfid';
 
 const RegisterRfidScreen = () => {
   const navigation = useNavigation<any>();
 
-  const [rfids, setRfids] = useState(dummyRfids);
+  const [rfids, setRfids] = useState<any[]>([]);
+  const [pageNo, setPageNo] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const pageSize = 10;
+
+  // Update fetchRfids to keep all object data
+  const fetchRfids = async (page: number) => {
+    setLoading(true);
+    try {
+      const res = await getListRfid(pageSize, page);
+      const newRfids = Array.isArray(res.member) ? res.member : [];
+      setRfids(prev =>
+        page === 1
+          ? newRfids
+          : [
+              ...prev,
+              ...newRfids.filter(
+                (item: any) =>
+                  !prev.some(
+                    (prevItem: any) => prevItem.tagcode === item.tagcode,
+                  ),
+              ),
+            ],
+      );
+      setHasMore(newRfids.length === pageSize);
+    } catch (e) {
+      setHasMore(false);
+    }
+    setLoading(false);
+  };
 
   const handleRegisterNew = () => {
-    // TODO: Implement register new RFID logic
-    // For now, just add a dummy
-    // setRfids(prev => [
-    //   ...prev,
-    //   `4C50710201900000000${Math.floor(Math.random() * 1000000)}`,
-    // ]);
     navigation.navigate('AddRFID');
   };
 
-  const renderItem = ({item}: {item: string}) => (
-    <View style={styles.rfidCard}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <Text style={styles.rfidText}>{item}</Text>
-    </View>
-  );
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      const nextPage = pageNo + 1;
+      setPageNo(nextPage);
+      fetchRfids(nextPage);
+    }
+  };
+
+  // Update renderItem to use object properties
+  const renderItem = ({item}: {item: any}) => {
+    let sideBarColor = 'gray';
+    if (item.status_description === 'Assigned') sideBarColor = '#A4DD00';
+    else if (item.status_description === 'Broken') sideBarColor = 'red';
+    else if (item.status_description === 'Blank') sideBarColor = 'gray';
+
+    return (
+      <View style={styles.rfidCard}>
+        <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
+        <Text style={styles.rfidText}>{item.tagcode}</Text>
+        {/* <Text style={styles.rfidText}>{item.status_description}</Text> */}
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <FlatList
         data={rfids}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={item => item.wms_rfidid?.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.2}
+        ListFooterComponent={
+          loading ? (
+            <View style={{padding: 16, alignItems: 'center'}}>
+              <Text>Loading...</Text>
+            </View>
+          ) : null
+        }
       />
       <View style={styles.buttonContainer}>
         <ButtonApp
@@ -111,8 +154,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.08,
     shadowRadius: 2,
-    // paddingVertical: 18,
-    // paddingHorizontal: 16,
     paddingRight: 16,
   },
   sideBar: {

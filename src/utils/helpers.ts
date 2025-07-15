@@ -2,6 +2,7 @@ import {Dimensions, Platform} from 'react-native';
 import {HistoryTypes} from './types';
 import {TeamData} from './data';
 import NetInfo from '@react-native-community/netinfo';
+import {checkSerialNumber} from '../services/materialRecive';
 
 const {width, height} = Dimensions.get('window');
 
@@ -145,3 +146,77 @@ export const checkWifiConnection = async () => {
   const state = await NetInfo.fetch();
   return state.type === 'wifi' && state.isConnected;
 };
+
+export function formatDateTime(dateString: string): string {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear();
+  const hour = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${day}-${month}-${year} ${hour}:${min}`;
+}
+
+export const getReceiptQuantityByPoline = (
+  wmsMatrectrans: any[] | undefined,
+  polinenum: number,
+): number => {
+  // Validate wmsMatrectrans is an array and not empty
+  if (!Array.isArray(wmsMatrectrans) || wmsMatrectrans.length === 0) {
+    return 0;
+  }
+  // Sum receiptquantity for all entries with the same polinenum
+  return wmsMatrectrans
+    .filter(trans => trans.polinenum === polinenum)
+    .reduce((sum, trans) => sum + (trans.receiptquantity ?? 0), 0);
+};
+
+export const getQuantityByPolineInspect = (
+  wmsMatrectrans: any[],
+  polinenum: number,
+): number => {
+  // Get acceptqty from the first entry with the same polinenum
+  const match = wmsMatrectrans?.find(trans => trans.polinenum === polinenum);
+  return match?.quantity ?? 0;
+};
+
+export const getAcceptQuantityByPoline = (
+  wmsMatrectrans: any[],
+  polinenum: number,
+): number => {
+  // Get acceptqty from the first entry with the same polinenum
+  const match = wmsMatrectrans?.find(trans => trans.polinenum === polinenum);
+  return match?.acceptqty ?? 0;
+};
+
+export const getRejectQuantityByPoline = (
+  wmsMatrectrans: any[],
+  polinenum: number,
+): number => {
+  // Get rejectqty from the first entry with the same polinenum
+  const match = wmsMatrectrans?.find(trans => trans.polinenum === polinenum);
+  return match?.rejectqty ?? 0;
+};
+
+export function generateSerialNumber(): string {
+  const chars = '0123456789ABCDEF';
+  let serial = '';
+  for (let i = 0; i < 24; i++) {
+    serial += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return serial;
+}

@@ -5,7 +5,6 @@ import Config from 'react-native-config';
 export const getApiUrl = async (): Promise<string | null> => {
   try {
     const url = await AsyncStorage.getItem('apiUrl');
-    console.log('getApiUrl', url);
 
     return url;
   } catch (e) {

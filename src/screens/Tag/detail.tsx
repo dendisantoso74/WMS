@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,41 +8,81 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import {scanPoWtag} from '../../services/materialRecive';
+import {getData} from '../../utils/store';
+import {SerializedItem} from '../../utils/types';
 
 const dummyRfids = ['00000000000000000000'];
 
 const TagDetailScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {listrfid} = route.params;
+  const PoNumber = listrfid[listrfid.length - 1];
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
 
-  const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      on
-      onPress={() => navigation.navigate('Item to Tag')}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-col">
-          <Text className="font-bold">TR02-FO24M</Text>
-          <Text className="font-bold">FIBER OPTIC 24 Core 100 Meters</Text>
-          <Text className="font-bold">Tag code: -</Text>
-          <Text className="font-bold">Serial: -</Text>
-          <Text className="font-bold">NEW</Text>
+  const [datas, setDatas] = useState([]);
+
+  useEffect(() => {
+    console.log('RFIDs from params:', PoNumber);
+
+    const fetchData = async () => {
+      const site = await getData('site');
+
+      scanPoWtag(PoNumber).then((res: any) => {
+        console.log('RFIDs fetched successfully:', res.member);
+        if (res.member.length === 0) {
+          navigation.goBack();
+          Alert.alert(
+            'Information',
+            `${PoNumber} Not Found at site: ${site} `,
+            // [{text: 'OK', onPress: () => navigation.goBack()}],
+            // {cancelable: false},
+          );
+        }
+        setDatas(res.member[0].wms_serializeditem);
+      });
+    };
+    fetchData();
+  }, [listrfid]);
+
+  const renderItem = ({item}: {item: SerializedItem}) => {
+    const isTagged = !!item.tagcode && !!item.serialnumber;
+    const sideBarColor = isTagged ? '#A4DD00' : 'gray';
+    return (
+      <TouchableOpacity
+        disabled={isTagged}
+        style={styles.rfidCard}
+        onPress={() =>
+          navigation.navigate('Item to Tag', {
+            item: item,
+          })
+        }>
+        <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
+        <View className="my-2">
+          <View className="flex-col">
+            <Text className="font-bold">{item.itemnum}</Text>
+            <Text className="font-bold">{item.description}</Text>
+            <Text className="font-bold">Tag code: {item?.tagcode}</Text>
+            <Text className="font-bold">Serial: {item?.serialnumber}</Text>
+            <Text className="font-bold">{item.conditioncode}</Text>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="flex-row p-2 bg-blue-400">
         <Text className="font-bold text-white">PO Number</Text>
-        <Text className="ml-10 font-bold text-white">2176</Text>
+        <Text className="ml-10 font-bold text-white">{PoNumber}</Text>
       </View>
       <View style={styles.filterContainer}>
         <TextInput
@@ -61,9 +101,9 @@ const TagDetailScreen = () => {
         />
       </View>
       <FlatList
-        data={rfids}
+        data={datas}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />

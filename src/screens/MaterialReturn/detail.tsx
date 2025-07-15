@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,14 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
+  Alert,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
+import {formatDateTime} from '../../utils/helpers';
+import {scanWoForReturn} from '../../services/materialReturn';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -19,6 +22,9 @@ const MaterialReturnDetailScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {listrfid} = route.params;
+  const woNum = listrfid[listrfid.length - 1];
+  const [datas, setDatas] = useState([]);
+  const [woList, setWoList] = useState([]);
 
   const [search, setSearch] = useState('');
 
@@ -34,23 +40,41 @@ const MaterialReturnDetailScreen = () => {
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
         <View className="flex-row justify-between">
-          <Text className="font-bold">TR02-FOM</Text>
-          <Text className="">Reserved : 150.0 METER</Text>
+          <Text className="font-bold">{item.invuseline[0].itemnum}</Text>
+          <Text className="">Reserved : 0 {item.invuseline[0].wms_unit}</Text>
         </View>
 
-        <Text className="font-bold">FIBER OPTIC 100 Meter</Text>
+        <Text className="font-bold">{item.invuseline[0].description}</Text>
         <View className="flex-row justify-between">
           <Text className="w-1/3 ml-3 text-lg font-bold">BROKEN</Text>
           <Text className="w-1/2 text-right">Outstanding / Issue</Text>
         </View>
         <View className="flex-row justify-between">
           <Text className="w-1/3 ml-3">ENTERED</Text>
-          <Text className="w-1/2 text-right">150.0 METER / 0.0 METER</Text>
+          <Text className="w-1/2 text-right">
+            0 {item.invuseline[0].wms_unit} / 0 {item.invuseline[0].wms_unit}
+          </Text>
         </View>
       </View>
     </View>
   );
 
+  useEffect(() => {
+    scanWoForReturn(woNum).then((res: any) => {
+      if (res.member.length === 0) {
+        navigation.goBack();
+        Alert.alert(
+          'No Data',
+          'No data found for this PO number.',
+          // [{text: 'OK', onPress: () => navigation.goBack()}],
+          // {cancelable: false},
+        );
+      }
+      setDatas(res.member[0]);
+      setWoList(res.member[0].invuse);
+      console.log('RFIDs fetched successfully:', res.member[0].invuse);
+    });
+  }, []);
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="flex-row p-2 bg-blue-400">
@@ -59,8 +83,10 @@ const MaterialReturnDetailScreen = () => {
           <Text className="font-bold text-white">WO Date</Text>
         </View>
         <View>
-          <Text className="ml-10 font-bold text-white">2176</Text>
-          <Text className="ml-10 font-bold text-white">12-Nov-2020 10:00</Text>
+          <Text className="ml-10 font-bold text-white">{woNum}</Text>
+          <Text className="ml-10 font-bold text-white">
+            {formatDateTime(datas?.changedate)}
+          </Text>
         </View>
       </View>
       <TextInput
@@ -71,9 +97,9 @@ const MaterialReturnDetailScreen = () => {
         onChangeText={setSearch}
       />
       <FlatList
-        data={rfids}
+        data={woList}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={item => item.invuseid}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />

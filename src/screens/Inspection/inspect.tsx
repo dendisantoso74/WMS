@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,66 +8,164 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
 import {Dropdown} from 'react-native-element-dropdown';
+import {getData} from '../../utils/store';
+import {inspectPo, ListRejectCode} from '../../services/materialRecive';
+import {getPersonByLoginId} from '../../services/user';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const dummyRfids = ['00000000000000000000'];
 
-const data = [
-  {label: 'Item 1', value: '1'},
-  {label: 'Item 2', value: '2'},
-  {label: 'Item 3', value: '3'},
-  {label: 'Item 4', value: '4'},
-  {label: 'Item 5', value: '5'},
-  {label: 'Item 6', value: '6'},
-  {label: 'Item 7', value: '7'},
-  {label: 'Item 8', value: '8'},
-];
-
 const InspectionReceivingApproveScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+
+  const {ponum} = route.params || {};
+  const {item} = route.params || {};
+  const {wms_matrectrans} = route.params || {};
+
+  console.log('Received ponum inspect next:', ponum, item);
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [datas, setDatas] = useState([]);
+  const [rejectCode, setRejectCode] = useState([{label: '', value: ''}]);
+  const [user, setUser] = React.useState<string | null>(null);
+  const [inputAceptedQty, setInputAcceptedQty] = useState(0);
+  const [inputRejectedQty, setInputRejectedQty] = useState(0);
+  const [inputRejectedCode, setInputRejectedCode] = useState('');
+
+  const [poline, setPoline] = useState([]);
+  const [wmsMatrectrans, setWmsMatrectrans] = useState([]);
+  const [tempQuantity, setTempQuantity] = useState(0);
+  // Initial payload
+  const [tempPayload, setTempPayload] = useState({
+    externalrefid: ponum,
+    sourcesysid: 'WMS',
+    ponum: ponum,
+    polinenum: datas.polinenum,
+    porevisionnum: datas.porevisionnum ?? 0,
+    siteid: datas.siteid,
+    positeid: datas.siteid,
+    orgid: datas.orgid,
+    inspected: 1,
+    receiptquantity: null,
+    acceptedqty: null,
+    rejectedqty: 0,
+    wms_inspectassignedby: '',
+    wms_matrectransid: datas?.wms_matrectransid,
+  });
 
   const [count, setCount] = useState(0);
 
   const handleDecrease = () => {
-    if (count > 1) setCount(count - 1);
+    if (inputAceptedQty > 1) setInputAcceptedQty(inputAceptedQty - 1);
   };
 
   const handleIncrease = () => {
-    setCount(count + 1);
+    setInputAcceptedQty(inputAceptedQty + 1);
   };
+
+  const handleApprove = async () => {
+    console.log('Approve button pressed');
+    inspectPo(tempPayload)
+      .then(res => {
+        console.log('Inspect Po response:', res);
+        if (res.error) {
+          ToastAndroid.show('Error approving inspection', ToastAndroid.SHORT);
+        } else {
+          ToastAndroid.show(
+            'Inspection approved successfully',
+            ToastAndroid.SHORT,
+          );
+          navigation.navigate('Inspection');
+        }
+      })
+      .catch(err => {
+        console.error('Error in handleApprove:', err);
+        Alert.alert('Error', err?.message || err?.Error?.message);
+        ToastAndroid.show('Error approving inspection', ToastAndroid.SHORT);
+      });
+    // console.log('tempPayload:', tempPayload);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const resRejectCode = await ListRejectCode();
+      console.log('ListRejectCode data:', resRejectCode);
+      setRejectCode(resRejectCode);
+
+      const userAsync = await AsyncStorage.getItem('MAXuser');
+      setUser(userAsync);
+
+      setDatas(item);
+      setPoline(item.poline);
+      setWmsMatrectrans(item.wms_matrectrans);
+      console.log('Poline inspect:', wms_matrectrans);
+
+      // tes temp payload
+      // To update just one field, for example acceptedqty:
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData2 = async () => {
+      const userAsync = await AsyncStorage.getItem('MAXuser');
+
+      setTempPayload(prev => ({
+        ...prev,
+        orgid: item.orgid,
+        polinenum: item.polinenum,
+        positeid: wms_matrectrans[0].positeid,
+        siteid: wms_matrectrans[0].positeid,
+        wms_matrectransid: wms_matrectrans[0].wms_matrectransid,
+        wms_inspectassignedby: userAsync, // or any value you want to set
+        receiptquantity: wms_matrectrans[0].receiptquantity,
+        acceptedqty: inputAceptedQty
+          ? parseInt(inputAceptedQty, 10)
+          : wms_matrectrans[0].receiptquantity,
+        // rejectedqty: inputRejectedQty
+        //   ? parseInt(inputRejectedQty, 10)
+        //   : 0,
+        // rejectedcode: inputRejectedCode || '',
+      }));
+    };
+
+    fetchData2();
+  }, [inputAceptedQty, inputRejectedQty, inputRejectedCode]);
 
   const renderItem = ({item}: {item: string}) => (
     <View className="">
       <View className="flex flex-row items-center justify-between">
         <View>
-          <Text className="font-bold text-xl">Accepted Qty</Text>
+          <Text className="text-xl font-bold">Accepted Qty</Text>
         </View>
         <View style={styles.counterRow}>
           <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
             <Text style={styles.circleBtnText}>-</Text>
           </TouchableOpacity>
           <View style={styles.countBox}>
-            <Text style={styles.countText}>{count}</Text>
+            <Text style={styles.countText}>{inputAceptedQty}</Text>
           </View>
           <TouchableOpacity style={styles.circleBtn} onPress={handleIncrease}>
             <Text style={styles.circleBtnText}>+</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="border border-green-500 rounded-full bg-green-600 ml-3">
+          <TouchableOpacity className="ml-3 bg-green-600 border border-green-500 rounded-full">
             <Icon library="Feather" name="check" size={30} color="white"></Icon>
           </TouchableOpacity>
         </View>
       </View>
       <View className="flex flex-row items-center justify-between">
         <View>
-          <Text className="font-bold text-xl">Rejected Qty</Text>
+          <Text className="text-xl font-bold">Rejected Qty</Text>
         </View>
         <View style={styles.counterRow}>
           <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
@@ -79,18 +177,18 @@ const InspectionReceivingApproveScreen = () => {
           <TouchableOpacity style={styles.circleBtn} onPress={handleIncrease}>
             <Text style={styles.circleBtnText}>+</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="border border-green-500 rounded-full bg-green-600 ml-3">
+          <TouchableOpacity className="ml-3 bg-green-600 border border-green-500 rounded-full">
             <Icon library="Feather" name="check" size={30} color="white"></Icon>
           </TouchableOpacity>
         </View>
       </View>
       <View className="flex flex-row items-center justify-between my-5">
         <View>
-          <Text className="font-bold text-xl">Rejected Code</Text>
+          <Text className="text-xl font-bold">Rejected Code</Text>
         </View>
         <Dropdown
           style={[styles.dropdown]}
-          data={data}
+          data={rejectCode}
           labelField="label"
           valueField="id"
           placeholder="Select option"
@@ -103,10 +201,10 @@ const InspectionReceivingApproveScreen = () => {
       </View>
       <View className="pt-6">
         <TouchableOpacity
-          className="flex-row items-center justify-center  rounded-xl "
+          className="flex-row items-center justify-center rounded-xl "
           style={{backgroundColor: 'red', height: 50, width: '50%'}}>
           <Icon library="Feather" name="plus" size={20} color="white"></Icon>
-          <Text className=" text-white justify-end">ADD REJECT</Text>
+          <Text className="justify-end text-white ">ADD REJECT</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -114,14 +212,19 @@ const InspectionReceivingApproveScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className=" bg-blue-400 w-full">
-        <View className="flex-row ml-2 my-1">
+      {console.log('tempPayload:', tempPayload)}
+      <View className="w-full bg-blue-400 ">
+        <View className="flex-row my-1 ml-2">
           <Text className="font-bold text-white">Material</Text>
-          <Text className="ml-10 font-bold text-white">: TR02-FOM</Text>
+          <Text className="ml-10 font-bold text-white">
+            : {datas.description}
+          </Text>
         </View>
-        <View className="flex-row ml-2 my-1">
+        <View className="flex-row my-1 ml-2">
           <Text className="font-bold text-white">PO QTY</Text>
-          <Text className="ml-10 font-bold text-white">: 3.0 ROLL</Text>
+          <Text className="ml-10 font-bold text-white">
+            : {datas.quantity} {datas.orderunit}
+          </Text>
         </View>
       </View>
       <FlatList
@@ -133,10 +236,11 @@ const InspectionReceivingApproveScreen = () => {
       />
       <View
         style={styles.buttonContainer}
-        onPress={() => navigation.navigate('InspectionReceivingApprove')}>
+        // onPress={() => navigation.navigate('InspectionReceivingApprove')}
+      >
         <ButtonApp
           label="Approve"
-          // onPress={console.log('Inspect button pressed')}
+          onPress={handleApprove}
           size="large"
           color="primary"
         />

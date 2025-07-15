@@ -1,6 +1,6 @@
 import React from 'react';
 import {Modal, View, ActivityIndicator, StyleSheet, Text} from 'react-native';
-import * as Progress from 'react-native-progress';
+// import * as Progress from 'react-native-progress';
 
 interface LoadingProps {
   visible: boolean;

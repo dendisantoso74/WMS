@@ -12,6 +12,7 @@ import ButtonApp from '../../compnents/ButtonApp';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {ScanPo} from '../../services/materialRecive';
 import {tagInfo} from '../../services/tagInfo';
+import {set} from 'lodash';
 
 const TagInfoDetailScreen = () => {
   const navigation = useNavigation<any>();
@@ -19,6 +20,7 @@ const TagInfoDetailScreen = () => {
   const {listrfid} = route.params;
 
   const [datas, setDatas] = useState([]);
+  const [wmsSerializeditem, setWmsSerializeditem] = useState([]);
 
   useEffect(() => {
     tagInfo(listrfid[listrfid.length - 1]).then((res: any) => {
@@ -33,6 +35,7 @@ const TagInfoDetailScreen = () => {
         );
       }
       setDatas(res.member[0]);
+      setWmsSerializeditem(res.member[0].wms_serializeditem[0] || []);
     });
   }, []);
 
@@ -51,6 +54,7 @@ const TagInfoDetailScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {console.log('serialze wms', wmsSerializeditem)}
       <View style={styles.flexContainer}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.container}>
@@ -65,58 +69,80 @@ const TagInfoDetailScreen = () => {
             <Text style={styles.label}>Serial Number</Text>
             <TextInput
               style={[styles.input, styles.disabledInput]}
-              value={datas?.tagcode || ''}
+              value={wmsSerializeditem?.serialnumber || ''}
               editable={false}
               placeholder="Serial Number"
               placeholderTextColor="#b0b0b0"
             />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Item Number</Text>
-              <Text style={styles.infoValue}>{itemNumber}</Text>
+              <Text style={styles.infoValue}>{wmsSerializeditem?.itemnum}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Item Name</Text>
-              <Text style={styles.infoValue}>{itemName}</Text>
+              <Text style={styles.infoValue}>
+                {wmsSerializeditem?.description}
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Stored Qty</Text>
-              <Text style={styles.infoValue}>{storedQty}</Text>
+              <Text style={styles.infoValue}>
+                {wmsSerializeditem?.qtystored}
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Issue Unit</Text>
-              <Text style={styles.infoValue}>{issueUnit}</Text>
+              <Text style={styles.infoValue}>
+                {wmsSerializeditem?.unitstored}
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Bin</Text>
-              <Text style={styles.infoValue}>{bin}</Text>
+              <Text style={styles.infoValue}>{wmsSerializeditem?.wms_bin}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Location</Text>
-              <Text style={styles.infoValue}>{bin}</Text>
+              <Text style={styles.infoValue}>
+                {wmsSerializeditem?.storeroom}
+              </Text>
             </View>
             {/* tag Asign to bin */}
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Zone</Text>
-              <Text style={styles.infoValue}>{bin}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Area</Text>
-              <Text style={styles.infoValue}>{bin}</Text>
-            </View>
+            {!wmsSerializeditem && (
+              <View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Zone</Text>
+                  <Text style={styles.infoValue}>
+                    {wmsSerializeditem?.qtystored}
+                  </Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Area</Text>
+                  <Text style={styles.infoValue}>
+                    {wmsSerializeditem?.qtystored}
+                  </Text>
+                </View>
+              </View>
+            )}
             {/* tag Asign to bin */}
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Condition Code</Text>
               <View style={styles.conditionBox}>
-                <Text style={styles.conditionText}>NEW</Text>
+                <Text style={styles.conditionText}>
+                  {wmsSerializeditem.conditioncode}
+                </Text>
               </View>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Remark</Text>
               <TextInput
                 style={[styles.input, styles.remarkInput]}
-                value={'-'}
-                // editable={false}
+                value={
+                  wmsSerializeditem?.itemcondition
+                    ? wmsSerializeditem?.itemcondition[0]?.description
+                    : '-'
+                }
+                editable={false}
                 multiline
               />
             </View>

@@ -55,6 +55,8 @@ import MaterialMovementScreen from '../screens/MaterialMovement';
 import MaterialMovementScanScreen from '../screens/MaterialMovement/detail';
 import MovementSmartScanScreen from '../screens/MaterialMovement/inspect';
 import MovementPageScreen from '../screens/MaterialMovement/Movementpage';
+import ScanBinScreen from '../screens/TagBin/scanBin';
+import RegisterBinScreen from '../screens/TagBin/registerBin';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -201,6 +203,12 @@ const AppNavigator = () => {
           <Stack.Screen name="AddRFID" component={AddRfidScreen} />
           {/* Tag Bin Menu */}
           <Stack.Screen name="TagBin" component={TagBinScreen} />
+          <Stack.Screen name="TagBin Scan" component={ScanBinScreen} />
+          <Stack.Screen
+            name="Register RFID Bin"
+            component={RegisterBinScreen}
+          />
+
           {/* Retaging Item Menu */}
           <Stack.Screen name="RetagingItem" component={RetagingItemScreen} />
           {/* Retaging Bin Menu */}

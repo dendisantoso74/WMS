@@ -20,6 +20,8 @@ import {
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
 import {debounce} from 'lodash';
+import {registerRfid} from '../../services/registerRfid';
+import {getData} from '../../utils/store';
 
 const dummyRfids = ['4C5071020190000000081386', '4C5071020190000000081350'];
 
@@ -27,10 +29,11 @@ const AddRfidScreen = () => {
   const navigation = useNavigation<any>();
   const [rfids, setRfids] = useState(dummyRfids);
 
-  // RFID SCAN
+  // RFID SCANNER
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([]);
+
   useEffect(() => {
     getListRfidDevices();
 
@@ -52,8 +55,6 @@ const AddRfidScreen = () => {
       ZebraEvent.ON_DEVICE_CONNECTED,
       (e: ZebraResultPayload) => {
         console.log(e.data); // "Connect successfully" || "Connect failed"
-        // Alert.alert(e.data);
-        ToastAndroid.show(e.data, ToastAndroid.SHORT);
       },
     );
 
@@ -66,11 +67,10 @@ const AddRfidScreen = () => {
 
   const handleRfidEvent = useCallback(
     debounce((newData: string[]) => {
-      setListRfid(pre => {
-        // Prevent duplicates
-        const set = new Set(pre);
-        newData.forEach(item => set.add(item));
-        return Array.from(set);
+      setListRfid(prev => {
+        // Merge and remove duplicates
+        const merged = [...prev, ...newData];
+        return Array.from(new Set(merged));
       });
     }, 200),
     [],
@@ -78,11 +78,7 @@ const AddRfidScreen = () => {
 
   const handleBarcodeEvent = useCallback(
     debounce((newData: string) => {
-      setListBarcodes(pre => {
-        // Prevent duplicates
-        if (pre.includes(newData)) return pre;
-        return [...pre, newData];
-      });
+      setListBarcodes(pre => [...pre, newData]);
     }, 200),
     [],
   );
@@ -92,13 +88,41 @@ const AddRfidScreen = () => {
     setListDevices(listDevices);
   };
 
-  const handleRegisterNew = () => {
-    // TODO: Implement register new RFID logic
-    // For now, just add a dummy
-    setRfids(prev => [
-      ...prev,
-      `4C50710201900000000${Math.floor(Math.random() * 1000000)}`,
-    ]);
+  const handleRegisterNew = async () => {
+    const siteid = await getData('site');
+    const orgid = siteid === 'TJB56' ? 'BJS' : 'BJP';
+    const receivedate = new Date().toISOString();
+    const status = 'Blank'; // Default status for new RFID
+
+    // const payload = {
+    //   orgid,
+    //   siteid,
+    //   receivedate,
+    //   tagcode: '',
+    //   status,
+    // };
+
+    if (listRfid.length > 0) {
+      for (const tagcode of listRfid) {
+        const payload = {
+          orgid,
+          siteid,
+          receivedate,
+          tagcode: tagcode,
+          status,
+        };
+        try {
+          await registerRfid(payload);
+          ToastAndroid.show(`RFID ${tagcode} registered`, ToastAndroid.SHORT);
+          console.log(`RFID ${tagcode} registered`);
+        } catch (error) {
+          ToastAndroid.show(
+            `Failed to register ${tagcode}`,
+            ToastAndroid.SHORT,
+          );
+        }
+      }
+    }
   };
 
   const renderItem = ({item}: {item: string}) => (
@@ -116,6 +140,21 @@ const AddRfidScreen = () => {
           Please scan on tags
         </Text>
       </View>
+      <Text style={[styles.text, styles.title]}>
+        Devices Scanner: {listDevices.length}
+      </Text>
+      <FlatList
+        style={{backgroundColor: '#FEF3C7', maxHeight: 30}}
+        data={listDevices}
+        renderItem={({item}) => (
+          <TouchableOpacity
+            onPress={() => connectToDevice(item)}
+            style={styles.item}>
+            <Text style={styles.text}>{item}</Text>
+          </TouchableOpacity>
+        )}
+      />
+
       <FlatList
         data={listRfid}
         renderItem={renderItem}
@@ -207,6 +246,21 @@ const styles = StyleSheet.create({
     bottom: 0,
     padding: 16,
     backgroundColor: 'transparent',
+  },
+  // rfid
+  text: {
+    color: '#333',
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    // marginVertical: 5,
+  },
+  item: {
+    // height: ,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
   },
 });
 
