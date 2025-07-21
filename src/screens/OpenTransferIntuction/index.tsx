@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import {getListTransferInstructions} from '../../services/transferInstruction';
+import {formatDateTime} from '../../utils/helpers';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -19,6 +21,26 @@ const TransferInstructionScreen = () => {
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [transferInstructions, setTransferInstructions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await getListTransferInstructions();
+        // Only keep items that have wms_ponum property
+        const filtered = Array.isArray(res.member)
+          ? res.member.filter((item: any) => !!item.wms_ponum)
+          : [];
+        setTransferInstructions(filtered);
+      } catch (e) {
+        setTransferInstructions([]);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
 
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
@@ -26,10 +48,10 @@ const TransferInstructionScreen = () => {
       onPress={() => navigation.navigate('Transfer Instruction Assign')}>
       <View>
         <View className="my-2">
-          <Text className="font-bold px-4">PO - 2176</Text>
-          <Text className="px-4">TI 2191</Text>
-          <Text className="px-4">INDOOR</Text>
-          <Text className="px-4">12-Nov-2020 15:12</Text>
+          <Text className="px-4 font-bold">{item.wms_ponum}</Text>
+          <Text className="px-4">{item.invusenum}</Text>
+          <Text className="px-4">{item.fromstoreloc}</Text>
+          <Text className="px-4">{formatDateTime(item.statusdate)}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -37,6 +59,7 @@ const TransferInstructionScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {console.log('list', transferInstructions)}
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
@@ -54,7 +77,7 @@ const TransferInstructionScreen = () => {
         />
       </View>
       <FlatList
-        data={rfids}
+        data={transferInstructions}
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}

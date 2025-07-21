@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,13 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import {fetchAssignedTransferInstructions} from '../../services/myTransferInstruction';
+import {formatDateTime} from '../../utils/helpers';
+import Loading from '../../compnents/Loading';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -19,6 +23,25 @@ const MyTransferInstructionScreen = () => {
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [assignedInstructions, setAssignedInstructions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Replace 'TAUFIQ MA' with the actual invowner if needed
+        const res = await fetchAssignedTransferInstructions('TAUFIQ MA');
+        console.log('Assigned Instructions fetched:', res);
+
+        setAssignedInstructions(Array.isArray(res.member) ? res.member : []);
+      } catch (e) {
+        setAssignedInstructions([]);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
 
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
@@ -26,10 +49,10 @@ const MyTransferInstructionScreen = () => {
       onPress={() => navigation.navigate('My Transfer Instruction Scan')}>
       <View>
         <View className="my-2">
-          <Text className="font-bold px-4">PO 2176</Text>
-          <Text className="px-4">TI 2191</Text>
-          <Text className="px-4">INDOOR</Text>
-          <Text className="px-4">12-Nov-2020 15:12</Text>
+          <Text className="px-4 font-bold">{item.wms_ponum}</Text>
+          <Text className="px-4">{item.invusenum}</Text>
+          <Text className="px-4">{item.fromstoreloc}</Text>
+          <Text className="px-4">{formatDateTime(item.statusdate)}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -53,13 +76,17 @@ const MyTransferInstructionScreen = () => {
           style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
-      <FlatList
-        data={rfids}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+      {loading ? (
+        <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
+      ) : (
+        <FlatList
+          data={assignedInstructions}
+          renderItem={renderItem}
+          keyExtractor={item => item.invusenum}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+        />
+      )}
     </SafeAreaView>
   );
 };

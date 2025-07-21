@@ -18,6 +18,8 @@ const dummyRfids = ['00000000000000000000'];
 const DetailWoMaterialReturnScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
+  // const {item} = route.params;
+  // console.log('item from params:', item);
 
   const [search, setSearch] = useState('');
 
@@ -36,7 +38,7 @@ const DetailWoMaterialReturnScreen = () => {
           <Text className="font-bold">TR02-FOM</Text>
         </View>
 
-        <Text className="font-bold">FIBER OPTIC 100 Meter</Text>
+        <Text className="font-bold">FIBER OPTIC 99 Meter</Text>
         <View className="flex-row justify-between">
           <Text className="w-1/3 ml-1 text-lg font-bold">Repaired</Text>
           <Text className="w-1/2 text-right">Issue / Return</Text>

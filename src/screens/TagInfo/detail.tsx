@@ -39,15 +39,6 @@ const TagInfoDetailScreen = () => {
     });
   }, []);
 
-  // Dummy data for preview
-  const tagCode = 'E2000020340A0144042071E8';
-  const serialNumber = '3070657A5C9BE8CF69108DC3';
-  const itemNumber = 'FHQ125DAVMA_FILTER';
-  const itemName = 'Air Filter - FHQ125DAVMA_Filter';
-  const storedQty = '5.0';
-  const issueUnit = 'SET';
-  const bin = 'MS-A1L-4-3-2-1';
-
   const handleUpdate = () => {
     // TODO: Implement update logic
   };

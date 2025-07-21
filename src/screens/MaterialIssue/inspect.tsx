@@ -23,6 +23,7 @@ const MaterialIssueInspectScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {listrfid} = route.params;
+  const woNumber = listrfid[listrfid.length - 1];
 
   const [search, setSearch] = useState('');
 
@@ -36,26 +37,30 @@ const MaterialIssueInspectScreen = () => {
   };
 
   useEffect(() => {
-    if (listrfid) {
-      setRfids(listrfid);
-    }
-    console.log('RFIDs from params:', listrfid);
+    console.log('RFIDs from params:', woNumber);
     //fetchwo
-    getWorkOrderDetails(listrfid)
+    getWorkOrderDetails(woNumber)
       .then(res => {
         if (res.error) {
           console.error('Error fetching work order details:', res.error);
         } else {
           setDatas(res.member);
-          setInvUse(res.member[0].invuse);
-          console.log('Work order details:', res.member);
+          const filteredInvUse = res.member[0].invuse.filter(
+            (item: any) =>
+              Array.isArray(item.invuseline) && item.invuseline.length > 0,
+          );
+          setInvUse(filteredInvUse);
+
+          console.log('Work order details:', res.member[0].invuse);
+          console.log('Filtered inventory use:', filteredInvUse);
+
           // Process the work order details as needed
         }
       })
       .catch(err => {
         console.error('Error in getWorkOrderDetails:', err);
       });
-  }, [listrfid]);
+  }, [woNumber]);
 
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
@@ -64,28 +69,28 @@ const MaterialIssueInspectScreen = () => {
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
         <View className="flex-row justify-between">
-          <Text className="font-bold">{item.invuseline[0].itemnum}</Text>
+          <Text className="font-bold">{item?.invuseline[0]?.itemnum}</Text>
           <Text className="">
-            Reserved : {item.invuseline[0].quantity}{' '}
-            {item.invuseline[0].wms_unit}
+            Reserved : {item?.invuseline[0]?.quantity}{' '}
+            {item?.invuseline[0]?.wms_unit}
           </Text>
         </View>
 
         <Text className="font-bold max-w-64">
-          {item.invuseline[0].description}
+          {item?.invuseline[0]?.description}
         </Text>
         <View className="flex-row justify-between">
           <Text className="w-1/3 ml-3 text-lg font-bold">
-            {item.invuseline[0].toconditioncode}
+            {item?.invuseline[0]?.toconditioncode}
           </Text>
-          <Text className="w-1/2 text-right">Order / Receive</Text>
+          <Text className="w-1/2 text-right">Outstanding / Issue</Text>
         </View>
         <View className="flex-row justify-between">
           <Text className="w-1/3 ml-3"></Text>
           <Text className="w-1/2 text-right">
             {' '}
-            - {item.invuseline[0].wms_unit} / {}
-            {item.invuseline[0].receivedqty} {item.invuseline[0].wms_unit}
+            - {item?.invuseline[0]?.wms_unit} / {}
+            {item?.invuseline[0]?.receivedqty} {item?.invuseline[0]?.wms_unit}
           </Text>
         </View>
       </View>

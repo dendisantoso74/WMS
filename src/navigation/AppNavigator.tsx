@@ -57,6 +57,7 @@ import MovementSmartScanScreen from '../screens/MaterialMovement/inspect';
 import MovementPageScreen from '../screens/MaterialMovement/Movementpage';
 import ScanBinScreen from '../screens/TagBin/scanBin';
 import RegisterBinScreen from '../screens/TagBin/registerBin';
+import BinDetailScreen from '../screens/RetagingItem/binDetail';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -211,6 +212,8 @@ const AppNavigator = () => {
 
           {/* Retaging Item Menu */}
           <Stack.Screen name="RetagingItem" component={RetagingItemScreen} />
+          <Stack.Screen name="Bin Detail" component={BinDetailScreen} />
+
           {/* Retaging Bin Menu */}
           <Stack.Screen name="RetagingBin" component={RetagingBinScreen} />
           {/* Material Receive Menu */}
@@ -257,7 +260,11 @@ const AppNavigator = () => {
           />
 
           {/*Putaway*/}
-          <Stack.Screen name="Scan WO Number" component={PutawayScanWoScreen} />
+          <Stack.Screen
+            name="Scan WO Number"
+            options={{title: 'Put Away Material'}}
+            component={PutawayScanWoScreen}
+          />
           <Stack.Screen
             name="Put Away Material"
             component={PutawayMaterialScreen}

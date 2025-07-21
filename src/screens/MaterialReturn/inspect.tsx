@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,10 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
+import {
+  findSuggestedBinReturn,
+  receiveMaterial,
+} from '../../services/materialReturn';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -30,9 +34,11 @@ const data = [
 const DetailMaterialReturnScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-
+  const {item, invuseid} = route.params;
+  console.log('item from params:', item, invuseid);
   const [search, setSearch] = useState('');
   const [count, setCount] = useState(0);
+  const [suggestBin, setSuggestBin] = useState('');
 
   const handleDecrease = () => {
     if (count > 1) setCount(count - 1);
@@ -49,38 +55,74 @@ const DetailMaterialReturnScreen = () => {
     setModalVisible(true);
   };
 
-  const renderItem = ({item}: {item: string}) => (
-    <View className="flex-col w-full px-2 pr-2">
-      <View className="flex-row items-center ">
-        <Text className="font-bold w-1/3">Return Qty</Text>
-        <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
-          <Text style={styles.circleBtnText}>-</Text>
-        </TouchableOpacity>
-        <View style={styles.countBox} className="w-36">
-          <Text style={styles.countText}>{count}</Text>
-        </View>
-        <TouchableOpacity style={styles.circleBtn} onPress={handleIncrease}>
-          <Text style={styles.circleBtnText}>+</Text>
-        </TouchableOpacity>
-      </View>
-      <View className="flex-row items-center mt-5">
-        <Text className="font-bold w-1/3">Suggestion Qty</Text>
-        <View className="bg-gray-200 w-2/3 py-2 ml-5">
-          <Text className="font-bold text-left ml-2 ">MS-A1L-4-2-2-1</Text>
-        </View>
-      </View>
-      <View className="flex-row items-center mt-5">
-        <Text className="font-bold w-1/3">Condition Code</Text>
-        <View className="bg-gray-200 w-2/3 py-2 ml-5">
-          <Text className="font-bold text-left ml-2">REPAIRED</Text>
-        </View>
-      </View>
-      <View className="flex-row items-center mt-5">
-        <Text className="font-bold w-1/3">Remark</Text>
-        <TextInput className="border rounded w-2/3 py-2 ml-5"></TextInput>
-      </View>
-    </View>
-  );
+  const buildReturnPayload = (
+    item: any,
+    invuseid: number,
+    count: number,
+    remark: string = '',
+  ) => ({
+    invuseline: [
+      {
+        frombin: item.frombin || item.binnum,
+        fromconditioncode: item.fromconditioncode || item.conditioncode,
+        fromstoreloc: item.storeloc,
+        inspectionrequired: true,
+        invuseId: 0,
+        invuselinenum:
+          item.invuselinenum ||
+          item.invuseline?.invuselinenum ||
+          item.invuselinenum ||
+          0,
+        issueid: item.matusetransid,
+        issueto: 'TAUFIQ MA',
+        itemnum: item.itemnum,
+        itemsetid: item.itemsetid,
+        linetype: item.linetype,
+        orgid: item.orgid,
+        quantity: count,
+        refwo: item.refwo,
+        remark: '',
+        toorgid: 'BJS',
+        tositeid: 'TJB56',
+        usetype: 'RETURN',
+        validated: false,
+        wms_usetype: 'RETURN',
+      },
+    ],
+  });
+
+  // Usage example (inside your handleAdd or similar function):
+
+  const handleAdd = async () => {
+    const payload = buildReturnPayload(item, invuseid, count);
+    if (count <= 0) {
+      ToastAndroid.show(
+        'Please enter a valid return quantity',
+        ToastAndroid.SHORT,
+      );
+      console.log('payload:', payload);
+
+      return;
+    } else {
+      await receiveMaterial(invuseid, payload).then(res => {
+        ToastAndroid.show('Material received successfully', ToastAndroid.SHORT);
+        navigation.navigate('Material Return Detail', {
+          listrfid: [item.refwo],
+        });
+      });
+    }
+    // navigation.goBack();
+  };
+
+  const suggestedBin = async () => {
+    const res = await findSuggestedBinReturn(item.itemnum, item.fromstoreloc);
+    setSuggestBin(res.member[0].binnum);
+    console.log('Suggested Bin:', res.member[0].binnum);
+  };
+
+  // useEffect(() => {
+  //   suggestedBin();
+  // }, [item]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -91,24 +133,54 @@ const DetailMaterialReturnScreen = () => {
           <Text className="font-bold text-white">Bin</Text>
         </View>
         <View>
+          <Text className="ml-10 font-bold text-white">{item.description}</Text>
           <Text className="ml-10 font-bold text-white">
-            FIBER OPTIC 24 CORE 100 Meters
+            {item.qtyrequested} {item.wms_unit}
           </Text>
-          <Text className="ml-10 font-bold text-white">100 METER</Text>
-          <Text className="ml-10 font-bold text-white">MS-A1L-4-4-2-1</Text>
+          <Text className="ml-10 font-bold text-white">{item.binnum}</Text>
         </View>
       </View>
-      <FlatList
-        data={rfids}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+
+      <View className="px-3 mt-4">
+        <View className="flex-row items-center ">
+          <Text className="w-1/3 font-bold">Return Qty</Text>
+          <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
+            <Text style={styles.circleBtnText}>-</Text>
+          </TouchableOpacity>
+          <View style={styles.countBox} className="w-36">
+            <Text style={styles.countText}>{count}</Text>
+          </View>
+          <TouchableOpacity
+            disabled={count == item.qtyrequested}
+            style={styles.circleBtn}
+            onPress={handleIncrease}>
+            <Text style={styles.circleBtnText}>+</Text>
+          </TouchableOpacity>
+        </View>
+        <View className="flex-row items-center mt-5">
+          <Text className="w-1/3 font-bold">Suggestion Bin</Text>
+          <View className="w-2/3 py-2 ml-5 bg-gray-200">
+            <Text className="ml-2 font-bold text-left ">{suggestBin}</Text>
+          </View>
+        </View>
+        <View className="flex-row items-center mt-5">
+          <Text className="w-1/3 font-bold">Condition Code</Text>
+          <View className="w-2/3 py-2 ml-5 bg-gray-200">
+            <Text className="ml-2 font-bold text-left">
+              {item.conditioncode}
+            </Text>
+          </View>
+        </View>
+        <View className="flex-row items-center mt-5">
+          <Text className="w-1/3 font-bold">Remark</Text>
+          <TextInput className="w-2/3 py-2 ml-5 border rounded"></TextInput>
+        </View>
+      </View>
+
       <View style={styles.buttonContainer}>
         <ButtonApp
           label="Add"
-          onPress={() => navigation.navigate('Detail Wo Material Return')}
+          onPress={() => handleAdd()}
           size="large"
           color="primary"
         />

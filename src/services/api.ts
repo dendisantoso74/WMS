@@ -16,7 +16,7 @@ export const getApiUrl = async (): Promise<string | null> => {
 // Konfigurasi utama Axios
 const api = axios.create({
   // baseURL: Config.API_URL, // Ganti dengan base URL API kamu
-  timeout: 10000, // Timeout request (dalam ms)
+  timeout: 50000, // Timeout request (dalam ms) 50 seconds
 });
 
 // Interceptor untuk menambahkan token (jika menggunakan autentikasi)

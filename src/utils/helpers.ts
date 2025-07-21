@@ -220,3 +220,29 @@ export function generateSerialNumber(): string {
   }
   return serial;
 }
+
+/**
+ * Search and get invuseline object by invuselineid from woListReturn
+ * @param woListReturn - array of return objects (each with invuseline array)
+ * @param invuselineid - the invuselineid to search for
+ * @returns the found invuseline object or undefined if not found
+ */
+export function findInvuselineByIdReturn(
+  woListReturn: any[],
+  invuselineid: number | string,
+) {
+  for (const returnObj of woListReturn) {
+    // console.log('Searching in return object:', returnObj.invuseline);
+
+    if (Array.isArray(returnObj.invuseline)) {
+      const found = returnObj.invuseline.find(
+        (line: any) => String(line.issueid) === String(invuselineid),
+      );
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+// Example usage:113832
+// const invuseline = findInvuselineById(woListReturn,

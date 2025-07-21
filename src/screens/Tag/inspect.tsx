@@ -143,7 +143,7 @@ const TagInspectScreen = () => {
         console.log('Tagging Response:', res);
       });
 
-      // Alert.alert('Success', `Tag ${tag} selected`);
+      Alert.alert('Success', `Tag ${tag} selected`);
       // navigation.goBack();
     } else {
       ToastAndroid.show('Please select a tag', ToastAndroid.SHORT);

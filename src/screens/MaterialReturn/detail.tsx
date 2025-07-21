@@ -13,8 +13,12 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
-import {formatDateTime} from '../../utils/helpers';
-import {scanWoForReturn} from '../../services/materialReturn';
+import {findInvuselineByIdReturn, formatDateTime} from '../../utils/helpers';
+import {
+  changeInvUseStatusComplete,
+  createInvUseReturnHeader,
+  scanWoForReturn,
+} from '../../services/materialReturn';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -25,41 +29,61 @@ const MaterialReturnDetailScreen = () => {
   const woNum = listrfid[listrfid.length - 1];
   const [datas, setDatas] = useState([]);
   const [woList, setWoList] = useState([]);
+  const [woListIssue, setWoListIssue] = useState([]);
+  const [woListReturn, setWoListReturn] = useState([]);
+  const [woListmatusetrans, setWoListmatusetrans] = useState([]);
 
   const [search, setSearch] = useState('');
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
+  const [returnInvuseId, setReturnInvuseId] = useState('');
 
   const handleReceive = () => {
     setModalVisible(true);
   };
+  // Update this function to also add invuselinenum from invuse.invuseline
+  const enrichMatusetransWithInvuseid = (matusetrans: any[], invuse: any[]) => {
+    return matusetrans.map(mt => {
+      let foundInvuseid: number | undefined;
+      let foundInvuselinenum: number | undefined;
+      for (const inv of invuse) {
+        if (Array.isArray(inv.invuseline)) {
+          const foundLine = inv.invuseline.find(
+            (line: any) => line.invuselineid === mt.invuselineid,
+          );
+          if (foundLine) {
+            foundInvuseid = inv.invuseid;
+            foundInvuselinenum = foundLine.invuselinenum;
+            break;
+          }
+        }
+      }
+      return {
+        ...mt,
+        invuseid: foundInvuseid,
+        invuselinenum: foundInvuselinenum,
+      };
+    });
+  };
 
-  const renderItem = ({item}: {item: string}) => (
-    <View style={styles.rfidCard}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-row justify-between">
-          <Text className="font-bold">{item.invuseline[0].itemnum}</Text>
-          <Text className="">Reserved : 0 {item.invuseline[0].wms_unit}</Text>
-        </View>
+  const getReturnInvuse = (datas: any) => {
+    if (!datas || !Array.isArray(datas.invuse)) return 'not found';
+    const found = datas.invuse.find(
+      (inv: any) =>
+        typeof inv.description === 'string' &&
+        inv.description.toUpperCase().includes('RETURN'),
+    );
 
-        <Text className="font-bold">{item.invuseline[0].description}</Text>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3 text-lg font-bold">BROKEN</Text>
-          <Text className="w-1/2 text-right">Outstanding / Issue</Text>
-        </View>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3">ENTERED</Text>
-          <Text className="w-1/2 text-right">
-            0 {item.invuseline[0].wms_unit} / 0 {item.invuseline[0].wms_unit}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
+    return found || 'not found';
+  };
+
+  // Usage example:
+  // returnInvuse will be the invuse object or 'not found'
 
   useEffect(() => {
+    createInvUseReturnHeader(woNum);
+
     scanWoForReturn(woNum).then((res: any) => {
       if (res.member.length === 0) {
         navigation.goBack();
@@ -71,13 +95,85 @@ const MaterialReturnDetailScreen = () => {
         );
       }
       setDatas(res.member[0]);
-      setWoList(res.member[0].invuse);
-      console.log('RFIDs fetched successfully:', res.member[0].invuse);
+      console.log('Work order details:', res);
+      // setreturnn invuse id
+      const returnInvuse = getReturnInvuse(res.member[0]);
+      setReturnInvuseId(returnInvuse.invuseid);
+      console.log('Return invuse:', returnInvuse);
+
+      // Filter only items that have invuseline and it's not empty
+      const filteredInvUse = res.member[0].invuse.filter(
+        (item: any) =>
+          Array.isArray(item.invuseline) && item.invuseline.length > 0,
+      );
+      setWoList(filteredInvUse);
+      setWoListIssue(
+        filteredInvUse.filter((item: any) => item.usetype === 'ISSUE'),
+      );
+      setWoListReturn(
+        filteredInvUse.filter((item: any) => item.usetype === 'MIXED'),
+      );
+      // Enrich matusetrans with invuseid
+      const enrichedMatusetrans = enrichMatusetransWithInvuseid(
+        res.member[0].matusetrans,
+        res.member[0].invuse,
+      );
+
+      setWoListmatusetrans(enrichedMatusetrans);
     });
   }, []);
+
+  const renderItem = ({item}: {item: string}) => {
+    const returnItem = findInvuselineByIdReturn(
+      woListReturn,
+      item.matusetransid,
+    );
+
+    const sideBarColor =
+      item?.qtyrequested === (returnItem ? returnItem.quantity : 0)
+        ? '#A4DD00'
+        : 'gray';
+
+    return (
+      <TouchableOpacity
+        disabled={item?.qtyrequested === (returnItem ? returnItem.quantity : 0)}
+        onPress={() =>
+          navigation.navigate('Detail Material', {
+            item: item,
+            invuseid: returnInvuseId,
+          })
+        }
+        style={styles.rfidCard}>
+        <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
+        <View className="my-2">
+          <View className="flex-row justify-between">
+            <Text className="font-bold">{item.itemnum}</Text>
+            <Text className=""></Text>
+          </View>
+
+          <Text className="font-bold">{item.description}</Text>
+          <View className="flex-row justify-between">
+            <Text className="w-1/3 ml-3 text-lg font-bold"></Text>
+            <Text className="w-1/2 text-right">Issue / Return</Text>
+          </View>
+          <View className="flex-row justify-between">
+            <Text className="w-1/3 ml-3"></Text>
+            <Text className="w-1/2 text-right">
+              {item?.qtyrequested} {item.wms_unit} /{' '}
+              {returnItem ? returnItem.quantity : 0} {item.wms_unit}
+            </Text>
+          </View>
+          <Text>{item.invuseid}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="flex-row p-2 bg-blue-400">
+        {console.log('issue list:', woListIssue)}
+        {console.log('return list:', woListReturn)}
         <View>
           <Text className="font-bold text-white">WO Number</Text>
           <Text className="font-bold text-white">WO Date</Text>
@@ -85,7 +181,7 @@ const MaterialReturnDetailScreen = () => {
         <View>
           <Text className="ml-10 font-bold text-white">{woNum}</Text>
           <Text className="ml-10 font-bold text-white">
-            {formatDateTime(datas?.changedate)}
+            {formatDateTime(datas?.reportdate)}
           </Text>
         </View>
       </View>
@@ -97,16 +193,16 @@ const MaterialReturnDetailScreen = () => {
         onChangeText={setSearch}
       />
       <FlatList
-        data={woList}
+        data={woListmatusetrans}
         renderItem={renderItem}
-        keyExtractor={item => item.invuseid}
+        keyExtractor={(item, i) => i.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
       <View style={styles.buttonContainer}>
         <ButtonApp
-          label="PUT TO STAGE"
-          onPress={() => navigation.navigate('Detail Material')}
+          label="RETURN"
+          onPress={() => changeInvUseStatusComplete(returnInvuseId)}
           size="large"
           color="primary"
         />

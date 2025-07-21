@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,17 +9,61 @@ import {
   TextInput,
   ToastAndroid,
 } from 'react-native';
+import {getTagBinList} from '../../services/tagBin';
 import ButtonApp from '../../compnents/ButtonApp';
-import Icon from '../../compnents/Icon';
 import {useNavigation} from '@react-navigation/native';
-
-const dummyRfids = ['4C5071020190000000081386', '4C5071020190000000081350'];
 
 const RetagingBinScreen = () => {
   const navigation = useNavigation<any>();
 
-  const [rfids, setRfids] = useState(dummyRfids);
+  const [bins, setBins] = useState<any[]>([]);
+  const [pageNo, setPageNo] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState('');
+  const pageSize = 10;
+
+  const fetchBins = async (page: number) => {
+    setLoading(true);
+    try {
+      const res = await getTagBinList('*', pageSize, page);
+      const newBins = Array.isArray(res.member) ? res.member : [];
+      setBins(prev =>
+        page === 1
+          ? newBins
+          : [
+              ...prev,
+              ...newBins.filter(
+                (item: any) =>
+                  !prev.some(
+                    (prevItem: any) => prevItem.wms_binid === item.wms_binid,
+                  ),
+              ),
+            ],
+      );
+      setHasMore(newBins.length === pageSize);
+    } catch (e) {
+      setHasMore(false);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchBins(1);
+  }, []);
+
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      const nextPage = pageNo + 1;
+      setPageNo(nextPage);
+      fetchBins(nextPage);
+    }
+  };
+
+  // Filter bins by bin number
+  const filteredBins = bins.filter(item =>
+    item.bin?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const handleRegisterNew = () => {
     // TODO: Implement register new RFID logic
@@ -32,44 +76,55 @@ const RetagingBinScreen = () => {
       'Register new RFID Bin is not ready.',
       ToastAndroid.SHORT,
     );
+    navigation.navigate('TagBin Scan');
   };
 
-  const renderItem = ({item}: {item: string}) => (
-    <View style={styles.rfidCard}>
-      <View>
-        <Text style={styles.rfidText}>{item}</Text>
-        <Text>{item}</Text>
-      </View>
-    </View>
+  const renderItem = ({item}: {item: any}) => (
+    <TouchableOpacity style={styles.binCard}>
+      {/* <Text style={styles.binText}>Tag: {item.tagcode}</Text> */}
+      <Text style={styles.binText}>Bin: {item.bin}</Text>
+      <Text style={styles.binText}>Zone: {item.wms_zone}</Text>
+      <Text style={styles.binText}>Store: {item.storeloc}</Text>
+    </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.filterContainer}>
-        <Text style={styles.filterLabel}>Filter by Bin Number</Text>
+      <View style={{padding: 12}}>
         <TextInput
-          style={styles.filterInput}
-          placeholder="Search Bin"
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: '#ccc',
+            paddingHorizontal: 12,
+            paddingVertical: 3,
+            fontSize: 14,
+            color: '#222',
+            marginBottom: 8,
+          }}
+          placeholder="Filter by Bin Number"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
         />
       </View>
       <FlatList
-        data={rfids}
+        data={filteredBins}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={item => item.wms_binid?.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.2}
+        ListFooterComponent={
+          loading ? (
+            <View style={{padding: 16, alignItems: 'center'}}>
+              <Text>Loading...</Text>
+            </View>
+          ) : null
+        }
       />
-      <View style={styles.buttonContainer}>
-        <ButtonApp
-          label="REGISTER NEW RFID BIN"
-          onPress={handleRegisterNew}
-          size="large"
-          color="primary"
-        />
-      </View>
     </SafeAreaView>
   );
 };
@@ -79,31 +134,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#285a8d',
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    zIndex: 10,
-  },
-  backButton: {
-    marginRight: 16,
-    padding: 4,
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginRight: 40, // To center title visually
-  },
   list: {
     flex: 1,
   },
@@ -111,26 +141,18 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingBottom: 80,
   },
-  rfidCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  binCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 16,
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    // paddingVertical: 18,
-    // paddingHorizontal: 16,
-    padding: 12,
+    padding: 16,
   },
-  rfidText: {
+  binText: {
     fontSize: 14,
     color: '#222',
     fontWeight: '500',
-    marginBottom: 16,
+    marginBottom: 4,
   },
   buttonContainer: {
     position: 'absolute',
@@ -139,29 +161,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     padding: 16,
     backgroundColor: 'transparent',
-  },
-  // filter style
-  filterContainer: {
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    paddingBottom: 4,
-    backgroundColor: '#f8f9fa',
-  },
-  filterLabel: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 4,
-    color: '#222',
-  },
-  filterInput: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    fontSize: 14,
-    color: '#222',
   },
 });
 

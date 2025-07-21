@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,24 +11,40 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
-
-const dummyRfids = ['00000000000000000000'];
+import {fetchPutawayMixed} from '../../services/putaway';
+import {formatDateTime} from '../../utils/helpers';
 
 const PutawayScanWoScreen = () => {
   const navigation = useNavigation<any>();
-
-  const [rfids, setRfids] = useState(dummyRfids);
+  const [rfids, setRfids] = useState<any[]>([]);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const renderItem = ({item}: {item: string}) => (
+  // Fetch list on mount or when search changes
+  useEffect(() => {
+    setLoading(true);
+    fetchPutawayMixed(search)
+      .then(res => {
+        setRfids(res.member || []);
+      })
+      .catch(() => {
+        ToastAndroid.show('Failed to fetch data', ToastAndroid.SHORT);
+        setRfids([]);
+      })
+      .finally(() => setLoading(false));
+  }, [search]);
+
+  const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() => navigation.navigate('Put Away Material')}>
+      onPress={() => navigation.navigate('Put Away Material', {item: item})}>
       <View>
-        <View className="my-2">
-          <Text className="font-bold px-4">WO - 2649</Text>
-          <Text className="px-4">UAT Transaction Punch List Test 003</Text>
-          <Text className="px-4">12-Nov-2020 15:12</Text>
+        <View style={{marginVertical: 8}}>
+          <Text className="ml-2 font-bold">WO - {item.wonum || 'N/A'}</Text>
+          <Text className="my-2 ml-2">
+            {item.description || 'No Description'}
+          </Text>
+          <Text className="ml-2">{formatDateTime(item.statusdate) || ''}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -39,25 +55,34 @@ const PutawayScanWoScreen = () => {
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Enter PO Number"
+          placeholder="Enter invuselineid"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
         />
-        <Icon
+        {/* <Icon
           library="Feather"
           name="search"
           size={20}
           color="#b0b0b0"
           style={{position: 'absolute', right: 12, top: 12}}
-        />
+        /> */}
       </View>
       <FlatList
         data={rfids}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={item =>
+          item.wonum?.toString() || Math.random().toString()
+        }
         contentContainerStyle={styles.listContent}
         style={styles.list}
+        ListEmptyComponent={
+          !loading && (
+            <View style={{alignItems: 'center', marginTop: 32}}>
+              <Text style={{color: '#888'}}>No data found.</Text>
+            </View>
+          )
+        }
       />
     </SafeAreaView>
   );
@@ -68,30 +93,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#285a8d',
-    paddingVertical: 16,
+  filterContainer: {
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  filterInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
     paddingHorizontal: 12,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    zIndex: 10,
-  },
-  backButton: {
-    marginRight: 16,
-    padding: 4,
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginRight: 40, // To center title visually
+    paddingVertical: 3,
+    fontSize: 14,
+    color: '#222',
+    marginTop: 6,
+    marginHorizontal: 8,
   },
   list: {
     flex: 1,
@@ -111,44 +128,14 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.08,
     shadowRadius: 2,
-    // paddingVertical: 18,
-    // paddingHorizontal: 16,
     paddingRight: 16,
-  },
-  sideBar: {
-    width: 18,
-    height: '100%',
-    backgroundColor: '#b0b0b0',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-    marginRight: 16,
   },
   rfidText: {
     fontSize: 14,
     color: '#222',
     fontWeight: '500',
-    marginVertical: 16,
-  },
-  buttonContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: 16,
-    backgroundColor: 'transparent',
-  },
-  filterInput: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    fontSize: 14,
-    color: '#222',
-    // marginBottom: 4,
-    marginTop: 6,
-    marginHorizontal: 8,
+    marginVertical: 4,
+    paddingHorizontal: 4,
   },
 });
 

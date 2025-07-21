@@ -33,8 +33,11 @@ export const receiveMaterial = async (invuseid: string, payload: any) => {
         'Content-Type': 'application/json',
       },
     });
+    console.log('Receive Material Response:', response?.data);
+
     return response.data;
   } catch (error) {
+    console.error('Error in receiveMaterial:', error);
     throw error;
   }
 };
@@ -70,6 +73,71 @@ export const putAway = async (invuselineid: string, frombin: string) => {
     });
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const findSuggestedBinReturn = async (
+  itemnum: string,
+  location: string,
+) => {
+  const siteid = await getData('site');
+
+  const url = `/maximo/oslc/os/MXINVBAL?lean=1&oslc.select=*&oslc.orderBy=%20%2Bcurbal&oslc.where=siteid="${siteid}" and itemnum="${itemnum}" and location="${location}" and binnum="*"`;
+  try {
+    const response = await api.get(url, {
+      headers: {
+        // 'maxauth': 'YW5kcm9tZWRpYTphbmRyb21lZGlh', // Add if needed
+        // 'Cookie': 'JSESSIONID=...' // Add if needed
+      },
+    });
+    console.log('Suggested Bin Response:', response.data);
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching suggested bin:', error);
+    throw error;
+  }
+};
+
+export const createInvUseReturnHeader = async (wonum: string) => {
+  const siteid = await getData('site');
+  const url = `/maxrest/oslc/script/WMS_INVUSERETURN?siteid=${siteid}&wonum=${wonum}`;
+  try {
+    const response = await api.get(url, {
+      headers: {
+        // 'maxauth': 'YW5kcm9tZWRpYTphbmRyb21lZGlh', // Uncomment if needed
+        // 'Cookie': 'JSESSIONID=...' // Uncomment if needed
+      },
+    });
+    console.log('fetchInvUseReturn Response:', response.data);
+    return true;
+  } catch (error) {
+    console.error('Error in fetchInvUseReturn:', error);
+    throw false;
+  }
+};
+
+export const changeInvUseStatusComplete = async (
+  invuseid: string,
+  memo: string = '',
+) => {
+  const url = `/maximo/oslc/os/mxinvuse/${invuseid}?action=CHANGESTATUS&lean=1&memo=${encodeURIComponent(memo)}&status=COMPLETE`;
+  try {
+    const response = await api.post(
+      url,
+      {},
+      {
+        headers: {
+          'x-method-override': 'PATCH',
+          // 'maxauth': 'YW5kcm9tZWRpYTphbmRyb21lZGlh', // Uncomment if needed
+        },
+      },
+    );
+    console.log('Change InvUse Status Response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error changing InvUse status to COMPLETE:', error);
     throw error;
   }
 };
