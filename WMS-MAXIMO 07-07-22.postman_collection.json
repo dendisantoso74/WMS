@@ -1,0 +1,3219 @@
+{
+	"info": {
+		"_postman_id": "e0dc77ef-04d8-4cef-88ca-3b89fd24f2c3",
+		"name": "WMS-MAXIMO 07/07/22",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5694637"
+	},
+	"item": [
+		{
+			"name": "RECEIVING",
+			"item": [
+				{
+					"name": "1. Scan PO / Detail PO",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "dGF1ZmlxLm1hcnVmOnRhdWZpcS5tYXJ1Zg==",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000XxHRjlOzmv6POcJcDGAM5Tg:-1",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.9:9080/maximo/oslc/os/WMS_MXRECEIPT?savedQuery=PO:POREV&oslc.select=ponum,status,poid,orderdate,vendor,siteid,orgid,revisionnum,poline{itemnum,description,orderqty,orderunit,wmsissueunit,conversion,polinenum,conditioncode},wms_matrectrans{itemnum,description,receiptquantity,rejectqty,wmsmatrectransid,orderunit,polinenum,positeid,orgid}&oslc.where=siteid=\"TJB56\" and poline.linetype=\"ITEM\" and ponum=\"BJS-PO-21-1026\"&lean=1",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"9"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXRECEIPT"
+							],
+							"query": [
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "savedQuery",
+									"value": "PO:POREV"
+								},
+								{
+									"key": "oslc.select",
+									"value": "ponum,status,poid,orderdate,vendor,siteid,orgid,revisionnum,poline{itemnum,description,orderqty,orderunit,wmsissueunit,conversion,polinenum,conditioncode},wms_matrectrans{itemnum,description,receiptquantity,rejectqty,wmsmatrectransid,orderunit,polinenum,positeid,orgid}"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"TJB56\" and poline.linetype=\"ITEM\" and ponum=\"BJS-PO-21-1026\""
+								},
+								{
+									"key": "lean",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.1 List Reject Code",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://49.0.205.154:9080/maxrest/oslc/os/mxdomain/_V01TX0lOU1BSRUpFQ1RDT0RF/alndomainvalue?lean=1&oslc.select=value",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maxrest",
+								"oslc",
+								"os",
+								"mxdomain",
+								"_V01TX0lOU1BSRUpFQ1RDT0RF",
+								"alndomainvalue"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "value"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Receive PO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "dGF1ZmlxLm1hcnVmOnRhdWZpcS5tYXJ1Zg==",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "BULK",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"inspected\": 0,\r\n        \"orderunit\": \"ROLL\",\r\n        \"orgid\": \"BJS\",\r\n        \"polinenum\": 1,\r\n        \"ponum\": \"PO-BJS-22-1038-EMT\",\r\n        \"porevisionnum\": 0,\r\n        \"receiptquantity\": 0.4,\r\n        \"siteid\": \"TJB56\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXMATRECTRANS?lean=1",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXMATRECTRANS"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.1. Receive PO [NEW]",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "dGF1ZmlxLm1hcnVmOnRhdWZpcS5tYXJ1Zg==",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "BULK",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000XxHRjlOzmv6POcJcDGAM5Tg:-1",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"inspected\": 0,\r\n        \"orderunit\": \"PCS\",\r\n        \"orgid\": \"BJS\",\r\n        \"polinenum\": 1,\r\n        \"ponum\": \"PO-BJS-21-1251-EMT\",\r\n        \"porevisionnum\": 2,\r\n        \"receiptquantity\": 1,\r\n        \"siteid\": \"TJB56\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/WMS_MXMATRECTRANS?lean=1",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXMATRECTRANS"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. List PO WINSP",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.9:9080/maximo/oslc/os/WMS_MXRECEIPT?lean=1&oslc.select=poid,ponum,vendor,orderdate,status,revisionnum,orgid,siteid,wms_matrectrans{issuetype,rowstamp,receiptquantity,itemnum,description,polinenum,packingslipnum,orderunit,issueunit,quantity,wms_matrectransid,conditioncode,status,rejectqty,acceptqty}&oslc.where=siteid=\"TJB56\" and ponum=\"BJS-PO-21-1026\"",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"9"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXRECEIPT"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.select",
+									"value": "poid,ponum,vendor,orderdate,status,revisionnum,orgid,siteid,wms_matrectrans{issuetype,rowstamp,receiptquantity,itemnum,description,polinenum,packingslipnum,orderunit,issueunit,quantity,wms_matrectransid,conditioncode,status,rejectqty,acceptqty}"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"TJB56\" and ponum=\"BJS-PO-21-1026\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.1. List PO WINSP [NEW]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000XxHRjlOzmv6POcJcDGAM5Tg:-1",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.9:9080/maximo/oslc/os/WMS_MXRECEIPT?lean=1&oslc.select=*&savedQuery=PO:POREV&oslc.where=siteid=\"BJPHO\" and status=\"APPR\" and receipts!=\"COMPLETE\" and ponum=\"PO-BJP-21-1800-BDL\"",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"9"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXRECEIPT"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "savedQuery",
+									"value": "PO:POREV"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"BJPHO\" and status=\"APPR\" and receipts!=\"COMPLETE\" and ponum=\"PO-BJP-21-1800-BDL\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Assign Inspect PO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "properties",
+								"value": "*",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "method",
+								"value": "PATCH",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"wms_inspectassignedstatus\": \"ASSIGNED/OPEN\",\r\n    \"wms_inspectassignedto\": \"ANDROMEDIA\",\r\n    \"status\": \"APPR\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/MXPO/{{poid}}",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXPO",
+								"{{poid}}"
+							],
+							"query": [
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Inspect PO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "SYNC",
+								"type": "text"
+							},
+							{
+								"key": "properties",
+								"value": "*",
+								"type": "text"
+							},
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "patch",
+								"value": "MERGE",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"externalrefid\": \"1631-1\",\r\n    \"sourcesysid\": \"WMS\",\r\n    \"ponum\": \"1631\",\r\n    \"polinenum\": 2,\r\n    \"porevisionnum\": 0,\r\n    \"siteid\": \"TJB56\",\r\n    \"positeid\": \"TJB56\",\r\n    \"orgid\": \"BJS\",\r\n    \"inspected\": 1,\r\n    \"receiptquantity\": 2,\r\n    \"acceptedqty\": 2,\r\n    \"rejectedqty\": 0,\r\n    \"wms_inspectassignedby\": \"ANDROMEDIA\"\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/MXRECEIPT?lean=1",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXRECEIPT"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.1 Inspect PO [NEW]",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "SYNC",
+								"type": "text"
+							},
+							{
+								"key": "properties",
+								"value": "*",
+								"type": "text"
+							},
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "patch",
+								"value": "MERGE",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000zt79kxFf_COIVSo8tIFixbD:-1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"externalrefid\": \"PO-BJP-21-1062-EMT\",\r\n    \"sourcesysid\": \"WMS\",\r\n    \"ponum\": \"PO-BJP-21-1062-EMT\",\r\n    \"polinenum\": 1,\r\n    \"porevisionnum\": 0,\r\n    \"siteid\": \"BJPHO\",\r\n    \"positeid\": \"BJPHO\",\r\n    \"orgid\": \"BJP\",\r\n    \"inspected\": 1,\r\n    \"receiptquantity\": 5,\r\n    \"acceptedqty\": 5,\r\n    \"rejectedqty\": 0,\r\n    \"wms_inspectassignedby\": \"TAUFIQ MA\",\r\n    \"wms_matrectransid\": 3935\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/MXRECEIPT?lean=1",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXRECEIPT"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.2 Assign Inspect PO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "SYNC",
+								"type": "text"
+							},
+							{
+								"key": "properties",
+								"value": "*",
+								"type": "text"
+							},
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n    \"wms_inspectassignedby\": \"ANDROMEDIA\",\r\n    \"externalrefid\": \"1408001\",\r\n    \"sourcesysid\": \"WMS\",\r\n    \"ponum\": \"1408\",\r\n    \"polinenum\": 2,\r\n    \"porevisionnum\": 0,\r\n    \"siteid\": \"TJB56\",\r\n    \"positeid\": \"TJB56\",\r\n    \"orgid\": \"BJS\"\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/MXRECEIPT?lean=1",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXRECEIPT"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. List PO WTAG [This]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/WMS_MXWTAG?lean=1&oslc.select=poid,ponum,siteid,orgid,vendor,orderdate,wms_serializeditem&oslc.where=wms_tagsiteid=\"TJB56\" and receipts!=\"NONE\" and wms_serializeditem.serialnumber!=\"*\" and wms_serializeditem.tagcode!=\"*\" and status=\"APPR\" and ponum=\"%25BJS%25\"",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXWTAG"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.select",
+									"value": "poid,ponum,siteid,orgid,vendor,orderdate,wms_serializeditem"
+								},
+								{
+									"key": "oslc.where",
+									"value": "wms_tagsiteid=\"TJB56\" and receipts!=\"NONE\" and wms_serializeditem.serialnumber!=\"*\" and wms_serializeditem.tagcode!=\"*\" and status=\"APPR\" and ponum=\"%25BJS%25\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7. Detail PO WTAG",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000q4UdqEcBipZEtyROtYyEENm:-1",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXWTAG?lean=1&oslc.select=*&oslc.where=ponum=\"PO-BJP-22-1906-EMT\" and status=\"APPR\"",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXWTAG"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "ponum=\"PO-BJP-22-1906-EMT\" and status=\"APPR\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8. Tagging PO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000q4UdqEcBipZEtyROtYyEENm:-1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"serialnumber\": \"2628978e6c988aseatest84\",\r\n    \"tagcode\": \"4C5071020190000000091665\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXSERIALIZEDITEM/2373?lean=1",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXSERIALIZEDITEM",
+								"2373"
+							],
+							"query": [
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "Cookie",
+									"value": "JSESSIONID=0000Lngi-QSmYmBt7-eSIqFILUh:-1",
+									"disabled": true
+								},
+								{
+									"key": "lean",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8.1 List RFID / check available RFID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/WMS_MXRFID?lean=1&oslc.select=*&oslc.where=siteid=\"{{siteid}}\" and status=\"Blank\"&oslc.pageSize=10",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXRFID"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and status=\"Blank\""
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and tagcode=\"{{tagcode}}\"",
+									"disabled": true
+								},
+								{
+									"key": "oslc.pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8.2 Check SerialNumber",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maxrest/oslc/script/WMS_CHECKSERIALNUMBER?siteid=TJB56&serialnumber=12345",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maxrest",
+								"oslc",
+								"script",
+								"WMS_CHECKSERIALNUMBER"
+							],
+							"query": [
+								{
+									"key": "siteid",
+									"value": "TJB56"
+								},
+								{
+									"key": "serialnumber",
+									"value": "12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "9. List / My List Transfer Instruction",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000XxHRjlOzmv6POcJcDGAM5Tg:-1",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.9:9080/maximo/oslc/os/MXINVUSE?lean=1&oslc.where=status=\"ENTERED\" and usetype=\"TRANSFER\" and wms_status=\"Open\" and wms_isgenerated=1&oslc.select=invuseid,wms_ponum,invusenum,fromstoreloce,statusdate",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"9"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVUSE"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and status=\"ENTERED\" and usetype=\"TRANSFER\" and wms_status=\"Assigned\" and invowner={{invowner}} and wms_isgenerated=1",
+									"disabled": true
+								},
+								{
+									"key": "oslc.where",
+									"value": "status=\"ENTERED\" and usetype=\"TRANSFER\" and wms_status=\"Open\" and wms_isgenerated=1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "invuseid,wms_ponum,invusenum,fromstoreloce,statusdate"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "9.2 My List Transfer Instruction",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000q4UdqEcBipZEtyROtYyEENm:-1",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.9:9080/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=*&oslc.where=status=\"ENTERED\" and usetype=\"TRANSFER\" and wms_status=\"Assigned\" and wms_isgenerated=1 and invowner=\"TAUFIQ MA\"",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"9"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVUSE"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and status=\"ENTERED\" and usetype=\"TRANSFER\" and wms_status=\"Assigned\" and invowner={{invowner}} and wms_isgenerated=1",
+									"disabled": true
+								},
+								{
+									"key": "oslc.where",
+									"value": "status=\"ENTERED\" and usetype=\"TRANSFER\" and wms_status=\"Assigned\" and wms_isgenerated=1 and invowner=\"TAUFIQ MA\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "10. Detail Transfer Instruction",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.9:9080/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=*&oslc.where=siteid=\"TJB56\" and wms_ponum=\"PO-BJP-21-1609-EMT\"",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"9"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVUSE"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"TJB56\" and wms_ponum=\"PO-BJP-21-1609-EMT\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "11. Assign Transfer Instruction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							},
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000XxHRjlOzmv6POcJcDGAM5Tg:-1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"invowner\": \"TAUFIQ MA\",\r\n    \"wms_status\": \"Assigned\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/MXINVUSE/7975?lean=1",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVUSE",
+								"7975"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "13. Put Away",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000q4UdqEcBipZEtyROtYyEENm:-1",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tobin\": \"MS-A1L-1-3-4-2\",\r\n    \"wms_status\": \"COMPLETE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/MXINVUSELINE/17942?_lean=1",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVUSELINE",
+								"17942"
+							],
+							"query": [
+								{
+									"key": "_lean",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "14. Complete TI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=0000q4UdqEcBipZEtyROtYyEENm:-1",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/mxinvuse/9667?action=CHANGESTATUS&lean=1&status=COMPLETE&memo=",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"mxinvuse",
+								"9667"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "CHANGESTATUS"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "status",
+									"value": "COMPLETE"
+								},
+								{
+									"key": "memo",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ISSUE",
+			"item": [
+				{
+					"name": "0. Generate INVUSAGE Header",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maxrest/oslc/script/WMS_INVUSEISSUE?siteid={{siteid}}&wonum={{wonum}}",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maxrest",
+								"oslc",
+								"script",
+								"WMS_INVUSEISSUE"
+							],
+							"query": [
+								{
+									"key": "siteid",
+									"value": "{{siteid}}"
+								},
+								{
+									"key": "wonum",
+									"value": "{{wonum}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1. Scan WO",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXWOISSUE?lean=1&oslc.select=*&oslc.where=siteid=\"TJB56\" and wonum=\"BJS-7116\"",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXWOISSUE"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"TJB56\" and wonum=\"BJS-7116\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Find Suggest Bin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/MXINVBAL?lean=1&oslc.select=*&oslc.orderBy=%20%2Bcurbal&oslc.where=siteid=\"{{siteid}}\" and itemnum=\"{{itemnum}}\" and location=\"{{location}}\" and curbal>0 and binnum=\"*\"",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVBAL"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.orderBy",
+									"value": "%20%2Bcurbal"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and itemnum=\"{{itemnum}}\" and location=\"{{location}}\" and curbal>0 and binnum=\"*\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.1 Find Item",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/MXITEM?lean=1&oslc.select=itemnum,description&oslc.where=siteid=\"{{siteid}}\" and description=\"%25{{description}}%25\"&oslc.orderBy=%20%2Bitemnum",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXITEM"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "itemnum,description"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and description=\"%25{{description}}%25\""
+								},
+								{
+									"key": "oslc.orderBy",
+									"value": "%20%2Bitemnum"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Pick Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"invuseline\": [\r\n        {\r\n            \"assetnum\": \"00SAA02AH001C\",\r\n            \"frombin\": \"MS-A1L-1-3-4-2\",\r\n            \"fromstoreloc\": \"INDOOR\",\r\n            \"invuselinenum\": 845,\r\n            \"issueto\": \"TAUFIQ MA\",\r\n            \"itemnum\": \"BY239P LED200\",\r\n            \"itemsetid\": \"ITEMSET\",\r\n            \"linetype\": \"ITEM\",\r\n            \"location\": \"INDOOR\",\r\n            \"orgid\": \"BJS\",\r\n            \"quantity\": 1.0,\r\n            \"refwo\": \"BJS-7010\",\r\n            \"requestnum\": \"5892\",\r\n            \"serialnumber\": \"2628978e6c988aseatest63\",\r\n            \"toorgid\": \"BJS\",\r\n            \"tositeid\": \"TJB56\",\r\n            \"usetype\": \"ISSUE\",\r\n            \"validated\": false,\r\n            \"wms_usetype\": \"ISSUE\"\r\n        }\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/MXINVUSE/7973?lean=1",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVUSE",
+								"7973"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Put to Stage Area",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/mxinvuse/7973?action=CHANGESTATUS&lean=1&memo=&status=STAGED",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"mxinvuse",
+								"7973"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "CHANGESTATUS"
+								},
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "memo",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "STAGED"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Complete Issue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/mxinvuse/7973?action=CHANGESTATUS&lean=1&memo=&status=COMPLETE",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"mxinvuse",
+								"7973"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "CHANGESTATUS"
+								},
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "memo",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "COMPLETE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RETURN",
+			"item": [
+				{
+					"name": "0. Generate INVUSAGE Header",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maxrest/oslc/script/WMS_INVUSERETURN?siteid={{siteid}}&wonum={{wonum}}",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maxrest",
+								"oslc",
+								"script",
+								"WMS_INVUSERETURN"
+							],
+							"query": [
+								{
+									"key": "siteid",
+									"value": "{{siteid}}"
+								},
+								{
+									"key": "wonum",
+									"value": "{{wonum}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1. Scan WO For Return",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXRETURN?oslc.select=*&oslc.where=siteid=\"TJB56\" and wonum=\"BJS-7389\"&lean=1",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXRETURN"
+							],
+							"query": [
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"TJB56\" and wonum=\"BJS-7389\""
+								},
+								{
+									"key": "lean",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Receive Material",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"invuseline\": [\r\n        {\r\n            \"linetype\": \"ITEM\",\r\n            \"tositeid\": \"TJB56\",\r\n            \"frombin\": \"MS-A1L-1-3-4-2\",\r\n            \"validated\": false,\r\n            \"fromstoreloc\": \"INDOOR\",\r\n            \"refwo\": \"BJS-7012\",\r\n            \"issueto\": \"TAUFIQ MA\",\r\n            \"quantity\": 1.0,\r\n            \"toorgid\": \"BJS\",\r\n            \"orgid\": \"BJS\",\r\n            \"invuselinenum\": 1,\r\n            \"itemnum\": \"BY239P LED200\",\r\n            \"itemsetid\": \"ITEMSET\",\r\n            \"inspectionrequired\": true,\r\n            \"usetype\": \"RETURN\",\r\n            \"wms_usetype\": \"RETURN_TO_STOREROOM\",\r\n            \"returnagainstissue\": true,\r\n            \"issueid\": 4746\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/MXINVUSE/7982",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVUSE",
+								"7982"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Tagging",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maxrest/oslc/script/WMS_INVUSELINERETURN?invuselineid=1823&tagcode=a061834c14da90ded0ee828d11715629&serialnumber=0cfed17080287bde",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maxrest",
+								"oslc",
+								"script",
+								"WMS_INVUSELINERETURN"
+							],
+							"query": [
+								{
+									"key": "invuselineid",
+									"value": "1823"
+								},
+								{
+									"key": "tagcode",
+									"value": "a061834c14da90ded0ee828d11715629"
+								},
+								{
+									"key": "serialnumber",
+									"value": "0cfed17080287bde"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Put Away",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"frombin\": \"MS-CR1-1-7-5-4\",\r\n    \"wms_finalbin\" : \"MS-CR1-1-7-5-4\",\r\n    \"wms_status\": \"COMPLETE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/MXINVUSELINE/8732?_lean=1",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVUSELINE",
+								"8732"
+							],
+							"query": [
+								{
+									"key": "_lean",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Put Away Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://192.168.200.13:9080/maxrest/oslc/script/WMS_INVUSELINERETURN?invuselineid=8680&tagcode=\"4C5071020190000000091812\"&serialnumber=\"3070B13BCA974F0700C0C841\"",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maxrest",
+								"oslc",
+								"script",
+								"WMS_INVUSELINERETURN"
+							],
+							"query": [
+								{
+									"key": "invuselineid",
+									"value": "8680"
+								},
+								{
+									"key": "tagcode",
+									"value": "\"4C5071020190000000091812\""
+								},
+								{
+									"key": "serialnumber",
+									"value": "\"3070B13BCA974F0700C0C841\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.1. FInd Suggest Bin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/MXINVBAL?lean=1&oslc.select=*&oslc.orderBy=%20%2Bcurbal&oslc.where=siteid=\"{{siteid}}\" and itemnum=\"{{itemnum}}\" and location=\"{{location}}\" and binnum=\"*\"",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"MXINVBAL"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.orderBy",
+									"value": "%20%2Bcurbal"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and itemnum=\"{{itemnum}}\" and location=\"{{location}}\" and binnum=\"*\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Complete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/mxinvuse/8159?action=CHANGESTATUS&lean=1&memo=&status=COMPLETE",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"mxinvuse",
+								"8159"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "CHANGESTATUS"
+								},
+								{
+									"key": "_lid",
+									"value": "{{mxuser}}",
+									"disabled": true
+								},
+								{
+									"key": "_lpwd",
+									"value": "{{mxpass}}",
+									"disabled": true
+								},
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "memo",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "COMPLETE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "STOCKOPNAME",
+			"item": [
+				{
+					"name": "0. Generate Header [NOT USED]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maxrest/oslc/script/WMS_OPIN?siteid={{siteid}}",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maxrest",
+								"oslc",
+								"script",
+								"WMS_OPIN"
+							],
+							"query": [
+								{
+									"key": "siteid",
+									"value": "{{siteid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1. List Stock Opname",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/WMS_MXOPIN?lean=1&oslc.select=*&oslc.where=siteid=\"TJB56\" and status in [\"ENTERED\",\"WAPPR\"]",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXOPIN"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.orderBy",
+									"value": "-checkeddate",
+									"disabled": true
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and wms_opinid={{wms_opinid}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"TJB56\" and status in [\"ENTERED\",\"WAPPR\"]"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.1. Detail Stock Opname",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/WMS_MXOPIN?lean=1&oslc.select=*&oslc.where=siteid=\"TJB56\" and wms_opinid=1561",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXOPIN"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"TJB56\" and wms_opinid=1561"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.2. Detail Bin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXTAGINFO?lean=1&oslc.select=*&oslc.where=tagcode=\"4C5071020190000000098388\"",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXTAGINFO"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "tagcode=\"4C5071020190000000098388\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.3. Detail Item",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/WMS_MXSERIALIZEDITEM?lean=1&oslc.select=*&oslc.where=siteid=\"{{siteid}}\" and serialnumber={{serialnumber}}",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXSERIALIZEDITEM"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and tagcide={{tagcode}}",
+									"disabled": true
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "siteid=\"{{siteid}}\" and serialnumber={{serialnumber}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Save Stock Opname",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"wms_opinline\": [\r\n        {\r\n            \"binnum\": \"MS-A1L-1-3-4-2\",\r\n            \"wms_opinid\": 1581,\r\n            \"physicalcount\": 1,\r\n            \"serialnumber\": \"3071F3FC2297AD4528624F0D\"\r\n        }\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "http://192.168.200.13:9080/maxrest/oslc/script/WMS_OPINLINE_SCAN?binnum=MS-A1L-1-3-4-2&wms_opinid=1581&physicalcount=1&serialnumber=3071F3FC2297AD4528624F0D",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"200",
+								"13"
+							],
+							"port": "9080",
+							"path": [
+								"maxrest",
+								"oslc",
+								"script",
+								"WMS_OPINLINE_SCAN"
+							],
+							"query": [
+								{
+									"key": "binnum",
+									"value": "MS-A1L-1-3-4-2"
+								},
+								{
+									"key": "wms_opinid",
+									"value": "1581"
+								},
+								{
+									"key": "physicalcount",
+									"value": "1"
+								},
+								{
+									"key": "serialnumber",
+									"value": "3071F3FC2297AD4528624F0D"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Set to WAPPR",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"action\": \"WAPPR\"\r\n}"
+						},
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/WMS_MXOPIN/{{opinid}}",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXOPIN",
+								"{{opinid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Set to ENTERED",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+								"type": "text"
+							},
+							{
+								"key": "x-method-override",
+								"value": "PATCH",
+								"type": "text"
+							},
+							{
+								"key": "patchtype",
+								"value": "MERGE",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"action\": \"ENTERED\"\r\n}"
+						},
+						"url": {
+							"raw": "http://147.139.139.145:9080/maximo/oslc/os/WMS_MXOPIN/{{opinid}}",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"139",
+								"145"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"WMS_MXOPIN",
+								"{{opinid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LOGIN",
+			"item": [
+				{
+					"name": "Login by person",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "dGF1ZmlxLm1hcnVmOnRhdWZpcS5tYXJ1Zg==",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://49.0.205.154:9080/maximo/oslc/os/oslcwmsperson?lean=1&oslc.select=*&oslc.where=maxuser{loginid=\"taufiq.maruf\"}",
+							"protocol": "http",
+							"host": [
+								"49",
+								"0",
+								"205",
+								"154"
+							],
+							"port": "9080",
+							"path": [
+								"maximo",
+								"oslc",
+								"os",
+								"oslcwmsperson"
+							],
+							"query": [
+								{
+									"key": "lean",
+									"value": "1"
+								},
+								{
+									"key": "oslc.select",
+									"value": "*"
+								},
+								{
+									"key": "oslc.where",
+									"value": "maxuser{loginid=\"taufiq.maruf\"}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Session",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "Zmlrcmk6RmlrcmkxMjM=",
+								"type": "text"
+							},
+							{
+								"key": "lean",
+								"value": "1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.132.238/maximo/oslc/login",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"132",
+								"238"
+							],
+							"path": [
+								"maximo",
+								"oslc",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout Session",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "maxauth",
+								"value": "Zmlrcmk6RmlrcmkxMjM=",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "0000bhc3wFlSZlVdsn76gkMprKL%3A-1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://147.139.132.238/maximo/oslc/logout",
+							"protocol": "http",
+							"host": [
+								"147",
+								"139",
+								"132",
+								"238"
+							],
+							"path": [
+								"maximo",
+								"oslc",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Code",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Condition Code",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "List WMS UseType",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "maxauth",
+						"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXITEMCONDITION?lean=1&oslc.select=*",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"200",
+						"13"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"os",
+						"WMS_MXITEMCONDITION"
+					],
+					"query": [
+						{
+							"key": "lean",
+							"value": "1"
+						},
+						{
+							"key": "oslc.select",
+							"value": "*"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update defsite",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "maxauth",
+						"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+						"type": "text"
+					},
+					{
+						"key": "x-method-override",
+						"value": "PATCH",
+						"type": "text"
+					},
+					{
+						"key": "patchtype",
+						"value": "MERGE",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"defsite\":\"TJB56\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://49.0.205.154:9080/maximo/oslc/os/WMS_SITEAUTH/475",
+					"protocol": "http",
+					"host": [
+						"49",
+						"0",
+						"205",
+						"154"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"os",
+						"WMS_SITEAUTH",
+						"475"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find Item",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "maxauth",
+						"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXSERIALIZEDITEM?lean=1&oslc.select=*&oslc.where=siteid=\"TJB56\" and serialnumber=\"2628978e6c988aseatest78\"",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"200",
+						"13"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"os",
+						"WMS_MXSERIALIZEDITEM"
+					],
+					"query": [
+						{
+							"key": "lean",
+							"value": "1"
+						},
+						{
+							"key": "oslc.select",
+							"value": "*"
+						},
+						{
+							"key": "oslc.where",
+							"value": "serialnumber=\"4C5071020190000000091628\"",
+							"disabled": true
+						},
+						{
+							"key": "oslc.where",
+							"value": "siteid=\"TJB56\" and serialnumber=\"2628978e6c988aseatest78\""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cookie WMS",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "maxauth",
+						"value": "dGF1ZmlxLm1hcnVmOnRhdWZpcS5tYXJ1Zg==",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://49.0.205.154:9080/maximo/oslc/login",
+					"protocol": "http",
+					"host": [
+						"49",
+						"0",
+						"205",
+						"154"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"login"
+					],
+					"query": [
+						{
+							"key": "oslc.where",
+							"value": "siteid=\"{{siteid}}\" and serialnumber=\"{{serialnumber}}\" and qtystored>0 and serialnumber=\"*\"",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Wms count outstanding",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "maxauth",
+						"value": "dGF1ZmlxLm1hcnVmOnRhdWZpcS5tYXJ1Zg==",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "192.168.200.13:9080/maximo/oslc/script/WMS_COUNTOUTSTANDING2?siteid=\"TJB56\"",
+					"host": [
+						"192",
+						"168",
+						"200",
+						"13"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"script",
+						"WMS_COUNTOUTSTANDING2"
+					],
+					"query": [
+						{
+							"key": "siteid",
+							"value": "\"TJB56\""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RFID Info",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "maxauth",
+						"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://192.168.200.13:9080/maximo/oslc/os/WMS_MXRFID?lean=1&oslc.select=*&oslc.where=siteid=\"TJB56\" and tagcode=\"4C5071020190000000091628\"",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"200",
+						"13"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"os",
+						"WMS_MXRFID"
+					],
+					"query": [
+						{
+							"key": "lean",
+							"value": "1"
+						},
+						{
+							"key": "oslc.select",
+							"value": "*"
+						},
+						{
+							"key": "oslc.where",
+							"value": "siteid=\"TJB56\" and tagcode=\"4C5071020190000000091628\""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WO User Issue",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "maxauth",
+						"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://149.129.252.41:9080/maxrest/oslc/script/WMS_USERWO",
+					"protocol": "http",
+					"host": [
+						"149",
+						"129",
+						"252",
+						"41"
+					],
+					"port": "9080",
+					"path": [
+						"maxrest",
+						"oslc",
+						"script",
+						"WMS_USERWO"
+					],
+					"query": [
+						{
+							"key": "oslc.where",
+							"value": "siteid=\"{{siteid}}\" and serialnumber=\"{{serialnumber}}\" and qtystored>0 and serialnumber=\"*\"",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tag / Untag Bin",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-method-override",
+						"value": "PATCH",
+						"type": "text"
+					},
+					{
+						"key": "properties",
+						"value": "*",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "maxauth",
+						"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+						"type": "text"
+					},
+					{
+						"key": "method",
+						"value": "PATCH",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "patchtype",
+						"value": "MERGE",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"wms_inspectassignedstatus\": \"ASSIGNED/OPEN\",\r\n    \"wms_inspectassignedto\": \"ANDROMEDIA\",\r\n    \"status\": \"APPR\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://147.139.139.145:9080/maximo/oslc/os/MXPO/{{poid}}",
+					"protocol": "http",
+					"host": [
+						"147",
+						"139",
+						"139",
+						"145"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"os",
+						"MXPO",
+						"{{poid}}"
+					],
+					"query": [
+						{
+							"key": "_lid",
+							"value": "{{mxuser}}",
+							"disabled": true
+						},
+						{
+							"key": "_lpwd",
+							"value": "{{mxpass}}",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post error log",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-method-override",
+						"value": "PATCH",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "properties",
+						"value": "*",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "maxauth",
+						"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+						"type": "text"
+					},
+					{
+						"key": "method",
+						"value": "PATCH",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "patchtype",
+						"value": "MERGE",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Error\": {\r\n        \"extendedError\": {\r\n            \"moreInfo\": {\r\n                \"href\": \"http:\\/\\/192.168.200.9:9080\\/maxrest\\/oslc\\/error\\/messages\\/BMXAA7901E\"\r\n            }\r\n        },\r\n        \"reasonCode\": \"BMXAA7901E\",\r\n        \"message\": \"BMXAA7901E - You cannot log in at this time. Contact the system administrator.\",\r\n        \"statusCode\": \"401\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.200.9:9080/maximo/oslc/os/WMS_ERROR_LOG?lean=1&oslc.select=*",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"200",
+						"9"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"os",
+						"WMS_ERROR_LOG"
+					],
+					"query": [
+						{
+							"key": "_lid",
+							"value": "{{mxuser}}",
+							"disabled": true
+						},
+						{
+							"key": "_lpwd",
+							"value": "{{mxpass}}",
+							"disabled": true
+						},
+						{
+							"key": "lean",
+							"value": "1"
+						},
+						{
+							"key": "oslc.select",
+							"value": "*"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get error log",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-method-override",
+						"value": "PATCH",
+						"type": "text"
+					},
+					{
+						"key": "properties",
+						"value": "*",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "maxauth",
+						"value": "YW5kcm9tZWRpYTphbmRyb21lZGlh",
+						"type": "text"
+					},
+					{
+						"key": "method",
+						"value": "PATCH",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "patchtype",
+						"value": "MERGE",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"wms_inspectassignedstatus\": \"ASSIGNED/OPEN\",\r\n    \"wms_inspectassignedto\": \"ANDROMEDIA\",\r\n    \"status\": \"APPR\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.200.9:9080/maximo/oslc/os/WMS_ERROR_LOG?lean=1&oslc.select=*",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"200",
+						"9"
+					],
+					"port": "9080",
+					"path": [
+						"maximo",
+						"oslc",
+						"os",
+						"WMS_ERROR_LOG"
+					],
+					"query": [
+						{
+							"key": "lean",
+							"value": "1"
+						},
+						{
+							"key": "oslc.select",
+							"value": "*"
+						},
+						{
+							"key": "_lid",
+							"value": "{{mxuser}}",
+							"disabled": true
+						},
+						{
+							"key": "_lpwd",
+							"value": "{{mxpass}}",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

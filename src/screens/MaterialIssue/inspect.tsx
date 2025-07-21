@@ -31,6 +31,7 @@ const MaterialIssueInspectScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [datas, setDatas] = useState<WoDetail[]>([]); // <-- Use WoDetail[] type
   const [invUse, setInvUse] = useState([]); // <-- Use WoDetail[] type
+  const [invreserve, setInvreserve] = useState([]); // <-- Use WoDetail[] type
 
   const handleReceive = () => {
     setModalVisible(true);
@@ -45,13 +46,14 @@ const MaterialIssueInspectScreen = () => {
           console.error('Error fetching work order details:', res.error);
         } else {
           setDatas(res.member);
+          setInvreserve(res.member[0].invreserve);
           const filteredInvUse = res.member[0].invuse.filter(
             (item: any) =>
               Array.isArray(item.invuseline) && item.invuseline.length > 0,
           );
           setInvUse(filteredInvUse);
 
-          console.log('Work order details:', res.member[0].invuse);
+          console.log('Work order details:', res);
           console.log('Filtered inventory use:', filteredInvUse);
 
           // Process the work order details as needed
@@ -69,19 +71,16 @@ const MaterialIssueInspectScreen = () => {
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
         <View className="flex-row justify-between">
-          <Text className="font-bold">{item?.invuseline[0]?.itemnum}</Text>
+          <Text className="font-bold">{item?.itemnum}</Text>
           <Text className="">
-            Reserved : {item?.invuseline[0]?.quantity}{' '}
-            {item?.invuseline[0]?.wms_unit}
+            Reserved : {item?.reservedqty} {item?.wms_unit}
           </Text>
         </View>
 
-        <Text className="font-bold max-w-64">
-          {item?.invuseline[0]?.description}
-        </Text>
+        <Text className="font-bold max-w-64">{item?.description}</Text>
         <View className="flex-row justify-between">
           <Text className="w-1/3 ml-3 text-lg font-bold">
-            {item?.invuseline[0]?.toconditioncode}
+            {item?.toconditioncode}
           </Text>
           <Text className="w-1/2 text-right">Outstanding / Issue</Text>
         </View>
@@ -89,8 +88,8 @@ const MaterialIssueInspectScreen = () => {
           <Text className="w-1/3 ml-3"></Text>
           <Text className="w-1/2 text-right">
             {' '}
-            - {item?.invuseline[0]?.wms_unit} / {}
-            {item?.invuseline[0]?.receivedqty} {item?.invuseline[0]?.wms_unit}
+            - {item?.wms_unit} / {}
+            {item?.receivedqty} {item?.wms_unit}
           </Text>
         </View>
       </View>
@@ -119,9 +118,9 @@ const MaterialIssueInspectScreen = () => {
         onChangeText={setSearch}
       />
       <FlatList
-        data={invUse}
+        data={invreserve}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={item => item.invreserveid}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />

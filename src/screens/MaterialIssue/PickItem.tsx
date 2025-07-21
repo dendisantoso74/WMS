@@ -31,10 +31,7 @@ const PickItemScreen = () => {
   useEffect(() => {
     //find sugestion bin
     const findbin = async () => {
-      const res = await findSugestBin(
-        item.invuseline[0].itemnum,
-        item.invuseline[0].fromstoreloc,
-      );
+      const res = await findSugestBin(item.itemnum, item.location);
       setSuggestedBin(res.member[0]);
       console.log('Suggested Bin:', res.member[0]);
     };
@@ -46,7 +43,7 @@ const PickItemScreen = () => {
   //   <View className="flex-col ">
   //     <View className="flex-row w-full mt-2 ">
   //       <Text className="w-1/2 font-bold">Item Name</Text>
-  //       <Text className="font-bold">{item?.invuseline[0].description}</Text>
+  //       <Text className="font-bold">{item?.description}</Text>
   //     </View>
   //     <View className="flex-row w-full mt-5">
   //       <Text className="w-1/2 font-bold">Condition Code</Text>
@@ -132,7 +129,7 @@ const PickItemScreen = () => {
       <View className="flex-col ">
         <View className="flex-row w-full mt-2 ">
           <Text className="w-1/2 font-bold">Item Name</Text>
-          <Text className="font-bold">{item?.invuseline[0].description}</Text>
+          <Text className="font-bold">{item?.description}</Text>
         </View>
         <View className="flex-row w-full mt-5">
           <Text className="w-1/2 font-bold">Condition Code</Text>
@@ -140,7 +137,7 @@ const PickItemScreen = () => {
         </View>
         <View className="flex-row w-full mt-5">
           <Text className="w-1/2 font-bold">Issue Unit</Text>
-          <Text className="font-bold">{item?.invuseline[0].wms_unit}</Text>
+          <Text className="font-bold">{item?.wms_unit}</Text>
         </View>
         <View className="flex-row items-center w-full mt-5">
           <Text className="w-1/2 font-bold">Stored Qty</Text>
@@ -153,7 +150,7 @@ const PickItemScreen = () => {
               value={search}
               onChangeText={setSearch}
             />
-            <Text className="font-bold">{item?.invuseline[0].wms_unit}</Text>
+            <Text className="font-bold">{item?.wms_unit}</Text>
           </View>
         </View>
         <View className="flex-row items-center w-full mt-5">
@@ -167,16 +164,14 @@ const PickItemScreen = () => {
               value={search}
               onChangeText={setSearch}
             />
-            <Text className="font-bold">{item?.invuseline[0].wms_unit}</Text>
+            <Text className="font-bold">{item?.wms_unit}</Text>
           </View>
         </View>
 
         <View className="flex-row items-center w-full mt-5">
           <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
           <View className="w-1/2 py-2 ">
-            <Text className="font-bold text-center ">
-              {item?.invuseline[0].frombin}
-            </Text>
+            <Text className="font-bold text-center ">{item?.frombin}</Text>
           </View>
         </View>
 
@@ -191,9 +186,7 @@ const PickItemScreen = () => {
         <View className="flex-row items-center w-full mt-5">
           <Text className="w-1/2 font-bold">User Type</Text>
           <View className="w-1/2 py-2 bg-gray-200">
-            <Text className="font-bold text-center ">
-              {item?.invuseline[0].wms_usetype}
-            </Text>
+            <Text className="font-bold text-center ">{item?.wms_usetype}</Text>
           </View>
         </View>
       </View>

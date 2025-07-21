@@ -30,15 +30,15 @@ const DetailMaterialScreen = () => {
     setModalVisible(true);
   };
 
-  const renderItem = ({item}: {item: string}) => (
-    <View className="items-end ">
-      <TouchableOpacity
-        className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
-        onPress={() => navigation.navigate('Pick Item', {item: item})}>
-        <Icon library="Feather" name="plus" size={15} color="white"></Icon>
-      </TouchableOpacity>
-    </View>
-  );
+  // const renderItem = ({item}: {item: string}) => (
+  //   <View className="items-end ">
+  //     <TouchableOpacity
+  //       className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
+  //       onPress={() => navigation.navigate('Pick Item', {item: item})}>
+  //       <Icon library="Feather" name="plus" size={15} color="white"></Icon>
+  //     </TouchableOpacity>
+  //   </View>
+  // );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -49,10 +49,10 @@ const DetailMaterialScreen = () => {
         </View>
         <View>
           <Text className="ml-10 font-bold text-white">
-            {item.invuseline[0].description}
+            {item?.description}
           </Text>
           <Text className="ml-10 font-bold text-white">
-            {item.invuseline[0].quantity} {item.invuseline[0].wms_unit}
+            {item?.reservedqty} {item?.wms_unit}
           </Text>
         </View>
       </View>
