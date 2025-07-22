@@ -22,6 +22,7 @@ const TransferInstructionScreen = () => {
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
   const [transferInstructions, setTransferInstructions] = useState<any[]>([]);
+  const [filteredInstructions, setFilteredInstructions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -29,23 +30,38 @@ const TransferInstructionScreen = () => {
       setLoading(true);
       try {
         const res = await getListTransferInstructions();
-        // Only keep items that have wms_ponum property
         const filtered = Array.isArray(res.member)
           ? res.member.filter((item: any) => !!item.wms_ponum)
           : [];
         setTransferInstructions(filtered);
+        setFilteredInstructions(filtered);
       } catch (e) {
         setTransferInstructions([]);
+        setFilteredInstructions([]);
       }
       setLoading(false);
     };
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (!search) {
+      setFilteredInstructions(transferInstructions);
+    } else {
+      setFilteredInstructions(
+        transferInstructions.filter((item: any) =>
+          item.wms_ponum?.toLowerCase().includes(search.toLowerCase()),
+        ),
+      );
+    }
+  }, [search, transferInstructions]);
+
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() => navigation.navigate('Transfer Instruction Assign')}>
+      onPress={() =>
+        navigation.navigate('Transfer Instruction Assign', {item: item})
+      }>
       <View>
         <View className="my-2">
           <Text className="px-4 font-bold">{item.wms_ponum}</Text>
@@ -77,7 +93,7 @@ const TransferInstructionScreen = () => {
         />
       </View>
       <FlatList
-        data={transferInstructions}
+        data={filteredInstructions}
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}

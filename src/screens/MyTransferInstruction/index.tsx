@@ -24,6 +24,7 @@ const MyTransferInstructionScreen = () => {
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
   const [assignedInstructions, setAssignedInstructions] = useState<any[]>([]);
+  const [filteredInstructions, setFilteredInstructions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -32,21 +33,36 @@ const MyTransferInstructionScreen = () => {
       try {
         // Replace 'TAUFIQ MA' with the actual invowner if needed
         const res = await fetchAssignedTransferInstructions('TAUFIQ MA');
-        console.log('Assigned Instructions fetched:', res);
-
-        setAssignedInstructions(Array.isArray(res.member) ? res.member : []);
+        const instructions = Array.isArray(res.member) ? res.member : [];
+        setAssignedInstructions(instructions);
+        setFilteredInstructions(instructions);
       } catch (e) {
         setAssignedInstructions([]);
+        setFilteredInstructions([]);
       }
       setLoading(false);
     };
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (!search) {
+      setFilteredInstructions(assignedInstructions);
+    } else {
+      setFilteredInstructions(
+        assignedInstructions.filter((item: any) =>
+          item.wms_ponum?.toLowerCase().includes(search.toLowerCase()),
+        ),
+      );
+    }
+  }, [search, assignedInstructions]);
+
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() => navigation.navigate('My Transfer Instruction Scan')}>
+      onPress={() =>
+        navigation.navigate('My Transfer Instruction Scan', {datas: item})
+      }>
       <View>
         <View className="my-2">
           <Text className="px-4 font-bold">{item.wms_ponum}</Text>
@@ -80,7 +96,7 @@ const MyTransferInstructionScreen = () => {
         <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
       ) : (
         <FlatList
-          data={assignedInstructions}
+          data={filteredInstructions}
           renderItem={renderItem}
           keyExtractor={item => item.invusenum}
           contentContainerStyle={styles.listContent}

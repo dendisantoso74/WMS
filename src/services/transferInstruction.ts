@@ -15,3 +15,18 @@ export const getListTransferInstructions = async () => {
     throw error;
   }
 };
+
+export const getTransferInstructionByNum = async (invusenum: string) => {
+  const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=invuseid,wms_ponum,invusenum,fromstoreloc,statusdate,invuseline&oslc.where=siteid="TJB56" and invusenum="${invusenum}"`;
+  try {
+    const response = await api.get(url, {
+      headers: {
+        // 'maxauth': 'YW5kcm9tZWRpYTphbmRyb21lZGlh', // Add if needed
+        // 'Cookie': 'JSESSIONID=...' // Add if needed
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

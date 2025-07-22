@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,17 +9,58 @@ import {
   TextInput,
   ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
+import {getTransferInstructionByNum} from '../../services/transferInstruction';
+import {max, set} from 'lodash';
+import {formatDateTime} from '../../utils/helpers';
+import {getData} from '../../utils/store';
+import {assignTransferInstruction} from '../../services/materialRecive';
 
 const dummyRfids = ['00000000000000000000'];
 
 const TransferInstructionAssignScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {item} = route.params;
+  console.log('item from params:', item);
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [invuse, setInvuse] = useState([]);
+  const [maxUser, setMaxUser] = useState('');
+
+  useEffect(() => {
+    getData('MAXuser').then(res => {
+      setMaxUser(res);
+    });
+    // You can fetch any initial data here if needed
+    getTransferInstructionByNum(item.invusenum).then(res => {
+      if (res.error) {
+        console.error('Error fetching transfer instruction:', res.error);
+      } else {
+        setInvuse(res.member[0].invuseline);
+        console.log('Fetched po num:', res.member);
+      }
+    });
+  }, []);
+
+  const handleAssignToMe = () => {
+    console.log('Assign to me pressed', item.invuseid, maxUser);
+    assignTransferInstruction(item.invuseid, maxUser).then(res => {
+      if (res.error) {
+        console.error('Error assigning transfer instruction:', res.error);
+        ToastAndroid.show(
+          'Error assigning transfer instruction',
+          ToastAndroid.SHORT,
+        );
+      } else {
+        ToastAndroid.show('Assigned successfully', ToastAndroid.SHORT);
+        navigation.goBack();
+      }
+    });
+  };
 
   const renderItem = ({item}: {item: string}) => (
     <View
@@ -29,13 +70,15 @@ const TransferInstructionAssignScreen = () => {
       <View style={[styles.sideBar, {backgroundColor: 'blue'}]} />
       <View className="my-2">
         <View className="flex-col justify-start">
-          <Text className="font-bold">Bin : MS-A1L-4-3-2-1</Text>
+          <Text className="font-bold">Bin : {item.tobin}</Text>
           <Text className="font-bold">
-            TR02-F24OM / Fiber Optic 24 Core 100meters
+            {item?.itemnum} / {item?.description}
           </Text>
-          <Text className="font-bold">TI Qty : 100.0meters</Text>
-          <Text className="font-bold">Putaway Qty : 0 METER</Text>
-          <Text className="font-bold">COndition Code : NEW</Text>
+          <Text className="font-bold">
+            TI Qty : {item.quantity} {item.wms_unit}
+          </Text>
+          <Text className="font-bold">Putaway Qty : 0 {item.wms_unit}</Text>
+          <Text className="font-bold">{item?.toconditioncode}</Text>
         </View>
       </View>
     </View>
@@ -49,10 +92,12 @@ const TransferInstructionAssignScreen = () => {
           <Text className="font-bold text-white">PO Date</Text>
           <Text className="font-bold text-white">TI Number</Text>
         </View>
-        <View className="px-10 flex-col justify-start">
-          <Text className="font-bold text-white">2176</Text>
-          <Text className="font-bold text-white">12-Nov-2020 13:16</Text>
-          <Text className="font-bold text-white">2191</Text>
+        <View className="flex-col justify-start px-10">
+          <Text className="font-bold text-white">{item.wms_ponum}</Text>
+          <Text className="font-bold text-white">
+            {formatDateTime(item.statusdate)}
+          </Text>
+          <Text className="font-bold text-white">{item.invusenum}</Text>
         </View>
       </View>
       <View style={styles.filterContainer}>
@@ -72,14 +117,19 @@ const TransferInstructionAssignScreen = () => {
         />
       </View>
       <FlatList
-        data={rfids}
+        data={invuse}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={item => item.invuselinenum}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
       <View style={styles.buttonContainer}>
-        <ButtonApp label="ASSIGN TO ME" size="large" color="primary" />
+        <ButtonApp
+          onPress={() => handleAssignToMe()}
+          label="ASSIGN TO ME"
+          size="large"
+          color="primary"
+        />
       </View>
     </SafeAreaView>
   );

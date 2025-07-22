@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,32 +9,46 @@ import {
   TextInput,
   ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-
-const dummyRfids = ['00000000000000000000'];
+import {formatDateTime} from '../../utils/helpers';
 
 const MyTransferInstructionScanScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {datas} = route.params;
+  console.log('item from params:', datas);
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [invuse, setInvuse] = useState([]);
 
-  const renderItem = ({item}: {item: string}) => (
+  useEffect(() => {
+    // You can fetch any initial data here if needed
+    setInvuse(datas.invuseline);
+  }, [datas]);
+
+  const renderItem = ({item}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() => navigation.navigate('My Transfer Instruction Submit')}>
+      onPress={() =>
+        navigation.navigate('My Transfer Instruction Submit', {
+          item: item,
+          invuseid: datas.invuseid,
+        })
+      }>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
         <View className="flex-col justify-start">
-          <Text className="font-bold">Bin : MS-A1L-$-3-2-1</Text>
+          <Text className="font-bold">Bin : {item.tobin}</Text>
           <Text className="font-bold">
-            TRO2-FO24M / FIBER OPTIC 24 CORE 100meters
+            {item?.itemnum} / {item?.description}
           </Text>
-          <Text className="font-bold">TI Qty : 100.0 Meter</Text>
-          <Text className="font-bold">Putaway Qty : 0 METER</Text>
-          <Text className="font-bold">Condition Code : NEW</Text>
+          <Text className="font-bold">
+            TI Qty : {item.quantity} {item.wms_unit}
+          </Text>
+          <Text className="font-bold">Putaway Qty : 0 {item.wms_unit}</Text>
+          <Text className="font-bold">{item?.toconditioncode}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -48,10 +62,12 @@ const MyTransferInstructionScanScreen = () => {
           <Text className="font-bold text-white">PO Date</Text>
           <Text className="font-bold text-white">TI Number</Text>
         </View>
-        <View className="px-10 flex-col justify-start">
-          <Text className="font-bold text-white">2176</Text>
-          <Text className="font-bold text-white">12-Nov-2020 13:16</Text>
-          <Text className="font-bold text-white">2191</Text>
+        <View className="flex-col justify-start px-10">
+          <Text className="font-bold text-white">{datas.wms_ponum}</Text>
+          <Text className="font-bold text-white">
+            {formatDateTime(datas.statusdate)}
+          </Text>
+          <Text className="font-bold text-white">{datas.invusenum}</Text>
         </View>
       </View>
       <View style={styles.filterContainer}>
@@ -71,7 +87,7 @@ const MyTransferInstructionScanScreen = () => {
         />
       </View>
       <FlatList
-        data={rfids}
+        data={invuse}
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}

@@ -12,10 +12,20 @@ import {
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
-import {findSugestBin} from '../../services/materialIssue';
+import {
+  findBinByTagCode,
+  findSugestBin,
+  pickItem,
+} from '../../services/materialIssue';
 import {set} from 'lodash';
+import {Dropdown} from 'react-native-element-dropdown';
+import {getData} from '../../utils/store';
 
-const dummyRfids = ['00000000000000000000'];
+const userTypeOptions = [
+  {label: 'ISSUE', value: 'ISSUE'},
+  {label: 'REFURBISH', value: 'REFURBISH'},
+  {label: 'REPLACEMENT', value: 'REPLACEMENT'},
+];
 
 const PickItemScreen = () => {
   const navigation = useNavigation<any>();
@@ -24,11 +34,22 @@ const PickItemScreen = () => {
 
   console.log('RFIDs from params:', item);
 
-  const [rfids, setRfids] = useState(dummyRfids);
+  const [rfids, setRfids] = useState('');
   const [search, setSearch] = useState('');
   const [suggestedBin, setSuggestedBin] = useState([]);
+  const [userType, setUserType] = useState(item?.wms_usetype || 'ISSUE'); // <-- Add state for dropdown
+  const [maxUser, setMaxUser] = useState(0);
+  const [bin, setBin] = useState('');
+  const [storeqty, setStoreqty] = useState('');
+  const [pickqty, setPickqty] = useState('');
 
   useEffect(() => {
+    //get MAXuser
+    const maxUser = getData('MAXuser').then(res => {
+      // console.log('MAXuser:', maxUser);
+      setMaxUser(res);
+    });
+
     //find sugestion bin
     const findbin = async () => {
       const res = await findSugestBin(item.itemnum, item.location);
@@ -39,75 +60,45 @@ const PickItemScreen = () => {
     findbin();
   }, [item]);
 
-  // const renderItem = ({item}: {item: string}) => (
-  //   <View className="flex-col ">
-  //     <View className="flex-row w-full mt-2 ">
-  //       <Text className="w-1/2 font-bold">Item Name</Text>
-  //       <Text className="font-bold">{item?.description}</Text>
-  //     </View>
-  //     <View className="flex-row w-full mt-5">
-  //       <Text className="w-1/2 font-bold">Condition Code</Text>
-  //       <Text className="font-bold">BROKEN</Text>
-  //     </View>
-  //     <View className="flex-row w-full mt-5">
-  //       <Text className="w-1/2 font-bold">Issue Unit</Text>
-  //       <Text className="font-bold">METER</Text>
-  //     </View>
-  //     <View className="flex-row items-center w-full mt-5">
-  //       <Text className="w-1/2 font-bold">Stored Qty</Text>
-  //       <View className="flex-row items-center ">
-  //         <TextInput
-  //           className="w-24 text-center"
-  //           style={styles.filterInput}
-  //           placeholder="0"
-  //           placeholderTextColor="#b0b0b0"
-  //           value={search}
-  //           onChangeText={setSearch}
-  //         />
-  //         <Text className="font-bold">METER</Text>
-  //       </View>
-  //     </View>
-  //     <View className="flex-row items-center w-full mt-5">
-  //       <Text className="w-1/2 font-bold">Pick Qty</Text>
-  //       <View className="flex-row items-center ">
-  //         <TextInput
-  //           className="w-24 text-center"
-  //           style={styles.filterInput}
-  //           placeholder="0"
-  //           placeholderTextColor="#b0b0b0"
-  //           value={search}
-  //           onChangeText={setSearch}
-  //         />
-  //         <Text className="font-bold">METER</Text>
-  //       </View>
-  //     </View>
+  const handleAdd = async () => {
+    const payload = {
+      assetnum: item.assetnum,
+      frombin: bin.bin || item.frombin,
+      fromstoreloc: item.location,
+      invuselinenum: item.invreserveid,
+      issueto: maxUser,
+      itemnum: 0,
+      itemsetid: item.itemsetid,
+      linetype: 'ITEM',
+      location: item.location,
+      orgid: item.orgid,
+      quantity: Number(pickqty),
+      refwo: item.wogroup,
+      requestnum: item.requestnum,
+      serialnumber: 'ABCDEFF00000000000FA1781',
+      toorgid: 'BJS',
+      tositeid: 'TJB56',
+      usetype: userType,
+      validated: false,
+      wms_usetype: userType,
+    };
 
-  //     <View className="flex-row items-center w-full mt-5">
-  //       <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
-  //       <View className="w-1/2 py-2 bg-gray-200">
-  //         <Text className="font-bold text-center ">MS-A1L-4-2-2-1</Text>
-  //       </View>
-  //     </View>
-  //     <View className="flex-row items-center w-full mt-5">
-  //       <Text className="w-1/2 font-bold">User Type</Text>
-  //       <View className="w-1/2 py-2 bg-gray-200">
-  //         <Text className="font-bold text-center ">ISSUE</Text>
-  //       </View>
-  //     </View>
-  //   </View>
-  // );
+    // You can now use this payload for your API call
+    console.log('Payload:', payload);
+    pickItem('55474', payload);
+    // navigation.navigate('Detail Wo');
+  };
+  const searchSerialNumber = async () => {
+    // console.log('Searching for serial number:', search);
 
-  // <Text>Item Name</Text>
-  //       <Text>Condition Code</Text>
-  //       <Text>Issue Unit</Text>
-  //       <Text>Stored Qty</Text>
-  //       <Text>Pick Qty</Text>
-  //       <Text>Bin</Text>
-  //       <Text>Suggestion Bin</Text>
-  //       <Text>User Type</Text>
+    const result = await findBinByTagCode(search);
+    setBin(result.member[0]);
+    console.log('Search BIN result:', result.member[0]);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {console.log('res user max', maxUser)}
       <Text className="mt-3 ml-4 font-bold">Serial Number</Text>
       <View style={styles.filterContainer}>
         <TextInput
@@ -116,6 +107,7 @@ const PickItemScreen = () => {
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
+          onSubmitEditing={searchSerialNumber}
         />
       </View>
       {/* <FlatList
@@ -131,15 +123,15 @@ const PickItemScreen = () => {
           <Text className="w-1/2 font-bold">Item Name</Text>
           <Text className="font-bold">{item?.description}</Text>
         </View>
-        <View className="flex-row w-full mt-5">
+        <View className="flex-row w-full mt-3">
           <Text className="w-1/2 font-bold">Condition Code</Text>
           <Text className="font-bold">BROKEN</Text>
         </View>
-        <View className="flex-row w-full mt-5">
+        <View className="flex-row w-full mt-3">
           <Text className="w-1/2 font-bold">Issue Unit</Text>
           <Text className="font-bold">{item?.wms_unit}</Text>
         </View>
-        <View className="flex-row items-center w-full mt-5">
+        <View className="flex-row items-center w-full mt-3">
           <Text className="w-1/2 font-bold">Stored Qty</Text>
           <View className="flex-row items-center ">
             <TextInput
@@ -147,13 +139,13 @@ const PickItemScreen = () => {
               style={styles.filterInput}
               placeholder="0"
               placeholderTextColor="#b0b0b0"
-              value={search}
-              onChangeText={setSearch}
+              value={storeqty}
+              onChangeText={setStoreqty}
             />
             <Text className="font-bold">{item?.wms_unit}</Text>
           </View>
         </View>
-        <View className="flex-row items-center w-full mt-5">
+        <View className="flex-row items-center w-full mt-3">
           <Text className="w-1/2 font-bold">Pick Qty</Text>
           <View className="flex-row items-center ">
             <TextInput
@@ -161,21 +153,21 @@ const PickItemScreen = () => {
               style={styles.filterInput}
               placeholder="0"
               placeholderTextColor="#b0b0b0"
-              value={search}
-              onChangeText={setSearch}
+              value={pickqty}
+              onChangeText={setPickqty}
             />
             <Text className="font-bold">{item?.wms_unit}</Text>
           </View>
         </View>
 
-        <View className="flex-row items-center w-full mt-5">
-          <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
+        <View className="flex-row items-center w-full mt-3">
+          <Text className="w-1/2 font-bold">Bin</Text>
           <View className="w-1/2 py-2 ">
-            <Text className="font-bold text-center ">{item?.frombin}</Text>
+            <Text className="font-bold text-center ">{bin.bin}</Text>
           </View>
         </View>
 
-        <View className="flex-row items-center w-full mt-5">
+        <View className="flex-row items-center w-full mt-3">
           <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
           <View className="w-1/2 py-2 bg-gray-200">
             <Text className="font-bold text-center ">
@@ -183,10 +175,30 @@ const PickItemScreen = () => {
             </Text>
           </View>
         </View>
-        <View className="flex-row items-center w-full mt-5">
-          <Text className="w-1/2 font-bold">User Type</Text>
+
+        <View className="flex-row items-center w-full mt-3">
+          <Text className="w-1/2 font-bold">Use Type</Text>
           <View className="w-1/2 py-2 bg-gray-200">
-            <Text className="font-bold text-center ">{item?.wms_usetype}</Text>
+            <Dropdown
+              data={userTypeOptions}
+              labelField="label"
+              valueField="value"
+              value={userType}
+              onChange={item => setUserType(item.value)}
+              style={{
+                backgroundColor: 'transparent',
+                // width: '100%',
+                paddingHorizontal: 8,
+              }}
+              placeholder="Select Use Type"
+            />
+          </View>
+        </View>
+
+        <View className="flex-row items-center w-full mt-3">
+          <Text className="w-1/2 font-bold">Issue To</Text>
+          <View className="w-1/2 py-2 ">
+            <Text className="font-bold ">{maxUser}</Text>
           </View>
         </View>
       </View>
@@ -195,7 +207,7 @@ const PickItemScreen = () => {
           label="ADD"
           size="large"
           color="primary"
-          onPress={() => navigation.navigate('Detail Wo')}
+          onPress={() => handleAdd()}
         />
       </View>
     </SafeAreaView>

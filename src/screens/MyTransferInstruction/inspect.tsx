@@ -9,32 +9,54 @@ import {
   TextInput,
   ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
+import {completeTransferInstruction} from '../../services/myTransferInstruction';
 
 const dummyRfids = ['00000000000000000000'];
 
 const MyTransferInstructionSubmitScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {item, invuseid} = route.params;
+  console.log('item from params:', item, invuseid);
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
 
-  const renderItem = ({item}: {item: string}) => (
+  const handleComplete = () => {
+    console.log('Complete pressed', item);
+    completeTransferInstruction(invuseid).then(res => {
+      if (res.error) {
+        console.error('Error completing transfer instruction:', res.error);
+        ToastAndroid.show(
+          'Error completing transfer instruction',
+          ToastAndroid.SHORT,
+        );
+      } else {
+        ToastAndroid.show('Transfer instruction completed', ToastAndroid.SHORT);
+        navigation.goBack();
+      }
+    });
+  };
+
+  const renderItem = ({data}) => (
     <TouchableOpacity
       style={styles.rfidCard}
       onPress={() => navigation.navigate('My Transfer Instruction Submit')}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2 flex-row">
+      <View className="flex-row my-2">
         <View className="flex-col justify-start">
-          <Text className="">Serial Number:30458094809485</Text>
-          <Text className="">TRO2-FO24M / FIBER OPTIC 24 CORE 100meters</Text>
-          <Text className="">TI Qty : 100.0 Meter</Text>
-          <Text className="">Putaway Qty : 0 METER</Text>
+          <Text className="text-sm">Serial Number: {item.serialnumber}</Text>
+          <Text className="text-sm">
+            {item.invuselineid} / {item.description}
+          </Text>
+          <Text className="text-sm">TI Qty : 100.0 Meter</Text>
+          <Text className="text-sm">Putaway Qty : 0 METER</Text>
         </View>
-        <View>
-          <View className="border border-red-500 rounded-full bg-red-500">
+        <View className="">
+          <View className="bg-red-500 border border-red-500 rounded-full">
             <Icon library="Feather" name="x" size={15} color="white"></Icon>
           </View>
         </View>
@@ -48,25 +70,30 @@ const MyTransferInstructionSubmitScreen = () => {
         <View className="flex-col justify-start">
           <Text className="font-bold text-white">Bin</Text>
         </View>
-        <View className="px-10 flex-col justify-start">
-          <Text className="font-bold text-white">MS-A1L-4-4-2-1</Text>
+        <View className="flex-col justify-start px-10">
+          <Text className="font-bold text-white">{item.tobin}</Text>
         </View>
       </View>
-      <View className="bg-blue-200 px-2 py-2">
+      <View className="px-2 py-2 bg-blue-200">
         <Text className="font-bold text-blue-600">
           Information : This is smartscan, please scan on material tag
         </Text>
       </View>
       <View style={styles.filterContainer}></View>
       <FlatList
-        data={rfids}
+        data={item.invuselinesplit}
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
       <View style={styles.buttonContainer}>
-        <ButtonApp label="SUBMIT" size="large" color="primary" />
+        <ButtonApp
+          onPress={() => handleComplete()}
+          label="Complete"
+          size="large"
+          color="primary"
+        />
       </View>
     </SafeAreaView>
   );

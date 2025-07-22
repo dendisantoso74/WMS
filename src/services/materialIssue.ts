@@ -1,3 +1,4 @@
+import {get} from 'lodash';
 import {getData} from '../utils/store';
 import api from './api';
 
@@ -25,8 +26,11 @@ export const pickItem = async (invuseId: string, itemDetails: any) => {
         'Content-Type': 'application/json',
       },
     });
+    console.log('Pick Item Response:', response?.data);
+
     return response.data;
   } catch (error) {
+    console.error('Error in pickItem:', error);
     throw error;
   }
 };
@@ -66,6 +70,23 @@ export const findSugestBin = async (
   try {
     const response = await api.get(url, {});
 
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const findBinByTagCode = async (tagcode: string) => {
+  const siteid = await getData('site');
+  const pageSize = 10;
+  const pageno = 1;
+  const url = `/maximo/oslc/os/WMS_MXBIN?lean=1&oslc.select=*&oslc.where=siteid="${siteid}" and tagcode="${tagcode}"&oslc.pageSize=${pageSize}&pageno=${pageno}`;
+  try {
+    const response = await api.get(url, {
+      headers: {
+        // 'Cookie': 'JSESSIONID=...' // Add if needed
+      },
+    });
     return response.data;
   } catch (error) {
     throw error;

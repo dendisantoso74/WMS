@@ -234,8 +234,11 @@ export const assignTransferInstruction = async (
         'Content-Type': 'application/json',
       },
     });
+    console.log('Assign Transfer Instruction Response:', response?.data);
+
     return response.data;
   } catch (error) {
+    console.error('Error in assignTransferInstruction:', error);
     throw error;
   }
 };

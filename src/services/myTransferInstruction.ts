@@ -19,3 +19,27 @@ export const fetchAssignedTransferInstructions = async (invowner: string) => {
     throw error;
   }
 };
+
+export const completeTransferInstruction = async (
+  invuseid: string,
+  memo: string = '',
+) => {
+  const url = `/maximo/oslc/os/mxinvuse/${invuseid}?action=CHANGESTATUS&lean=1&status=COMPLETE&memo=${encodeURIComponent(memo)}`;
+  try {
+    const response = await api.post(
+      url,
+      {},
+      {
+        headers: {
+          'x-method-override': 'PATCH',
+          // 'Cookie': 'JSESSIONID=...' // Add if needed
+        },
+      },
+    );
+    console.log('Complete response data:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error completing transfer instruction:', error);
+    throw error;
+  }
+};
