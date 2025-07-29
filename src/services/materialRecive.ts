@@ -257,8 +257,11 @@ export const putAway = async (invuselineId: string, toBin: string) => {
         'Content-Type': 'application/json',
       },
     });
+    console.log('Put Away Response:', response?.data);
+
     return response.data;
   } catch (error) {
+    console.error('Error in putAway:', error);
     throw error;
   }
 };

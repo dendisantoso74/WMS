@@ -13,17 +13,19 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
 import {completeTransferInstruction} from '../../services/myTransferInstruction';
+import {putAway} from '../../services/materialRecive';
 
 const dummyRfids = ['00000000000000000000'];
 
 const MyTransferInstructionSubmitScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item, invuseid} = route.params;
-  console.log('item from params:', item, invuseid);
+  const {item, invuseid, tobin} = route.params;
+  console.log('INVUSEID:', invuseid);
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [completedIds, setCompletedIds] = useState<string[]>([]);
 
   const handleComplete = () => {
     console.log('Complete pressed', item);
@@ -41,28 +43,61 @@ const MyTransferInstructionSubmitScreen = () => {
     });
   };
 
-  const renderItem = ({data}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      onPress={() => navigation.navigate('My Transfer Instruction Submit')}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="flex-row my-2">
-        <View className="flex-col justify-start">
-          <Text className="text-sm">Serial Number: {item.serialnumber}</Text>
-          <Text className="text-sm">
-            {item.invuselineid} / {item.description}
-          </Text>
-          <Text className="text-sm">TI Qty : 100.0 Meter</Text>
-          <Text className="text-sm">Putaway Qty : 0 METER</Text>
-        </View>
-        <View className="">
-          <View className="bg-red-500 border border-red-500 rounded-full">
-            <Icon library="Feather" name="x" size={15} color="white"></Icon>
+  const handleModalSubmit = async invuselineid => {
+    putAway(invuselineid, tobin).then(res => {
+      if (res.error) {
+        console.error('Error in put away:', res.error);
+        ToastAndroid.show('Error in put away', ToastAndroid.SHORT);
+      } else {
+        ToastAndroid.show('Put away successful', ToastAndroid.SHORT);
+        setCompletedIds(prev => [...prev, invuselineid]);
+        // navigation.navigate('My Transfer Instruction Submit', {
+        //   item: invuse,
+        //   invuseid: datas.invuseid,
+        //   tobin: inputValue,
+        // });
+      }
+    });
+  };
+
+  const renderItem = ({item}) => {
+    const isCompleted = completedIds.includes(item.invuselineid);
+    return (
+      <TouchableOpacity
+        style={styles.rfidCard}
+        onPress={
+          () => handleModalSubmit(item.invuselineid)
+          // console.log('My Transfer Instruction Submit', item.invuselineid)
+        }>
+        <View
+          style={[
+            styles.sideBar,
+            {backgroundColor: isCompleted ? '#A4DD00' : 'gray'},
+          ]}
+        />
+        {console.log('item:', item)}
+        <View className="flex-row my-2">
+          <View className="flex-col justify-start">
+            <Text className="text-sm">Serial Number: {item.serialnumber}</Text>
+            <Text className="text-sm">
+              {item.invuselineid} / {item.description}
+            </Text>
+            <Text className="text-sm">
+              TI Qty : {item.quantity} {item.wms_unit}
+            </Text>
+            <Text className="text-sm">
+              Putaway Qty : {item.receivedqty} {item.wms_unit}
+            </Text>
+          </View>
+          <View className="">
+            <View className="bg-red-500 border border-red-500 rounded-full">
+              <Icon library="Feather" name="x" size={15} color="white"></Icon>
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -71,7 +106,7 @@ const MyTransferInstructionSubmitScreen = () => {
           <Text className="font-bold text-white">Bin</Text>
         </View>
         <View className="flex-col justify-start px-10">
-          <Text className="font-bold text-white">{item.tobin}</Text>
+          <Text className="font-bold text-white">{tobin}</Text>
         </View>
       </View>
       <View className="px-2 py-2 bg-blue-200">
@@ -81,7 +116,7 @@ const MyTransferInstructionSubmitScreen = () => {
       </View>
       <View style={styles.filterContainer}></View>
       <FlatList
-        data={item.invuselinesplit}
+        data={item}
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={styles.listContent}

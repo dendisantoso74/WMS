@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,48 @@ import {
   FlatList,
   SafeAreaView,
   TouchableOpacity,
+  Button,
+  Modal,
+  TextInput,
+  Alert,
 } from 'react-native';
 import {useRoute} from '@react-navigation/native';
+import ModalApp from '../../compnents/ModalApp';
+import ModalInput from '../../compnents/ModalInput';
+import {retagSerializedItem} from '../../services/retagingItem';
 
 const BinDetailScreen = () => {
   const route = useRoute();
   const {item} = route.params as {item: any};
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+
+  useEffect(() => {
+    console.log('Bin details:', item);
+  }, [item]);
+
+  const handleRetag = () => {
+    setModalVisible(true);
+  };
+
+  const handleModalSubmit = async () => {
+    console.log('Input value:', inputValue);
+    await retagSerializedItem(
+      item.wms_serializeditem[0].wms_serializeditemid,
+      inputValue,
+    ).then(res => {
+      console.log('Retagging response:', res);
+      if (res.error) {
+        console.error('Error retagging item:', res.error);
+      } else {
+        Alert.alert('Success', 'Item retagged successfully!');
+        console.log('Item retagged successfully:', res);
+        setModalVisible(false);
+        setInputValue('');
+      }
+    });
+  };
 
   const renderItem = item => {
     // Set sidebar color: green if fully received, otherwise gray
@@ -19,7 +55,7 @@ const BinDetailScreen = () => {
     console.log('Item details:', item);
 
     return (
-      <TouchableOpacity style={styles.rfidCard}>
+      <TouchableOpacity onPress={() => handleRetag()} style={styles.rfidCard}>
         <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
         <View className="my-2">
           <View className="flex-row justify-between">
@@ -58,22 +94,38 @@ const BinDetailScreen = () => {
         data={item.wms_serializeditem}
         keyExtractor={si => si.wms_serializeditemid?.toString()}
         renderItem={renderItem}
-        // {({item: si}) => (
-        //   <View style={styles.serialItemCard}>
-        //     <Text style={styles.serialTitle}>{si.serialnumber}</Text>
-        //     <Text style={styles.serialDesc}>{si.description}</Text>
-        //     <Text style={styles.serialInfo}>Item: {si.itemnum}</Text>
-        //     <Text style={styles.serialInfo}>Qty Stored: {si.qtystored}</Text>
-        //     <Text style={styles.serialInfo}>Condition: {si.conditioncode}</Text>
-        //     <Text style={styles.serialInfo}>Tag: {si.tagcode}</Text>
-        //     <Text style={styles.serialInfo}>PO: {si.ponum}</Text>
-        //     <Text style={styles.serialInfo}>
-        //       Last Modified: {si.datemodified}
-        //     </Text>
-        //   </View>
-        // )}
         contentContainerStyle={styles.listContent}
       />
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
+              Enter Value
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Type here..."
+              value={inputValue}
+              onChangeText={setInputValue}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                marginTop: 16,
+              }}>
+              <Button title="Cancel" onPress={() => setModalVisible(false)} />
+              <View style={{width: 12}} />
+              <Button title="Submit" onPress={handleModalSubmit} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -157,6 +209,28 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
     marginRight: 16,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: '80%',
+    elevation: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#f8f9fa',
   },
 });
 export default BinDetailScreen;

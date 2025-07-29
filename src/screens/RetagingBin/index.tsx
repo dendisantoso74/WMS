@@ -8,6 +8,8 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  Modal,
+  Button,
 } from 'react-native';
 import {getTagBinList} from '../../services/tagBin';
 import ButtonApp from '../../compnents/ButtonApp';
@@ -65,22 +67,39 @@ const RetagingBinScreen = () => {
     item.bin?.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleRegisterNew = () => {
-    // TODO: Implement register new RFID logic
-    // For now, just add a dummy
-    // setRfids(prev => [
-    //   ...prev,
-    //   `4C50710201900000000${Math.floor(Math.random() * 1000000)}`,
-    // ]);
-    ToastAndroid.show(
-      'Register new RFID Bin is not ready.',
-      ToastAndroid.SHORT,
-    );
-    navigation.navigate('TagBin Scan');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  useEffect(() => {
+    console.log('Bin details:', filteredBins);
+  }, []);
+
+  const handleRetag = item => {
+    setSelectedItem(item);
+    setModalVisible(true);
+  };
+
+  const handleModalSubmit = async () => {
+    console.log('Input value:', inputValue, selectedItem);
+    // await retagSerializedItem(
+    //   selectedItem.wms_serializeditem[0].wms_serializeditemid,
+    //   inputValue,
+    // ).then(res => {
+    //   console.log('Retagging response:', res);
+    //   if (res.error) {
+    //     console.error('Error retagging item:', res.error);
+    //   } else {
+    //     Alert.alert('Success', 'Item retagged successfully!');
+    //     console.log('Item retagged successfully:', res);
+    //     setModalVisible(false);
+    //     setInputValue('');
+    //   }
+    // });
   };
 
   const renderItem = ({item}: {item: any}) => (
-    <TouchableOpacity style={styles.binCard}>
+    <TouchableOpacity onPress={() => handleRetag(item)} style={styles.binCard}>
       {/* <Text style={styles.binText}>Tag: {item.tagcode}</Text> */}
       <Text style={styles.binText}>Bin: {item.bin}</Text>
       <Text style={styles.binText}>Zone: {item.wms_zone}</Text>
@@ -125,6 +144,36 @@ const RetagingBinScreen = () => {
           ) : null
         }
       />
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
+              Enter Value
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Type here..."
+              value={inputValue}
+              onChangeText={setInputValue}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                marginTop: 16,
+              }}>
+              <Button title="Cancel" onPress={() => setModalVisible(false)} />
+              <View style={{width: 12}} />
+              <Button title="Submit" onPress={() => handleModalSubmit()} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -161,6 +210,28 @@ const styles = StyleSheet.create({
     bottom: 0,
     padding: 16,
     backgroundColor: 'transparent',
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: '80%',
+    elevation: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#f8f9fa',
   },
 });
 

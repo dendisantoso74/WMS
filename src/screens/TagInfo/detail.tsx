@@ -147,12 +147,8 @@ const TagInfoDetailScreen = () => {
                   <Text style={styles.infoLabel}>Remark</Text>
                   <TextInput
                     style={[styles.input, styles.remarkInput]}
-                    value={
-                      wmsSerializeditem?.itemcondition
-                        ? wmsSerializeditem?.itemcondition[0]?.description
-                        : '-'
-                    }
-                    editable={false}
+                    value={datas?.description ? datas?.description : '-'}
+                    // editable={false}
                     multiline
                   />
                 </View>
@@ -264,6 +260,7 @@ const styles = StyleSheet.create({
     height: 60,
     textAlignVertical: 'center',
     width: '60%',
+    color: 'black',
   },
 });
 

@@ -19,3 +19,30 @@ export const fetchRetaggingItems = async (
     throw error;
   }
 };
+
+export const retagSerializedItem = async (
+  wmsId: string | number,
+  tagcode: string,
+) => {
+  const url = `/maximo/oslc/os/WMS_MXSERIALIZEDITEM/${wmsId}?lean=1`;
+  const payload = {
+    STATUS: 'RETAG',
+    tagcode: tagcode,
+  };
+  try {
+    console.log('Retagging payload:', payload, wmsId);
+    const response = await api.post(url, payload, {
+      headers: {
+        'Patch-Type': 'MERGE',
+        'x-method-override': 'PATCH',
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log('Retagging response:', response.data);
+
+    return response.data;
+  } catch (error) {
+    console.error('Error retagging serialized item:', error);
+    throw error;
+  }
+};

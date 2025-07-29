@@ -22,26 +22,15 @@ import {
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
 import {debounce} from 'lodash';
-import {
-  generateSerialNumber,
-  getAvailableSerialNumber,
-} from '../../utils/helpers';
+import {generateSerialNumber} from '../../utils/helpers';
 import {checkSerialNumber, taggingPo} from '../../services/materialRecive';
 
-const dummyRfids = [
-  '00000000000000000000',
-  '11111111111111111111',
-  '22222222222222222222',
-  '33333333333333333333',
-  '44444444444444444444',
-];
 const TagInspectScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item} = route.params;
   console.log('RFIDs from params:', item);
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [modalTag, setModalTag] = useState(false);
   const [selectTag, setSelectTag] = useState('');
   const [serialGenerate, setSerialGenerate] = useState<string>('');
@@ -49,7 +38,9 @@ const TagInspectScreen = () => {
   // RFID SCANNER
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
-  const [listRfid, setListRfid] = useState<string[]>([]);
+  const [listRfid, setListRfid] = useState<string[]>([
+    '4C5071020190000000089026',
+  ]);
 
   useEffect(() => {
     getListRfidDevices();

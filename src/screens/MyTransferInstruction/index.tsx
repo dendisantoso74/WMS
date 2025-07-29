@@ -14,14 +14,12 @@ import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {fetchAssignedTransferInstructions} from '../../services/myTransferInstruction';
 import {formatDateTime} from '../../utils/helpers';
-import Loading from '../../compnents/Loading';
-
-const dummyRfids = ['00000000000000000000'];
+// import {useIsFocused} from '@react-navigation/native';
 
 const MyTransferInstructionScreen = () => {
   const navigation = useNavigation<any>();
+  // const isFocused = useIsFocused();
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
   const [assignedInstructions, setAssignedInstructions] = useState<any[]>([]);
   const [filteredInstructions, setFilteredInstructions] = useState<any[]>([]);

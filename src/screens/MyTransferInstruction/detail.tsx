@@ -8,36 +8,95 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  Modal,
+  Button,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {formatDateTime} from '../../utils/helpers';
+import ButtonApp from '../../compnents/ButtonApp';
+import {set} from 'lodash';
+import {putAway} from '../../services/materialRecive';
+import {getTransferInstructionByPoNum} from '../../services/myTransferInstruction';
 
 const MyTransferInstructionScanScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {datas} = route.params;
-  console.log('item from params:', datas);
+  console.log('item from params dertail:', datas);
 
   const [search, setSearch] = useState('');
   const [invuse, setInvuse] = useState([]);
+  const [invuseid, setInvuseid] = useState('');
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  // const status = datas.status;
 
   useEffect(() => {
     // You can fetch any initial data here if needed
-    setInvuse(datas.invuseline);
+    getTransferInstructionByPoNum(datas.wms_ponum).then(res => {
+      if (res.error) {
+        console.error(
+          'Error fetching transfer instruction by PO number:',
+          res.error,
+        );
+      } else {
+        // console.log('Fetched transfer instruction:', res.member[0].invuseid);
+        setInvuseid(res.member[0].invuseid);
+        setInvuse(res.member[0].invuseline);
+      }
+    });
   }, [datas]);
+
+  const handleScanRfid = () => {
+    console.log('cek');
+    setModalVisible(true);
+  };
+
+  const handleModalSubmit = async () => {
+    // putAway(datas.invuseline[0].invuselineid, inputValue).then(res => {
+    //   if (res.error) {
+    //     console.error('Error in put away:', res.error);
+    //     ToastAndroid.show('Error in put away', ToastAndroid.SHORT);
+    //   } else {
+    //     ToastAndroid.show('Put away successful', ToastAndroid.SHORT);
+    //     navigation.navigate('My Transfer Instruction Submit', {
+    //       item: invuse,
+    //       invuseid: datas.invuseid,
+    //       tobin: inputValue,
+    //     });
+    //   }
+    // });
+
+    navigation.navigate('My Transfer Instruction Submit', {
+      item: invuse,
+      invuseid: invuseid,
+      tobin: inputValue,
+    });
+    console.log('Input value:', datas.invuseline[0].invuselineid, inputValue);
+  };
 
   const renderItem = ({item}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() =>
-        navigation.navigate('My Transfer Instruction Submit', {
-          item: item,
-          invuseid: datas.invuseid,
-        })
-      }>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
+      // onPress={() =>
+      //   navigation.navigate('My Transfer Instruction Submit', {
+      //     item: item,
+      //     invuseid: datas.invuseid,
+      //   })
+      // }
+    >
+      <View
+        style={[
+          styles.sideBar,
+          {
+            backgroundColor:
+              item.wms_status === 'COMPLETE' ? '#A4DD00' : 'gray',
+          },
+        ]}
+      />
       <View className="my-2">
         <View className="flex-col justify-start">
           <Text className="font-bold">Bin : {item.tobin}</Text>
@@ -93,6 +152,39 @@ const MyTransferInstructionScanScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
+      <View className="m-4">
+        <ButtonApp onPress={() => handleScanRfid()} label="SCAN RFID" />
+      </View>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
+              Enter Value
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Type here..."
+              value={inputValue}
+              onChangeText={setInputValue}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                marginTop: 16,
+              }}>
+              <Button title="Cancel" onPress={() => setModalVisible(false)} />
+              <View style={{width: 12}} />
+              <Button title="Submit" onPress={handleModalSubmit} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -183,6 +275,28 @@ const styles = StyleSheet.create({
     // marginBottom: 4,
     marginTop: 6,
     marginHorizontal: 8,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: '80%',
+    elevation: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#f8f9fa',
   },
 });
 
