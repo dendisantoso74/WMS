@@ -92,3 +92,54 @@ export const findBinByTagCode = async (tagcode: string) => {
     throw error;
   }
 };
+
+export const generateIssueHeader = async (wonum: string) => {
+  const siteid = await getData('site');
+  const url = `/maxrest/oslc/script/WMS_INVUSEISSUE?siteid=${siteid}&wonum=${wonum}`;
+  try {
+    const response = await api.get(url, {
+      headers: {
+        // 'maxauth': 'YW5kcm9tZWRpYTphbmRyb21lZGlh', // Add if needed
+        // 'Cookie': 'JSESSIONID=...' // Add if needed
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getItemSNByTagCode = async (tagcode: string) => {
+  const url = `/maximo/oslc/os/WMS_MXRFID?lean=1&oslc.select=*&oslc.where=tagcode="${tagcode}"`;
+  try {
+    const response = await api.get(url, {
+      headers: {
+        // 'maxauth': 'YW5kcm9tZWRpYTphbmRyb21lZGlh', // Add if needed
+        // 'Cookie': 'JSESSIONID=...' // Add if needed
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const putToStage = async (invuseid: string, memo: string = '') => {
+  const url = `/maximo/oslc/os/mxinvuse/${invuseid}?action=CHANGESTATUS&lean=1&memo=${encodeURIComponent(memo)}&status=STAGED`;
+  try {
+    const response = await api.post(
+      url,
+      {},
+      {
+        headers: {
+          'x-method-override': 'PATCH',
+          // 'maxauth': 'YW5kcm9tZWRpYTphbmRyb21lZGlh', // Add if needed
+          // 'Cookie': 'JSESSIONID=...' // Add if needed
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

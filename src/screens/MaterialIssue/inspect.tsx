@@ -12,7 +12,12 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
-import {getWorkOrderDetails} from '../../services/materialIssue';
+import {
+  completeIssue,
+  generateIssueHeader,
+  getWorkOrderDetails,
+  putToStage,
+} from '../../services/materialIssue';
 import {set} from 'lodash';
 import {formatDateTime} from '../../utils/helpers';
 import {WoDetail} from '../../utils/types';
@@ -40,33 +45,58 @@ const MaterialIssueInspectScreen = () => {
   useEffect(() => {
     console.log('RFIDs from params:', woNumber);
     //fetchwo
-    getWorkOrderDetails(woNumber)
-      .then(res => {
-        if (res.error) {
-          console.error('Error fetching work order details:', res.error);
-        } else {
-          setDatas(res.member);
-          setInvreserve(res.member[0].invreserve);
-          const filteredInvUse = res.member[0].invuse.filter(
-            (item: any) =>
-              Array.isArray(item.invuseline) && item.invuseline.length > 0,
-          );
-          setInvUse(filteredInvUse);
+    generateIssueHeader(woNumber).then(x => {
+      getWorkOrderDetails(woNumber)
+        .then(res => {
+          if (res.error) {
+            console.error('Error fetching work order details:', res.error);
+          } else {
+            setDatas(res.member);
+            setInvreserve(res.member[0].invreserve);
+            const filteredInvUse = res.member[0].invuse.filter(
+              (item: any) =>
+                Array.isArray(item.invuseline) && item.invuseline.length > 0,
+            );
+            setInvUse(res.member[0].invuse);
 
-          console.log('Work order details:', res);
-          console.log('Filtered inventory use:', filteredInvUse);
+            console.log('Work order details:', res);
+            console.log('Filtered inventory use:', res.member[0].invuse);
 
-          // Process the work order details as needed
-        }
-      })
-      .catch(err => {
-        console.error('Error in getWorkOrderDetails:', err);
-      });
+            // Process the work order details as needed
+          }
+        })
+        .catch(err => {
+          console.error('Error in getWorkOrderDetails:', err);
+        });
+    });
   }, [woNumber]);
 
-  const renderItem = ({item}: {item: string}) => (
+  const handlePutToStage = async () => {
+    // console.log('Put to stage pressed', invUse[0]?.status);
+
+    if (invUse[0]?.status === 'STAGED') {
+      console.log('Already staged');
+      completeIssue(invUse[0]?.invuseid).then(res => {
+        console.log('Complete issue response:', res);
+      });
+    } else {
+      console.log('Not staged');
+
+      putToStage(invUse[0]?.invuseid).then(res => {
+        console.log('Put to stage response:', res);
+      });
+    }
+  };
+
+  const renderItem = ({item, index}: {item: string; index: number}) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate('Detail Material Issue', {item: item})}
+      onPress={() =>
+        navigation.navigate('Detail Material Issue', {
+          item: item,
+          invuselinenum: index + 1,
+          invinvUseId: invUse[0]?.invuseid,
+        })
+      }
       style={styles.rfidCard}>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
@@ -126,8 +156,8 @@ const MaterialIssueInspectScreen = () => {
       />
       <View style={styles.buttonContainer}>
         <ButtonApp
-          label="PUT TO STAGE"
-          onPress={() => navigation.navigate('Detail Material Issue')}
+          label={invUse[0]?.status === 'STAGED' ? 'COMPLETE' : 'PUT TO STAGE'}
+          onPress={() => handlePutToStage()}
           size="large"
           color="primary"
         />

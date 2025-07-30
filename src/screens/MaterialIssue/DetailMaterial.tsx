@@ -18,8 +18,8 @@ const dummyRfids = ['00000000000000000000'];
 const DetailMaterialScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item} = route.params;
-  console.log('RFIDs from params:', item);
+  const {item, invuselinenum, invinvUseId} = route.params;
+  console.log('RFIDs from params:', item, invuselinenum, invinvUseId);
 
   const [search, setSearch] = useState('');
 
@@ -60,7 +60,13 @@ const DetailMaterialScreen = () => {
       <View className="items-end ">
         <TouchableOpacity
           className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
-          onPress={() => navigation.navigate('Pick Item', {item: item})}>
+          onPress={() =>
+            navigation.navigate('Pick Item', {
+              item: item,
+              invuselinenum: invuselinenum,
+              invinvUseId: invinvUseId,
+            })
+          }>
           <Icon library="Feather" name="plus" size={15} color="white"></Icon>
         </TouchableOpacity>
       </View>

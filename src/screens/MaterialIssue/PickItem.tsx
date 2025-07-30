@@ -15,11 +15,13 @@ import ButtonApp from '../../compnents/ButtonApp';
 import {
   findBinByTagCode,
   findSugestBin,
+  getItemSNByTagCode,
   pickItem,
 } from '../../services/materialIssue';
 import {set} from 'lodash';
 import {Dropdown} from 'react-native-element-dropdown';
 import {getData} from '../../utils/store';
+import {tagInfo} from '../../services/tagInfo';
 
 const userTypeOptions = [
   {label: 'ISSUE', value: 'ISSUE'},
@@ -30,9 +32,9 @@ const userTypeOptions = [
 const PickItemScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item} = route.params;
+  const {item, invuselinenum, invinvUseId} = route.params;
 
-  console.log('RFIDs from params:', item);
+  console.log('RFIDs from params:', item, invuselinenum, invinvUseId);
 
   const [rfids, setRfids] = useState('');
   const [search, setSearch] = useState('');
@@ -42,6 +44,7 @@ const PickItemScreen = () => {
   const [bin, setBin] = useState('');
   const [storeqty, setStoreqty] = useState('');
   const [pickqty, setPickqty] = useState('');
+  const [serialNumberItem, setSerialNumberItem] = useState('');
 
   useEffect(() => {
     //get MAXuser
@@ -57,6 +60,11 @@ const PickItemScreen = () => {
       console.log('Suggested Bin:', res.member[0]);
     };
 
+    const getDetailBin = async () => {
+      // const res = await findBinByTagCode(item.tagcode);
+      // setBin(res.member[0]);
+    };
+
     findbin();
   }, [item]);
 
@@ -65,9 +73,9 @@ const PickItemScreen = () => {
       assetnum: item.assetnum,
       frombin: bin.bin || item.frombin,
       fromstoreloc: item.location,
-      invuselinenum: item.invreserveid,
+      invuselinenum: invuselinenum,
       issueto: maxUser,
-      itemnum: 0,
+      itemnum: item.itemnum,
       itemsetid: item.itemsetid,
       linetype: 'ITEM',
       location: item.location,
@@ -75,39 +83,54 @@ const PickItemScreen = () => {
       quantity: Number(pickqty),
       refwo: item.wogroup,
       requestnum: item.requestnum,
-      serialnumber: 'ABCDEFF00000000000FA1781',
+      serialnumber: serialNumberItem, // need to be make sure this payload is existing because is required
       toorgid: 'BJS',
       tositeid: 'TJB56',
       usetype: userType,
       validated: false,
       wms_usetype: userType,
+      // conditioncode: 'NEW', //tambahan payload karena error condition code
+      // fromconditioncode: 'NEW', //tambahan payload karena error condition code
     };
 
     // You can now use this payload for your API call
-    console.log('Payload:', payload);
-    pickItem('55474', payload);
+    console.log('invuseid, Payload:', invinvUseId, payload);
+    await pickItem(invinvUseId, payload);
     // navigation.navigate('Detail Wo');
   };
   const searchSerialNumber = async () => {
     // console.log('Searching for serial number:', search);
 
-    const result = await findBinByTagCode(search);
+    // const result = await findBinByTagCode(search);
+    const result = await getItemSNByTagCode(search).then(res => {
+      console.log('Tag Info:', res.member[0]);
+      setSerialNumberItem(res.member[0].wms_serializeditem);
+    });
+
     setBin(result.member[0]);
     console.log('Search BIN result:', result.member[0]);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {console.log('res user max', maxUser)}
       <Text className="mt-3 ml-4 font-bold">Serial Number</Text>
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Serial Number"
+          placeholder="Tag Code serch by Tag Code"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
           onSubmitEditing={searchSerialNumber}
+        />
+        <TextInput
+          style={styles.filterInput}
+          placeholder="Serial Number"
+          placeholderTextColor="#b0b0b0"
+          value={serialNumberItem}
+          editable={false}
+          // onChangeText={setSearch}
+          // onSubmitEditing={searchSerialNumber}
         />
       </View>
       {/* <FlatList
@@ -125,7 +148,7 @@ const PickItemScreen = () => {
         </View>
         <View className="flex-row w-full mt-3">
           <Text className="w-1/2 font-bold">Condition Code</Text>
-          <Text className="font-bold">BROKEN</Text>
+          <Text className="font-bold">-</Text>
         </View>
         <View className="flex-row w-full mt-3">
           <Text className="w-1/2 font-bold">Issue Unit</Text>
@@ -163,7 +186,9 @@ const PickItemScreen = () => {
         <View className="flex-row items-center w-full mt-3">
           <Text className="w-1/2 font-bold">Bin</Text>
           <View className="w-1/2 py-2 ">
-            <Text className="font-bold text-center ">{bin.bin}</Text>
+            <Text className="font-bold text-center ">
+              {suggestedBin.binnum}
+            </Text>
           </View>
         </View>
 

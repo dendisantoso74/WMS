@@ -42,7 +42,6 @@ import MaterialIssueScanScreen from '../screens/MaterialIssue';
 import MaterialIssueInspectScreen from '../screens/MaterialIssue/inspect';
 import DetailMaterialScreen from '../screens/MaterialIssue/DetailMaterial';
 import PickItemScreen from '../screens/MaterialIssue/PickItem';
-import DetailWoScreen from '../screens/MaterialIssue/DetailWo';
 import MaterialReturnScanScreen from '../screens/MaterialReturn';
 import MaterialReturnDetailScreen from '../screens/MaterialReturn/detail';
 import DetailMaterialReturnScreen from '../screens/MaterialReturn/inspect';
@@ -291,7 +290,6 @@ const AppNavigator = () => {
             options={{title: 'Detail Material'}}
           />
           <Stack.Screen name="Pick Item" component={PickItemScreen} />
-          <Stack.Screen name="Detail Wo" component={DetailWoScreen} />
 
           {/* Material Return */}
           <Stack.Screen
