@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,14 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ScrollView,
+  Alert,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
 import {
@@ -18,10 +24,18 @@ import {
   getItemSNByTagCode,
   pickItem,
 } from '../../services/materialIssue';
-import {set} from 'lodash';
+import {debounce, set} from 'lodash';
 import {Dropdown} from 'react-native-element-dropdown';
 import {getData} from '../../utils/store';
 import {tagInfo} from '../../services/tagInfo';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  connectToDevice,
+  getAllDevices,
+  type ZebraResultPayload,
+  type ZebraRfidResultPayload,
+} from 'react-native-zebra-rfid-barcode';
 
 const userTypeOptions = [
   {label: 'ISSUE', value: 'ISSUE'},
@@ -36,7 +50,6 @@ const PickItemScreen = () => {
 
   console.log('RFIDs from params:', item, invuselinenum, invinvUseId);
 
-  const [rfids, setRfids] = useState('');
   const [search, setSearch] = useState('');
   const [suggestedBin, setSuggestedBin] = useState([]);
   const [userType, setUserType] = useState(item?.wms_usetype || 'ISSUE'); // <-- Add state for dropdown
@@ -45,6 +58,42 @@ const PickItemScreen = () => {
   const [storeqty, setStoreqty] = useState('');
   const [pickqty, setPickqty] = useState('');
   const [serialNumberItem, setSerialNumberItem] = useState('');
+
+  const handleRfidEvent = useCallback(
+    debounce((newData: string) => {
+      console.log('RFID Data:', newData);
+      // if newdata is array make popup to select item for set to search
+
+      setSearch(newData);
+    }, 200),
+    [],
+  );
+
+  const handleBarcodeEvent = useCallback(
+    debounce((newData: string) => {
+      setSearch(newData);
+      searchSerialNumber(newData);
+    }, 200),
+    [],
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const barcodeEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_BARCODE,
+        (e: ZebraResultPayload) => {
+          handleBarcodeEvent(e.data);
+        },
+      );
+
+      const rfidEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_RFID,
+        (e: ZebraRfidResultPayload) => {
+          handleRfidEvent(e.data);
+        },
+      );
+    }, []),
+  );
 
   useEffect(() => {
     //get MAXuser
@@ -70,6 +119,8 @@ const PickItemScreen = () => {
 
   const handleAdd = async () => {
     const payload = {
+      serialnumber: serialNumberItem, // need to be make sure this payload is existing because is required
+      quantity: Number(pickqty),
       assetnum: item.assetnum,
       frombin: bin.bin || item.frombin,
       fromstoreloc: item.location,
@@ -80,10 +131,8 @@ const PickItemScreen = () => {
       linetype: 'ITEM',
       location: item.location,
       orgid: item.orgid,
-      quantity: Number(pickqty),
       refwo: item.wogroup,
       requestnum: item.requestnum,
-      serialnumber: serialNumberItem, // need to be make sure this payload is existing because is required
       toorgid: 'BJS',
       tositeid: 'TJB56',
       usetype: userType,
@@ -93,16 +142,42 @@ const PickItemScreen = () => {
       // fromconditioncode: 'NEW', //tambahan payload karena error condition code
     };
 
+    // Validation activate soon
+    // for (const key in payload) {
+    //   if (
+    //     payload[key] === undefined ||
+    //     payload[key] === null ||
+    //     payload[key] === '' ||
+    //     (key === 'quantity' && (!payload[key] || payload[key] <= 0))
+    //   ) {
+    //     ToastAndroid.show(`Error: ${key} is empty`, ToastAndroid.SHORT);
+    //     return;
+    //   }
+    // }
+
     // You can now use this payload for your API call
-    console.log('invuseid, Payload:', invinvUseId, payload);
-    await pickItem(invinvUseId, payload);
-    // navigation.navigate('Detail Wo');
+    console.log('invuseid, Payload:', invinvUseId, payload, item);
+    await pickItem(invinvUseId, payload)
+      .then(res => {
+        console.log('Pick item response:', res);
+        ToastAndroid.show('Item picked successfully', ToastAndroid.SHORT);
+        navigation.navigate('Material Issue Inspect', {
+          listrfid: [item.wogroup],
+        });
+      })
+      .catch(err => {
+        console.error('Error picking item:', err);
+        Alert.alert(
+          'Error',
+          err.Error.message || 'An error occurred while picking the item.',
+        );
+      });
   };
-  const searchSerialNumber = async () => {
+  const searchSerialNumber = async (tagcode: string) => {
     // console.log('Searching for serial number:', search);
 
     // const result = await findBinByTagCode(search);
-    const result = await getItemSNByTagCode(search).then(res => {
+    const result = await getItemSNByTagCode(tagcode).then(res => {
       console.log('Tag Info:', res.member[0]);
       setSerialNumberItem(res.member[0].wms_serializeditem);
     });
@@ -113,120 +188,130 @@ const PickItemScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Text className="mt-3 ml-4 font-bold">Serial Number</Text>
-      <View style={styles.filterContainer}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Tag Code serch by Tag Code"
-          placeholderTextColor="#b0b0b0"
-          value={search}
-          onChangeText={setSearch}
-          onSubmitEditing={searchSerialNumber}
-        />
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Serial Number"
-          placeholderTextColor="#b0b0b0"
-          value={serialNumberItem}
-          editable={false}
-          // onChangeText={setSearch}
-          // onSubmitEditing={searchSerialNumber}
-        />
-      </View>
-      {/* <FlatList
-        data={rfids}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      /> */}
+      <ScrollView
+        contentContainerStyle={{paddingBottom: 100}}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+        <Text className="mt-3 ml-4 font-bold">Tag Code</Text>
+        <View style={styles.filterContainer}>
+          <TextInput
+            style={styles.filterInput}
+            placeholder="Search by tag code"
+            placeholderTextColor="#b0b0b0"
+            value={search}
+            onChangeText={setSearch}
+            onSubmitEditing={() => searchSerialNumber(search)}
+          />
+          <Text className="mt-3 ml-4 font-bold">Serial Number</Text>
 
-      <View className="flex-col ">
-        <View className="flex-row w-full mt-2 ">
-          <Text className="w-1/2 font-bold">Item Name</Text>
-          <Text className="font-bold">{item?.description}</Text>
-        </View>
-        <View className="flex-row w-full mt-3">
-          <Text className="w-1/2 font-bold">Condition Code</Text>
-          <Text className="font-bold">-</Text>
-        </View>
-        <View className="flex-row w-full mt-3">
-          <Text className="w-1/2 font-bold">Issue Unit</Text>
-          <Text className="font-bold">{item?.wms_unit}</Text>
-        </View>
-        <View className="flex-row items-center w-full mt-3">
-          <Text className="w-1/2 font-bold">Stored Qty</Text>
-          <View className="flex-row items-center ">
-            <TextInput
-              className="w-24 text-center"
-              style={styles.filterInput}
-              placeholder="0"
-              placeholderTextColor="#b0b0b0"
-              value={storeqty}
-              onChangeText={setStoreqty}
-            />
-            <Text className="font-bold">{item?.wms_unit}</Text>
-          </View>
-        </View>
-        <View className="flex-row items-center w-full mt-3">
-          <Text className="w-1/2 font-bold">Pick Qty</Text>
-          <View className="flex-row items-center ">
-            <TextInput
-              className="w-24 text-center"
-              style={styles.filterInput}
-              placeholder="0"
-              placeholderTextColor="#b0b0b0"
-              value={pickqty}
-              onChangeText={setPickqty}
-            />
-            <Text className="font-bold">{item?.wms_unit}</Text>
-          </View>
+          <TextInput
+            style={styles.filterInput}
+            placeholder="Serial Number"
+            placeholderTextColor="#b0b0b0"
+            value={serialNumberItem}
+            editable={false}
+            // onChangeText={setSearch}
+            // onSubmitEditing={searchSerialNumber}
+          />
         </View>
 
-        <View className="flex-row items-center w-full mt-3">
-          <Text className="w-1/2 font-bold">Bin</Text>
-          <View className="w-1/2 py-2 ">
-            <Text className="font-bold text-center ">
-              {suggestedBin.binnum}
-            </Text>
-          </View>
-        </View>
-
-        <View className="flex-row items-center w-full mt-3">
-          <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
-          <View className="w-1/2 py-2 bg-gray-200">
-            <Text className="font-bold text-center ">
-              {suggestedBin.binnum}
-            </Text>
-          </View>
-        </View>
-
-        <View className="flex-row items-center w-full mt-3">
-          <Text className="w-1/2 font-bold">Use Type</Text>
-          <View className="w-1/2 py-2 bg-gray-200">
-            <Dropdown
-              data={userTypeOptions}
-              labelField="label"
-              valueField="value"
-              value={userType}
-              onChange={item => setUserType(item.value)}
+        <View className="flex-col mx-3">
+          <View className="flex-row w-full mt-2 ">
+            <Text className="w-1/2 font-bold">Item Name</Text>
+            <View
               style={{
-                backgroundColor: 'transparent',
-                // width: '100%',
-                paddingHorizontal: 8,
-              }}
-              placeholder="Select Use Type"
-            />
+                flex: 1,
+              }}>
+              <Text
+              // numberOfLines={2}
+              // ellipsizeMode="tail"
+              >
+                {item?.description}
+              </Text>
+            </View>
           </View>
-        </View>
+          <View className="flex-row w-full mt-3">
+            <Text className="w-1/2 font-bold">Condition Code</Text>
+            <Text>{item?.conditioncode}</Text>
+          </View>
+          <View className="flex-row w-full mt-3">
+            <Text className="w-1/2 font-bold">Issue Unit</Text>
+            <Text>{item?.wms_unit}</Text>
+          </View>
+          <View className="flex-row items-center w-full mt-3">
+            <Text className="w-1/2 font-bold">Stored Qty</Text>
+            <View className="flex-row items-center ">
+              <TextInput
+                className="w-24 text-center"
+                style={styles.filterInput}
+                placeholder="0"
+                placeholderTextColor="#b0b0b0"
+                value={storeqty}
+                onChangeText={setStoreqty}
+              />
+              <Text>{item?.wms_unit}</Text>
+            </View>
+          </View>
+          <View className="flex-row items-center w-full mt-3">
+            <Text className="w-1/2 font-bold">Pick Qty</Text>
+            <View className="flex-row items-center ">
+              <TextInput
+                className="w-24 text-center"
+                style={styles.filterInput}
+                placeholder="0"
+                placeholderTextColor="#b0b0b0"
+                value={pickqty}
+                onChangeText={setPickqty}
+              />
+              <Text>{item?.wms_unit}</Text>
+            </View>
+          </View>
 
-        <View className="flex-row items-center w-full mt-3">
-          <Text className="w-1/2 font-bold">Issue To</Text>
-          <View className="w-1/2 py-2 ">
-            <Text className="font-bold ">{maxUser}</Text>
+          <View className="flex-row items-center w-full mt-3">
+            <Text className="w-1/2 font-bold">Bin</Text>
+            <View className="w-1/2 py-2 ">
+              <Text className="font-bold text-center ">
+                {suggestedBin?.binnum}
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-center w-full mt-3">
+            <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
+            <View className="w-1/2 py-2 bg-gray-200">
+              <Text className="font-bold text-center ">
+                {suggestedBin?.binnum}
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-center w-full mt-3">
+            <Text className="w-1/2 font-bold">Use Type</Text>
+            <View className="w-1/2 py-2 bg-gray-200">
+              <Dropdown
+                data={userTypeOptions}
+                labelField="label"
+                valueField="value"
+                value={userType}
+                onChange={item => setUserType(item.value)}
+                style={{
+                  backgroundColor: 'transparent',
+                  // width: '100%',
+                  paddingHorizontal: 8,
+                }}
+                placeholder="Select Use Type"
+              />
+            </View>
+          </View>
+
+          <View className="flex-row items-center w-full mt-3">
+            <Text className="w-1/2 font-bold">Issue To</Text>
+            <View className="w-1/2 py-2 ">
+              <Text className="font-bold ">{maxUser}</Text>
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
       <View style={styles.buttonContainer}>
         <ButtonApp
           label="ADD"

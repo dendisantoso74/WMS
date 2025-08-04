@@ -30,6 +30,7 @@ import logoQrcode from '../assets/images/qrcode.png'; // Adjust the path as nece
 import {useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TextInput} from 'react-native';
+import PreventBackNavigate from '../utils/preventBack';
 
 const {width} = Dimensions.get('window');
 const FRAME_SIZE = width * 0.7;
@@ -289,6 +290,8 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
 
   return (
     <SafeAreaView style={{flex: 1}}>
+      <PreventBackNavigate />
+
       <View style={styles.container}>
         <View className="h-full border">
           {showDevices && (

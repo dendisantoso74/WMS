@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TextInput,
   Alert,
+  ToastAndroid,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
@@ -58,8 +59,14 @@ const MaterialReceiveDetailScreen = () => {
           Alert.alert('Error', res.error);
         } else {
           console.log('ReceivePo response:', res);
-          Alert.alert('Material received');
+          // Alert.alert('Success', 'Material received');
+          ToastAndroid.show(
+            `Material received: ${item.itemnum} - ${quantity} ${item.orderunit}`,
+            ToastAndroid.SHORT,
+          );
+          fetchData();
           setModalVisible(false);
+
           // navigation.goBack();
         }
       })
@@ -82,40 +89,39 @@ const MaterialReceiveDetailScreen = () => {
       receiptquantity: 1,
       siteid: 'TJB56',
     };
-    const res = await ReceivePo([polineChanges]);
+    // const res = await ReceivePo([polineChanges]);
 
-    if (res.error) {
-      Alert.alert('Error', res.error);
-      return;
-    }
-    console.log('ReceivePo response:', res);
+    // if (res.error) {
+    //   Alert.alert('Error', res.error);
+    //   return;
+    // }
+    console.log('ReceivePo response:');
     // after submit successfully
-    Alert.alert('Material received');
+    Alert.alert('Success', 'Material received');
     setModalConfirmVisible(false);
     // navigation.goBack();
   };
 
+  const fetchData = async () => {
+    const site = await getData('site');
+
+    ScanPo(listrfid[listrfid.length - 1]).then((res: any) => {
+      console.log('RFIDs fetched successfully:', res.member);
+      if (res.member.length === 0) {
+        navigation.goBack();
+        Alert.alert(
+          'Information',
+          `${listrfid[listrfid.length - 1]} Not Found at site: ${site} `,
+          // [{text: 'OK', onPress: () => navigation.goBack()}],
+          // {cancelable: false},
+        );
+      }
+      setDatas(res.member[0]);
+      setPoline(res.member[0].poline);
+      setWmsMatrectrans(res.member[0].wms_matrectrans);
+    });
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      const site = await getData('site');
-
-      ScanPo(listrfid[listrfid.length - 1]).then((res: any) => {
-        console.log('RFIDs fetched successfully:', res.member);
-        if (res.member.length === 0) {
-          navigation.goBack();
-          Alert.alert(
-            'Information',
-            `${listrfid[listrfid.length - 1]} Not Found at site: ${site} `,
-            // [{text: 'OK', onPress: () => navigation.goBack()}],
-            // {cancelable: false},
-          );
-        }
-        setDatas(res.member[0]);
-        setPoline(res.member[0].poline);
-        setWmsMatrectrans(res.member[0].wms_matrectrans);
-      });
-    };
-
     fetchData();
   }, [modalVisible, tempQuantity]);
 
@@ -238,8 +244,10 @@ const MaterialReceiveDetailScreen = () => {
           poline.find(item => item.polinenum === selectedData)?.orderqty -
             getReceiptQuantityByPoline(wmsMatrectrans, selectedData) || ''
         }
-        total={3}
-        onClose={() => setModalVisible(false)}
+        total={0}
+        onClose={() => {
+          setModalVisible(false);
+        }}
         onReceive={e =>
           handleReceive(
             e,

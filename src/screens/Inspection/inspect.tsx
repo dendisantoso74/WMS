@@ -126,12 +126,13 @@ const InspectionReceivingApproveScreen = () => {
         polinenum: item.polinenum,
         positeid: wms_matrectrans[0].positeid,
         siteid: wms_matrectrans[0].positeid,
-        wms_matrectransid: wms_matrectrans[0].wms_matrectransid,
+        wms_matrectransid: item.wms_matrectransid,
         wms_inspectassignedby: userAsync, // or any value you want to set
-        receiptquantity: wms_matrectrans[0].receiptquantity,
+        receiptquantity: parseInt(inputRejectedQty + inputAceptedQty, 10),
         acceptedqty: inputAceptedQty
           ? parseInt(inputAceptedQty, 10)
           : wms_matrectrans[0].receiptquantity,
+        inspected: inputRejectedQty + inputAceptedQty,
         // rejectedqty: inputRejectedQty
         //   ? parseInt(inputRejectedQty, 10)
         //   : 0,

@@ -17,19 +17,7 @@ import {
   findSuggestedBinReturn,
   receiveMaterial,
 } from '../../services/materialReturn';
-
-const dummyRfids = ['00000000000000000000'];
-
-const data = [
-  {label: 'Item 1', value: '1'},
-  {label: 'Item 2', value: '2'},
-  {label: 'Item 3', value: '3'},
-  {label: 'Item 4', value: '4'},
-  {label: 'Item 5', value: '5'},
-  {label: 'Item 6', value: '6'},
-  {label: 'Item 7', value: '7'},
-  {label: 'Item 8', value: '8'},
-];
+import PreventBackNavigate from '../../utils/preventBack';
 
 const DetailMaterialReturnScreen = () => {
   const navigation = useNavigation<any>();
@@ -48,7 +36,6 @@ const DetailMaterialReturnScreen = () => {
     setCount(count + 1);
   };
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleReceive = () => {
@@ -67,7 +54,7 @@ const DetailMaterialReturnScreen = () => {
         fromconditioncode: item.fromconditioncode || item.conditioncode,
         fromstoreloc: item.storeloc,
         inspectionrequired: true,
-        invuseId: 0,
+        // invuseId: 0,
         invuselinenum:
           item.invuselinenum ||
           item.invuseline?.invuselinenum ||
@@ -87,6 +74,7 @@ const DetailMaterialReturnScreen = () => {
         usetype: 'RETURN',
         validated: false,
         wms_usetype: 'RETURN',
+        returnagainstissue: true,
       },
     ],
   });
@@ -276,14 +264,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginHorizontal: 8,
   },
-  buttonContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: 16,
-    backgroundColor: 'transparent',
-  },
   circleBtn: {
     width: 35,
     height: 35,
@@ -307,6 +287,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     paddingVertical: 8,
+  },
+  countText: {
+    fontSize: 28,
+    color: '#222',
+    fontWeight: '500',
   },
 });
 

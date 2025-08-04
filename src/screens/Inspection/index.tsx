@@ -14,6 +14,7 @@ import Icon from '../../compnents/Icon';
 import {ListPoWINSP} from '../../services/materialRecive';
 import {formatDateTime} from '../../utils/helpers';
 import Loading from '../../compnents/Loading';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -80,6 +81,8 @@ const InspectionScreen = () => {
   );
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate toScreen="HomeWMS" />
+
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}

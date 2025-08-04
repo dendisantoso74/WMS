@@ -45,7 +45,6 @@ import PickItemScreen from '../screens/MaterialIssue/PickItem';
 import MaterialReturnScanScreen from '../screens/MaterialReturn';
 import MaterialReturnDetailScreen from '../screens/MaterialReturn/detail';
 import DetailMaterialReturnScreen from '../screens/MaterialReturn/inspect';
-import DetailWoMaterialReturnScreen from '../screens/MaterialReturn/detailwo';
 import StockOpnameListScreen from '../screens/StockOpname';
 import DetailStockOpnameScreen from '../screens/StockOpname/detail';
 import DetaliBinStockOpnameScreen from '../screens/StockOpname/inspect';
@@ -305,11 +304,6 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Detail Material"
             component={DetailMaterialReturnScreen}
-          />
-          <Stack.Screen
-            name="Detail Wo Material Return"
-            component={DetailWoMaterialReturnScreen}
-            options={{title: 'Detail WO'}}
           />
 
           {/* Stock Opname */}

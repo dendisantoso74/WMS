@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,16 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
+  ToastAndroid,
+  Alert,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
 import {
   completeIssue,
@@ -21,6 +27,7 @@ import {
 import {set} from 'lodash';
 import {formatDateTime} from '../../utils/helpers';
 import {WoDetail} from '../../utils/types';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const dummyRfids = [''];
 
@@ -42,33 +49,52 @@ const MaterialIssueInspectScreen = () => {
     setModalVisible(true);
   };
 
+  const fetchWo = async () => {
+    getWorkOrderDetails(woNumber)
+      .then(res => {
+        if (res.error) {
+          console.error('Error fetching work order details:', res.error);
+        } else {
+          // Check if the work order exists
+          console.log('chec exist:', res.member[0]);
+
+          setDatas(res.member);
+
+          setInvreserve(res.member[0].invreserve);
+          const filteredInvUse = res.member[0].invuse.filter(
+            (item: any) =>
+              Array.isArray(item.invuseline) && item.invuseline.length > 0,
+          );
+          setInvUse(res.member[0].invuse);
+
+          console.log('Work order details:', res);
+          console.log('Filtered inventory use:', res.member[0].invuse);
+
+          // Process the work order details as needed
+        }
+      })
+      .catch(err => {
+        console.error('Error in getWorkOrderDetails:', err);
+      });
+  };
+
   useEffect(() => {
     console.log('RFIDs from params:', woNumber);
     //fetchwo
-    generateIssueHeader(woNumber).then(x => {
-      getWorkOrderDetails(woNumber)
-        .then(res => {
-          if (res.error) {
-            console.error('Error fetching work order details:', res.error);
-          } else {
-            setDatas(res.member);
-            setInvreserve(res.member[0].invreserve);
-            const filteredInvUse = res.member[0].invuse.filter(
-              (item: any) =>
-                Array.isArray(item.invuseline) && item.invuseline.length > 0,
-            );
-            setInvUse(res.member[0].invuse);
+    generateIssueHeader(woNumber)
+      .then(x => {
+        fetchWo();
+      })
+      .catch(err => {
+        navigation.goBack();
 
-            console.log('Work order details:', res);
-            console.log('Filtered inventory use:', res.member[0].invuse);
-
-            // Process the work order details as needed
-          }
-        })
-        .catch(err => {
-          console.error('Error in getWorkOrderDetails:', err);
-        });
-    });
+        Alert.alert(
+          'Information',
+          `${woNumber} Not Found `,
+          // [{text: 'OK', onPress: () => navigation.goBack()}],
+          // {cancelable: false},
+        );
+      });
   }, [woNumber]);
 
   const handlePutToStage = async () => {
@@ -78,56 +104,74 @@ const MaterialIssueInspectScreen = () => {
       console.log('Already staged');
       completeIssue(invUse[0]?.invuseid).then(res => {
         console.log('Complete issue response:', res);
+        ToastAndroid.show('Issue completed successfully', ToastAndroid.SHORT);
+        fetchWo();
       });
     } else {
       console.log('Not staged');
 
       putToStage(invUse[0]?.invuseid).then(res => {
         console.log('Put to stage response:', res);
+        ToastAndroid.show('Put to stage successfully', ToastAndroid.SHORT);
+        fetchWo();
       });
     }
   };
 
-  const renderItem = ({item, index}: {item: string; index: number}) => (
-    <TouchableOpacity
-      onPress={() =>
-        navigation.navigate('Detail Material Issue', {
-          item: item,
-          invuselinenum: index + 1,
-          invinvUseId: invUse[0]?.invuseid,
-        })
-      }
-      style={styles.rfidCard}>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-row justify-between">
-          <Text className="font-bold">{item?.itemnum}</Text>
-          <Text className="">
-            Reserved : {item?.reservedqty} {item?.wms_unit}
-          </Text>
-        </View>
+  const renderItem = ({item, index}: {item: string; index: number}) => {
+    const sideBarColor =
+      item?.reservedqty === item?.pendingqty + item?.stagedqty
+        ? '#A4DD00'
+        : 'gray';
+    return (
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate('Detail Material Issue', {
+            item: item,
+            invuselinenum: index + 1,
+            invinvUseId: invUse[0]?.invuseid,
+          })
+        }
+        style={styles.rfidCard}>
+        <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
+        <View className="my-2">
+          <View className="flex-row justify-between">
+            <Text className="font-bold">{item?.itemnum}</Text>
+            <Text className="">
+              Reserved : {item?.reservedqty} {item?.wms_unit}
+            </Text>
+          </View>
 
-        <Text className="font-bold max-w-64">{item?.description}</Text>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3 text-lg font-bold">
-            {item?.toconditioncode}
-          </Text>
-          <Text className="w-1/2 text-right">Outstanding / Issue</Text>
+          <Text className="font-bold max-w-64">{item?.description}</Text>
+          <View className="flex-row justify-between">
+            <Text className="w-1/3 ml-3 text-lg font-bold">
+              {item?.conditioncode}
+            </Text>
+            <Text className="w-1/2 text-right">Outstanding / Issue</Text>
+          </View>
+          <View className="flex-row justify-between">
+            <Text className="w-1/3 font-bold">
+              {/* {item?.conditioncode} */}
+            </Text>
+            <Text className="w-1/2 text-right">
+              {invUse[0]?.status === 'STAGED'
+                ? item?.reservedqty - item?.stagedqty
+                : item?.reservedqty - item?.pendingqty}
+              {item?.wms_unit} / {''}
+              {invUse[0]?.status === 'STAGED'
+                ? item?.stagedqty
+                : item?.pendingqty}
+              {item?.wms_unit}
+            </Text>
+          </View>
         </View>
-        <View className="flex-row justify-between">
-          <Text className="w-1/3 ml-3"></Text>
-          <Text className="w-1/2 text-right">
-            {' '}
-            - {item?.wms_unit} / {}
-            {item?.receivedqty} {item?.wms_unit}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate toScreen="Material Issue Scan" />
       <View className="flex-row p-2 bg-blue-400">
         <View>
           <Text className="font-bold text-white">WO Number</Text>
@@ -154,14 +198,16 @@ const MaterialIssueInspectScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
-      <View style={styles.buttonContainer}>
-        <ButtonApp
-          label={invUse[0]?.status === 'STAGED' ? 'COMPLETE' : 'PUT TO STAGE'}
-          onPress={() => handlePutToStage()}
-          size="large"
-          color="primary"
-        />
-      </View>
+      {invreserve && (
+        <View style={styles.buttonContainer}>
+          <ButtonApp
+            label={invUse[0]?.status === 'STAGED' ? 'COMPLETE' : 'PUT TO STAGE'}
+            onPress={() => handlePutToStage()}
+            size="large"
+            color="primary"
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };

@@ -23,6 +23,7 @@ import {
   getReceiptQuantityByPoline,
   getRejectQuantityByPoline,
 } from '../../utils/helpers';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -210,6 +211,7 @@ const InspectionReceivingScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate toScreen="Inspection" />
       <View className="flex-row p-2 bg-blue-400">
         <Text className="font-bold text-white">PO Number</Text>
         <Text className="ml-10 font-bold text-white">{ponum}</Text>

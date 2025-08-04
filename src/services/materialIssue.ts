@@ -7,8 +7,11 @@ export const getWorkOrderDetails = async (workOrderId: string) => {
   const url = `/maximo/oslc/os/WMS_MXWOISSUE?lean=1&oslc.select=*&oslc.where=siteid="${site}" and wonum="${workOrderId}"`;
   try {
     const response = await api.get(url);
+    console.log('Work Order Details Response:', response.data);
+
     return response.data;
   } catch (error) {
+    console.error('Error in getWorkOrderDetails:', error);
     throw error;
   }
 };
@@ -103,8 +106,10 @@ export const generateIssueHeader = async (wonum: string) => {
         // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
+    console.log('generateIssueHeader Response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('Error in generateIssueHeader:', error);
     throw error;
   }
 };

@@ -24,7 +24,7 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
   material,
   orderQty,
   remainingQty,
-  total = 1,
+  total = 0,
   orderunit,
   onClose,
   onReceive,
@@ -32,7 +32,7 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
   const [count, setCount] = useState(total);
 
   const handleDecrease = () => {
-    if (count > 1) setCount(count - 1);
+    if (count > 0) setCount(count - 1);
   };
 
   const handleIncrease = () => {
@@ -79,7 +79,10 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
             </View>
           </View>
           <View style={styles.counterRow}>
-            <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
+            <TouchableOpacity
+              disabled={count === 0}
+              style={styles.circleBtn}
+              onPress={handleDecrease}>
               <Text style={styles.circleBtnText}>-</Text>
             </TouchableOpacity>
             <View style={styles.countBox}>
@@ -92,11 +95,17 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
                 maxLength={6}
               />
             </View>
-            <TouchableOpacity style={styles.circleBtn} onPress={handleIncrease}>
+            <TouchableOpacity
+              disabled={count >= remainingQty}
+              style={styles.circleBtn}
+              onPress={handleIncrease}>
               <Text style={styles.circleBtnText}>+</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.receiveBtn} onPress={handleReceive}>
+          <TouchableOpacity
+            disabled={count === 0}
+            style={styles.receiveBtn}
+            onPress={handleReceive}>
             <Text style={styles.receiveBtnText}>Receive Material</Text>
           </TouchableOpacity>
         </View>

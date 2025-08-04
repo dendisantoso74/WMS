@@ -19,6 +19,7 @@ import {
   createInvUseReturnHeader,
   scanWoForReturn,
 } from '../../services/materialReturn';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -44,27 +45,31 @@ const MaterialReturnDetailScreen = () => {
   };
   // Update this function to also add invuselinenum from invuse.invuseline
   const enrichMatusetransWithInvuseid = (matusetrans: any[], invuse: any[]) => {
-    return matusetrans.map(mt => {
-      let foundInvuseid: number | undefined;
-      let foundInvuselinenum: number | undefined;
-      for (const inv of invuse) {
-        if (Array.isArray(inv.invuseline)) {
-          const foundLine = inv.invuseline.find(
-            (line: any) => line.invuselineid === mt.invuselineid,
-          );
-          if (foundLine) {
-            foundInvuseid = inv.invuseid;
-            foundInvuselinenum = foundLine.invuselinenum;
-            break;
+    return (
+      matusetrans
+        // .filter(mt => mt.issuetype === 'RETURN') // <-- Only items with issuetype RETURN
+        .map(mt => {
+          let foundInvuseid: number | undefined;
+          let foundInvuselinenum: number | undefined;
+          for (const inv of invuse) {
+            if (Array.isArray(inv.invuseline)) {
+              const foundLine = inv.invuseline.find(
+                (line: any) => line.invuselineid === mt.invuselineid,
+              );
+              if (foundLine) {
+                foundInvuseid = inv.invuseid;
+                foundInvuselinenum = foundLine.invuselinenum;
+                break;
+              }
+            }
           }
-        }
-      }
-      return {
-        ...mt,
-        invuseid: foundInvuseid,
-        invuselinenum: foundInvuselinenum,
-      };
-    });
+          return {
+            ...mt,
+            invuseid: foundInvuseid,
+            invuselinenum: foundInvuselinenum,
+          };
+        })
+    );
   };
 
   const getReturnInvuse = (datas: any) => {
@@ -82,46 +87,65 @@ const MaterialReturnDetailScreen = () => {
   // returnInvuse will be the invuse object or 'not found'
 
   useEffect(() => {
-    createInvUseReturnHeader(woNum);
+    //this will create invuse header for return and then get the list
+    createInvUseReturnHeader(woNum).then(x => {
+      scanWoForReturn(woNum).then((res: any) => {
+        if (res.member.length === 0) {
+          navigation.goBack();
+          Alert.alert(
+            'No Data',
+            'No data found for this PO number.',
+            // [{text: 'OK', onPress: () => navigation.goBack()}],
+            // {cancelable: false},
+          );
+        }
+        setDatas(res.member[0]);
+        console.log('Work order details:', res);
+        // setreturnn invuse id
+        const returnInvuse = getReturnInvuse(res.member[0]);
+        setReturnInvuseId(returnInvuse.invuseid);
+        console.log('Return invuse:', returnInvuse);
 
-    scanWoForReturn(woNum).then((res: any) => {
-      if (res.member.length === 0) {
-        navigation.goBack();
-        Alert.alert(
-          'No Data',
-          'No data found for this PO number.',
-          // [{text: 'OK', onPress: () => navigation.goBack()}],
-          // {cancelable: false},
+        // Filter only items that have invuseline and it's not empty
+        const filteredInvUse = res.member[0].invuse.filter(
+          (item: any) =>
+            Array.isArray(item.invuseline) && item.invuseline.length > 0,
         );
-      }
-      setDatas(res.member[0]);
-      console.log('Work order details:', res);
-      // setreturnn invuse id
-      const returnInvuse = getReturnInvuse(res.member[0]);
-      setReturnInvuseId(returnInvuse.invuseid);
-      console.log('Return invuse:', returnInvuse);
+        setWoList(filteredInvUse);
+        setWoListIssue(
+          filteredInvUse.filter((item: any) => item.usetype === 'ISSUE'),
+        );
+        setWoListReturn(
+          filteredInvUse.filter(
+            (item: any) =>
+              item.usetype === 'MIXED' && item.status === 'ENTERED',
+          ),
+        );
+        // Enrich matusetrans with invuseid
+        const enrichedMatusetrans = enrichMatusetransWithInvuseid(
+          res.member[0].matusetrans,
+          res.member[0].invuse,
+        );
 
-      // Filter only items that have invuseline and it's not empty
-      const filteredInvUse = res.member[0].invuse.filter(
-        (item: any) =>
-          Array.isArray(item.invuseline) && item.invuseline.length > 0,
-      );
-      setWoList(filteredInvUse);
-      setWoListIssue(
-        filteredInvUse.filter((item: any) => item.usetype === 'ISSUE'),
-      );
-      setWoListReturn(
-        filteredInvUse.filter((item: any) => item.usetype === 'MIXED'),
-      );
-      // Enrich matusetrans with invuseid
-      const enrichedMatusetrans = enrichMatusetransWithInvuseid(
-        res.member[0].matusetrans,
-        res.member[0].invuse,
-      );
-
-      setWoListmatusetrans(enrichedMatusetrans);
+        setWoListmatusetrans(enrichedMatusetrans);
+      });
     });
   }, []);
+
+  const handleComplete = async (returnInvuseId: string) => {
+    changeInvUseStatusComplete(returnInvuseId)
+      .then(res => {
+        console.log('Change invuse status response:', res);
+        Alert.alert('Success', 'Material return completed successfully');
+      })
+      .catch(err => {
+        console.error('Error changing invuse status:', err);
+        Alert.alert(
+          'Error',
+          err.Error.message || 'Failed to complete material return',
+        );
+      });
+  };
 
   const renderItem = ({item}: {item: string}) => {
     const returnItem = findInvuselineByIdReturn(
@@ -161,6 +185,8 @@ const MaterialReturnDetailScreen = () => {
             <Text className="w-1/2 text-right">
               {item?.qtyrequested} {item.wms_unit} /{' '}
               {returnItem ? returnItem.quantity : 0} {item.wms_unit}
+              {/* {item?.quantity} {item.wms_unit} / {item?.receivedqty}{' '}
+              {item.wms_unit} */}
             </Text>
           </View>
           <Text>{item.invuseid}</Text>
@@ -171,6 +197,7 @@ const MaterialReturnDetailScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate toScreen="Material Return Scan" />
       <View className="flex-row p-2 bg-blue-400">
         {console.log('issue list:', woListIssue)}
         {console.log('return list:', woListReturn)}
@@ -199,14 +226,16 @@ const MaterialReturnDetailScreen = () => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
-      <View style={styles.buttonContainer}>
-        <ButtonApp
-          label="RETURN"
-          onPress={() => changeInvUseStatusComplete(returnInvuseId)}
-          size="large"
-          color="primary"
-        />
-      </View>
+      {
+        <View style={styles.buttonContainer}>
+          <ButtonApp
+            label="RETURN"
+            onPress={() => handleComplete(returnInvuseId)}
+            size="large"
+            color="primary"
+          />
+        </View>
+      }
     </SafeAreaView>
   );
 };

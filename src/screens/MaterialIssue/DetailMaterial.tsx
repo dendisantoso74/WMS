@@ -57,7 +57,7 @@ const DetailMaterialScreen = () => {
         </View>
       </View>
 
-      <View className="items-end ">
+      <View className="items-end mt-3 mr-3 ">
         <TouchableOpacity
           className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
           onPress={() =>
