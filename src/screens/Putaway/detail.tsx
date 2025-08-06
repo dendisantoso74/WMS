@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -12,54 +12,171 @@ import {
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
-import {formatDateTime} from '../../utils/helpers';
-
-const dummyRfids = ['00000000000000000000'];
+import {formatDateTime, generateSerialNumber} from '../../utils/helpers';
+import ModalInputRfid from '../../compnents/wms/ModalInputRfid';
+import {set} from 'lodash';
+import {
+  completePutaway,
+  findSuggestedBinPutaway,
+  tagItemPutaway,
+} from '../../services/putaway';
+import {checkSerialNumber} from '../../services/materialRecive';
+import {changeInvUseStatusComplete} from '../../services/materialReturn';
+import {findBinByTagCode} from '../../services/materialIssue';
 
 const PutawayMaterialScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item} = route.params;
-  console.log('item from params:', item);
+  console.log('item from params put away:', item);
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [invUse, setInvUse] = useState([]);
+  const [modalBinVisible, setModalBinVisible] = useState(false);
+  const [modalItemVisible, setModalItemVisible] = useState(false);
 
-  const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      // onPress={() => navigation.navigate('Scan Material')}
-    >
-      <View style={[styles.sideBar, {backgroundColor: 'blue'}]} />
-      <View className="flex-col w-10/12 my-1">
-        <View className="flex-row justify-between">
-          <Text className="font-bold">
-            {item.invuseline ? item.invuseline[0]?.itemnum : '-'}
-          </Text>
+  const [modalValueBin, setModalValueBin] = useState('');
+  const [modalValueItem, setModalValueItem] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [suggestedBin, setSuggestedBin] = useState('');
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  useEffect(() => {
+    //set invuse that have status retur entered
+    const filteredInvUse = item.invuse.filter(
+      (inv: any) => inv.status === 'ENTERED' && inv.usetype === 'MIXED',
+    );
+    setInvUse(filteredInvUse);
+    console.log('Filtered InvUse:', filteredInvUse);
+  }, [item.invuse]);
+
+  const handlePressItem = async (item: any) => {
+    setModalBinVisible(true);
+
+    const SN = await generateSerialNumber();
+    setSerialNumber(SN);
+
+    const bin = await findSuggestedBinPutaway(
+      item.invuseline[0]?.itemnum,
+      item.fromstoreloc,
+    );
+    setSuggestedBin(bin.member[0]?.binnum || '');
+    console.log('Selected InvUse:', bin.member[0].binnum);
+  };
+
+  const handleSubmitBin = async () => {
+    if (!modalValueBin) {
+      ToastAndroid.show('Please enter a BIN', ToastAndroid.SHORT);
+      return;
+    }
+
+    const checkSN = await checkSerialNumber(serialNumber);
+    if (checkSN.error) {
+      ToastAndroid.show(checkSN.error, ToastAndroid.SHORT);
+      return;
+    }
+    console.log('selectedItem:', selectedItem);
+
+    const bin = await findBinByTagCode(modalValueBin);
+
+    console.log('Selected Bin:', bin?.member[0]?.bin);
+
+    const payload = {
+      // tag item
+      invuselineid: selectedItem.invuseline[0].invuselineid,
+      tagcode: modalValueItem,
+      serialnumber: serialNumber,
+      // tag bin
+      frombin: selectedItem.invuseline[0].frombin,
+      wms_finalbin: bin?.member[0]?.bin,
+      wms_status: 'COMPLETE',
+    };
+
+    console.log('Payload to submit:', payload);
+
+    await tagItemPutaway(
+      payload.invuselineid,
+      payload.tagcode,
+      payload.serialnumber,
+    )
+      .then(res => {
+        console.log('Tagging Response:', res);
+        ToastAndroid.show('Item tagged successfully', ToastAndroid.SHORT);
+        // navigation.goBack();
+      })
+      .catch(err => {
+        console.error('Error tagging item:', err);
+        ToastAndroid.show('Error tagging item', ToastAndroid.SHORT);
+      });
+
+    await completePutaway(
+      payload.invuselineid,
+      payload.frombin,
+      payload.wms_finalbin,
+    );
+
+    setModalBinVisible(false);
+  };
+
+  const handleCompletereturn = async () => {
+    console.log('Complete button pressed', invUse[0].invuseid);
+    changeInvUseStatusComplete(invUse[0].invuseid)
+      .then(res => {
+        console.log('Complete return response:', res);
+        ToastAndroid.show('Return completed successfully', ToastAndroid.SHORT);
+        // navigation.goBack();
+        // reload the list
+      })
+      .catch(err => {
+        console.error('Error completing return:', err);
+        ToastAndroid.show('Error completing return', ToastAndroid.SHORT);
+      });
+  };
+
+  const renderItem = ({item}: {item: string}) => {
+    const sideBarColor = item.invuseline[0]?.serialnumber ? '#A4DD00' : 'blue';
+
+    return (
+      <TouchableOpacity
+        disabled={!!item.invuseline[0]?.serialnumber}
+        style={styles.rfidCard}
+        onPress={() => {
+          setModalItemVisible(true);
+          setSelectedItem(item);
+        }}>
+        <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
+        <View className="flex-col w-10/12 my-1">
+          <View className="flex-row justify-between">
+            <Text className="font-bold">
+              {item.invuseline ? item.invuseline[0]?.itemnum : '-'}
+            </Text>
+          </View>
+          <View className="flex-row justify-between">
+            <Text className="font-bold">
+              {item.invuseline ? item.invuseline[0]?.description : '-'}
+            </Text>
+          </View>
+          <View className="flex-row justify-between">
+            <Text className="font-bold text-left ">
+              {item.invuseline ? item.invuseline[0]?.frombin : '-'}
+            </Text>
+            <Text className="text-right ">Return</Text>
+          </View>
+          <View className="flex-row justify-between">
+            <Text className="font-bold text-left ">
+              {item.invuseline ? item.invuseline[0]?.fromconditioncode : '-'}
+            </Text>
+            <Text className="text-right ">
+              {item.invuseline ? item.invuseline[0]?.quantity : '-'}{' '}
+              {item.invuseline ? item.invuseline[0]?.wms_unit : '-'}
+            </Text>
+          </View>
         </View>
-        <View className="flex-row justify-between">
-          <Text className="font-bold">
-            {item.invuseline ? item.invuseline[0]?.description : '-'}
-          </Text>
-        </View>
-        <View className="flex-row justify-between">
-          <Text className="font-bold text-left ">
-            {item.invuseline ? item.invuseline[0]?.frombin : '-'}
-          </Text>
-          <Text className="text-right ">Return</Text>
-        </View>
-        <View className="flex-row justify-between">
-          <Text className="font-bold text-left ">
-            {item.invuseline ? item.invuseline[0]?.fromconditioncode : '-'}
-          </Text>
-          <Text className="text-right ">
-            {item.invuseline ? item.invuseline[0]?.quantity : '-'}{' '}
-            {item.invuseline ? item.invuseline[0]?.wms_unit : '-'}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -92,20 +209,58 @@ const PutawayMaterialScreen = () => {
         />
       </View>
       <FlatList
-        data={item.invuse}
+        data={invUse}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={(item, i) => i.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
+        ListEmptyComponent={
+          <View style={{alignItems: 'center', marginTop: 32}}>
+            <Text style={{color: '#888'}}>No data found</Text>
+          </View>
+        }
       />
       <View style={styles.buttonContainer}>
         <ButtonApp
           label="COMPLETE"
           size="large"
           color="primary"
-          onPress={() => navigation.navigate('')}
+          onPress={() => handleCompletereturn()}
         />
       </View>
+
+      <ModalInputRfid
+        visible={modalItemVisible}
+        value={modalValueItem}
+        onChangeText={setModalValueItem}
+        title="Scan Item Tag"
+        placeholder="Scan or enter Item Tag"
+        onSubmit={() => {
+          if (!modalValueItem) {
+            ToastAndroid.show('Please enter an Item Tag', ToastAndroid.SHORT);
+            return;
+          }
+          setModalItemVisible(false);
+          handlePressItem(selectedItem);
+        }}
+        onCancel={() => setModalItemVisible(false)}
+        // suggestBin={suggestedBin} // Example suggested bin
+      />
+
+      <ModalInputRfid
+        mode="bin"
+        visible={modalBinVisible}
+        value={modalValueBin}
+        onChangeText={setModalValueBin}
+        title="Scan BIN"
+        onSubmit={() => {
+          handleSubmitBin();
+        }}
+        onCancel={() => setModalBinVisible(false)}
+        serialNumber={serialNumber}
+        placeholder="Scan or enter BIN Tag"
+        suggestBin={suggestedBin} // Example suggested bin
+      />
     </SafeAreaView>
   );
 };

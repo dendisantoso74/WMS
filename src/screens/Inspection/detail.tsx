@@ -50,7 +50,7 @@ const InspectionReceivingScreen = () => {
     ReceivePo([
       {
         // Assuming ReceivePo expects an array of poline changes
-        inspected: 0,
+        inspected: quantity,
         orderunit: item.orderunit,
         orgid: 'BJS',
         polinenum: item.polinenum,

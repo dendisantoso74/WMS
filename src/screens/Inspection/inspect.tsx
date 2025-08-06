@@ -37,7 +37,9 @@ const InspectionReceivingApproveScreen = () => {
   const [datas, setDatas] = useState([]);
   const [rejectCode, setRejectCode] = useState([{label: '', value: ''}]);
   const [user, setUser] = React.useState<string | null>(null);
-  const [inputAceptedQty, setInputAcceptedQty] = useState(0);
+  const [inputAceptedQty, setInputAcceptedQty] = useState(
+    item?.receiptquantity,
+  );
   const [inputRejectedQty, setInputRejectedQty] = useState(0);
   const [inputRejectedCode, setInputRejectedCode] = useState('');
 
@@ -51,9 +53,9 @@ const InspectionReceivingApproveScreen = () => {
     ponum: ponum,
     polinenum: datas.polinenum,
     porevisionnum: datas.porevisionnum ?? 0,
-    siteid: datas.siteid,
-    positeid: datas.siteid,
-    orgid: datas.orgid,
+    siteid: 'TJB56',
+    positeid: 'TJB56',
+    orgid: 'BJS',
     inspected: 1,
     receiptquantity: null,
     acceptedqty: null,
@@ -65,11 +67,19 @@ const InspectionReceivingApproveScreen = () => {
   const [count, setCount] = useState(0);
 
   const handleDecrease = () => {
-    if (inputAceptedQty > 1) setInputAcceptedQty(inputAceptedQty - 1);
+    if (inputAceptedQty > 0) setInputAcceptedQty(inputAceptedQty - 1);
   };
 
   const handleIncrease = () => {
     setInputAcceptedQty(inputAceptedQty + 1);
+  };
+
+  const handleDecreaseReject = () => {
+    if (inputRejectedQty > 0) setInputRejectedQty(inputRejectedQty - 1);
+  };
+
+  const handleIncreaseReject = () => {
+    setInputRejectedQty(inputRejectedQty + 1);
   };
 
   const handleApprove = async () => {
@@ -122,94 +132,24 @@ const InspectionReceivingApproveScreen = () => {
 
       setTempPayload(prev => ({
         ...prev,
-        orgid: item.orgid,
+        // orgid: item.orgid,
         polinenum: item.polinenum,
-        positeid: wms_matrectrans[0].positeid,
-        siteid: wms_matrectrans[0].positeid,
+        // positeid: wms_matrectrans[0].positeid,
+        // siteid: wms_matrectrans[0].positeid,
         wms_matrectransid: item.wms_matrectransid,
         wms_inspectassignedby: userAsync, // or any value you want to set
         receiptquantity: parseInt(inputRejectedQty + inputAceptedQty, 10),
         acceptedqty: inputAceptedQty
           ? parseInt(inputAceptedQty, 10)
           : wms_matrectrans[0].receiptquantity,
-        inspected: inputRejectedQty + inputAceptedQty,
-        // rejectedqty: inputRejectedQty
-        //   ? parseInt(inputRejectedQty, 10)
-        //   : 0,
+        inspected: 1, // 1 is code for inspection approved
+        rejectedqty: inputRejectedQty ? parseInt(inputRejectedQty, 10) : 0,
         // rejectedcode: inputRejectedCode || '',
       }));
     };
 
     fetchData2();
   }, [inputAceptedQty, inputRejectedQty, inputRejectedCode]);
-
-  const renderItem = ({item}: {item: string}) => (
-    <View className="">
-      <View className="flex flex-row items-center justify-between">
-        <View>
-          <Text className="text-xl font-bold">Accepted Qty</Text>
-        </View>
-        <View style={styles.counterRow}>
-          <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
-            <Text style={styles.circleBtnText}>-</Text>
-          </TouchableOpacity>
-          <View style={styles.countBox}>
-            <Text style={styles.countText}>{inputAceptedQty}</Text>
-          </View>
-          <TouchableOpacity style={styles.circleBtn} onPress={handleIncrease}>
-            <Text style={styles.circleBtnText}>+</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="ml-3 bg-green-600 border border-green-500 rounded-full">
-            <Icon library="Feather" name="check" size={30} color="white"></Icon>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View className="flex flex-row items-center justify-between">
-        <View>
-          <Text className="text-xl font-bold">Rejected Qty</Text>
-        </View>
-        <View style={styles.counterRow}>
-          <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
-            <Text style={styles.circleBtnText}>-</Text>
-          </TouchableOpacity>
-          <View style={styles.countBox}>
-            <Text style={styles.countText}>{count}</Text>
-          </View>
-          <TouchableOpacity style={styles.circleBtn} onPress={handleIncrease}>
-            <Text style={styles.circleBtnText}>+</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="ml-3 bg-green-600 border border-green-500 rounded-full">
-            <Icon library="Feather" name="check" size={30} color="white"></Icon>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View className="flex flex-row items-center justify-between my-5">
-        <View>
-          <Text className="text-xl font-bold">Rejected Code</Text>
-        </View>
-        <Dropdown
-          style={[styles.dropdown]}
-          data={rejectCode}
-          labelField="label"
-          valueField="id"
-          placeholder="Select option"
-          // value={value} // to set default value
-          onChange={item => {
-            console.log(item);
-          }}
-          // disable={disabled} // Apply disabled prop
-        />
-      </View>
-      <View className="pt-6">
-        <TouchableOpacity
-          className="flex-row items-center justify-center rounded-xl "
-          style={{backgroundColor: 'red', height: 50, width: '50%'}}>
-          <Icon library="Feather" name="plus" size={20} color="white"></Icon>
-          <Text className="justify-end text-white ">ADD REJECT</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -222,19 +162,98 @@ const InspectionReceivingApproveScreen = () => {
           </Text>
         </View>
         <View className="flex-row my-1 ml-2">
-          <Text className="font-bold text-white">PO QTY</Text>
+          <Text className="font-bold text-white">Order QTY</Text>
           <Text className="ml-10 font-bold text-white">
             : {datas.quantity} {datas.orderunit}
           </Text>
         </View>
       </View>
-      <FlatList
-        data={rfids}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+
+      <View className="mx-3">
+        <View className="flex flex-row items-center justify-between">
+          <View>
+            <Text className="text-xl font-bold">Accepted Qty</Text>
+          </View>
+          <View style={styles.counterRow}>
+            <TouchableOpacity
+              disabled={inputAceptedQty === 0}
+              style={styles.circleBtn}
+              onPress={handleDecrease}>
+              <Text style={styles.circleBtnText}>-</Text>
+            </TouchableOpacity>
+            <View style={styles.countBox}>
+              <Text style={styles.countText}>{inputAceptedQty}</Text>
+            </View>
+            <TouchableOpacity
+              disabled={inputAceptedQty === item.receiptquantity}
+              style={styles.circleBtn}
+              onPress={handleIncrease}>
+              <Text style={styles.circleBtnText}>+</Text>
+            </TouchableOpacity>
+            {/* <TouchableOpacity className="ml-3 bg-green-600 border border-green-500 rounded-full">
+              <Icon
+                library="Feather"
+                name="check"
+                size={30}
+                color="white"></Icon>
+            </TouchableOpacity> */}
+          </View>
+        </View>
+        <View className="flex flex-row items-center justify-between">
+          <View>
+            <Text className="text-xl font-bold">Rejected Qty</Text>
+          </View>
+          <View style={styles.counterRow}>
+            <TouchableOpacity
+              style={styles.circleBtn}
+              onPress={handleDecreaseReject}>
+              <Text style={styles.circleBtnText}>-</Text>
+            </TouchableOpacity>
+            <View style={styles.countBox}>
+              <Text style={styles.countText}>{inputRejectedQty}</Text>
+            </View>
+            <TouchableOpacity
+              disabled={inputRejectedQty === item.receiptquantity}
+              style={styles.circleBtn}
+              onPress={handleIncreaseReject}>
+              <Text style={styles.circleBtnText}>+</Text>
+            </TouchableOpacity>
+            {/* <TouchableOpacity className="ml-3 bg-green-600 border border-green-500 rounded-full">
+              <Icon
+                library="Feather"
+                name="check"
+                size={30}
+                color="white"></Icon>
+            </TouchableOpacity> */}
+          </View>
+        </View>
+        <View className="flex flex-row items-center justify-between my-5">
+          <View>
+            <Text className="text-xl font-bold">Rejected Code</Text>
+          </View>
+          <Dropdown
+            style={[styles.dropdown]}
+            data={rejectCode}
+            labelField="label"
+            valueField="id"
+            placeholder="Select option"
+            // value={value} // to set default value
+            onChange={item => {
+              console.log(item);
+            }}
+            // disable={disabled} // Apply disabled prop
+          />
+        </View>
+        <View className="pt-6">
+          <TouchableOpacity
+            className="flex-row items-center justify-center rounded-xl "
+            style={{backgroundColor: 'red', height: 50, width: '50%'}}>
+            <Icon library="Feather" name="plus" size={20} color="white"></Icon>
+            <Text className="justify-end text-white ">ADD REJECT</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <View
         style={styles.buttonContainer}
         // onPress={() => navigation.navigate('InspectionReceivingApprove')}

@@ -8,11 +8,13 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {fetchPutawayMixed} from '../../services/putaway';
 import {formatDateTime} from '../../utils/helpers';
+import Loading from '../../compnents/Loading';
 
 const PutawayScanWoScreen = () => {
   const navigation = useNavigation<any>();
@@ -20,10 +22,10 @@ const PutawayScanWoScreen = () => {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch list on mount or when search changes
+  // Fetch list on mount
   useEffect(() => {
     setLoading(true);
-    fetchPutawayMixed(search)
+    fetchPutawayMixed('')
       .then(res => {
         setRfids(res.member || []);
       })
@@ -32,7 +34,15 @@ const PutawayScanWoScreen = () => {
         setRfids([]);
       })
       .finally(() => setLoading(false));
-  }, [search]);
+  }, []);
+
+  // Local search filter
+  const filteredRfids = rfids.filter(item =>
+    search === ''
+      ? true
+      : item.wonum?.toString().toLowerCase().includes(search.toLowerCase()) ||
+        item.description?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
@@ -55,35 +65,34 @@ const PutawayScanWoScreen = () => {
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Enter invuselineid"
+          placeholder="Enter WO number or description"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
         />
-        {/* <Icon
-          library="Feather"
-          name="search"
-          size={20}
-          color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
-        /> */}
       </View>
-      <FlatList
-        data={rfids}
-        renderItem={renderItem}
-        keyExtractor={item =>
-          item.wonum?.toString() || Math.random().toString()
-        }
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-        ListEmptyComponent={
-          !loading && (
-            <View style={{alignItems: 'center', marginTop: 32}}>
-              <Text style={{color: '#888'}}>No data found.</Text>
-            </View>
-          )
-        }
-      />
+      {loading ? (
+        <View style={{flex: 1, marginTop: 32, alignItems: 'center'}}>
+          <ActivityIndicator size="large" color="#3674B5" />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredRfids}
+          renderItem={renderItem}
+          keyExtractor={item =>
+            item.wonum?.toString() || Math.random().toString()
+          }
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+          ListEmptyComponent={
+            !loading && (
+              <View style={{alignItems: 'center', marginTop: 32}}>
+                <Text style={{color: '#888'}}>No data found.</Text>
+              </View>
+            )
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };

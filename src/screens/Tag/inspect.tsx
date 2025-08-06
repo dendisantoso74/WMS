@@ -28,8 +28,8 @@ import {checkSerialNumber, taggingPo} from '../../services/materialRecive';
 const TagInspectScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item} = route.params;
-  console.log('RFIDs from params:', item);
+  const {item, invuseid} = route.params;
+  console.log('RFIDs from params:', item, invuseid);
 
   const [modalTag, setModalTag] = useState(false);
   const [selectTag, setSelectTag] = useState('');
@@ -39,7 +39,7 @@ const TagInspectScreen = () => {
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([
-    '4C5071020190000000091978',
+    '4C5071020190000000091973',
   ]);
 
   useEffect(() => {

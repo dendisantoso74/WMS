@@ -49,7 +49,8 @@ export const ListRejectCode = async () => {
 export const ListPoWINSP = async () => {
   const site = await getData('site');
 
-  const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&oslc.select=*&savedQuery=PO:POREV&oslc.where=siteid="${site}" and status="APPR" and receipts!="COMPLETE" and ponum="${site === 'TJB56' ? '%25BJS%25' : '%25BJS%25'}"`;
+  // const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&oslc.select=*&savedQuery=PO:POREV&oslc.where=siteid="${site}" and status="APPR" and receipts!="COMPLETE" and ponum="${site === 'TJB56' ? '%25BJS%25' : '%25BJS%25'}"`;
+  const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&savedQuery=PO:POREV&oslc.select=poid,ponum,vendor,orderdate,status,revisionnum,orgid,siteid,wms_matrectrans{issuetype,rowstamp,receiptquantity,itemnum,description,polinenum,packingslipnum,orderunit,issueunit,quantity,wms_matrectransid,conditioncode,status,rejectqty,acceptqty}&oslc.where=siteid="TJB56" and status="APPR" and receipts!="COMPLETE" and wms_matrectrans.status="WINSP"`;
   try {
     const res = await api.get(url);
     return res.data;

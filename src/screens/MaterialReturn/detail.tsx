@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TextInput,
   Alert,
+  ToastAndroid,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
@@ -33,6 +34,7 @@ const MaterialReturnDetailScreen = () => {
   const [woListIssue, setWoListIssue] = useState([]);
   const [woListReturn, setWoListReturn] = useState([]);
   const [woListmatusetrans, setWoListmatusetrans] = useState([]);
+  const [headerReturn, setHeaderReturn] = useState({});
 
   const [search, setSearch] = useState('');
 
@@ -116,11 +118,19 @@ const MaterialReturnDetailScreen = () => {
           filteredInvUse.filter((item: any) => item.usetype === 'ISSUE'),
         );
         setWoListReturn(
-          filteredInvUse.filter(
+          res.member[0].invuse.filter(
             (item: any) =>
               item.usetype === 'MIXED' && item.status === 'ENTERED',
           ),
         );
+
+        //set header return
+        const mixedInvuse = datas.invuse?.find(
+          (inv: any) => inv.usetype === 'MIXED' && inv.status !== 'COMPLETE',
+        );
+        setHeaderReturn(mixedInvuse);
+        console.log('Mixed Invuse:', mixedInvuse);
+
         // Enrich matusetrans with invuseid
         const enrichedMatusetrans = enrichMatusetransWithInvuseid(
           res.member[0].matusetrans,
@@ -133,21 +143,26 @@ const MaterialReturnDetailScreen = () => {
   }, []);
 
   const handleComplete = async (returnInvuseId: string) => {
-    changeInvUseStatusComplete(returnInvuseId)
-      .then(res => {
-        console.log('Change invuse status response:', res);
-        Alert.alert('Success', 'Material return completed successfully');
-      })
-      .catch(err => {
-        console.error('Error changing invuse status:', err);
-        Alert.alert(
-          'Error',
-          err.Error.message || 'Failed to complete material return',
-        );
-      });
+    // this is func to complete the return - moved to putaway module
+    // changeInvUseStatusComplete(returnInvuseId)
+    //   .then(res => {
+    //     console.log('Change invuse status response:', res);
+    //     Alert.alert('Success', 'Material return completed successfully');
+    //   })
+    //   .catch(err => {
+    //     console.error('Error changing invuse status:', err);
+    //     Alert.alert(
+    //       'Error',
+    //       err.Error.message || 'Failed to complete material return',
+    //     );
+    //   });
+    // ToastAndroid.show('Return completed successfully', ToastAndroid.SHORT);
+    Alert.alert('Information', 'Go to Putaway to complete the return');
   };
 
   const renderItem = ({item}: {item: string}) => {
+    console.log('Rendering item:', item);
+
     const returnItem = findInvuselineByIdReturn(
       woListReturn,
       item.matusetransid,
@@ -189,7 +204,7 @@ const MaterialReturnDetailScreen = () => {
               {item.wms_unit} */}
             </Text>
           </View>
-          <Text>{item.invuseid}</Text>
+          <Text>{returnInvuseId}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -201,6 +216,8 @@ const MaterialReturnDetailScreen = () => {
       <View className="flex-row p-2 bg-blue-400">
         {console.log('issue list:', woListIssue)}
         {console.log('return list:', woListReturn)}
+        {console.log('woListmatusetrans list:', woListmatusetrans)}
+
         <View>
           <Text className="font-bold text-white">WO Number</Text>
           <Text className="font-bold text-white">WO Date</Text>

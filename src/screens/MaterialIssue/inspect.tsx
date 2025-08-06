@@ -203,6 +203,7 @@ const MaterialIssueInspectScreen = () => {
           <ButtonApp
             label={invUse[0]?.status === 'STAGED' ? 'COMPLETE' : 'PUT TO STAGE'}
             onPress={() => handlePutToStage()}
+            disabled={invUse[0]?.status === 'COMPLETE'}
             size="large"
             color="primary"
           />

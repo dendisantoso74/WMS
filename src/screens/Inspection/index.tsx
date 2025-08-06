@@ -73,7 +73,7 @@ const InspectionScreen = () => {
           <Text className="px-4 font-bold">PO : {item?.ponum}</Text>
           <Text className="px-4 font-semibold">Vendor : {item?.vendor}</Text>
           <Text className="px-4">
-            Date : {item.statusdate ? formatDateTime(item.statusdate) : ''}
+            Date : {item.orderdate ? formatDateTime(item.orderdate) : ''}
           </Text>
         </View>
       </View>
