@@ -39,19 +39,22 @@ const MaterialReceiveDetailScreen = () => {
   const [wmsMatrectrans, setWmsMatrectrans] = useState([]);
   const [tempQuantity, setTempQuantity] = useState(0);
 
-  const handleReceive = (quantity: number, item: any) => {
+  const handleReceive = async (quantity: number, item: any) => {
+    const site = await getData('site');
+    console.log('------------receive site', site);
+
     console.log('Temp Quantity:', quantity, 'Poline:', item);
     ReceivePo([
       {
         // Assuming ReceivePo expects an array of poline changes
         inspected: 0,
         orderunit: item.orderunit,
-        orgid: 'BJS',
+        orgid: site === 'TJB56' ? 'BJS' : 'BJP',
         polinenum: item.polinenum,
         ponum: listrfid[listrfid.length - 1],
         porevisionnum: 0,
         receiptquantity: quantity,
-        siteid: 'TJB56',
+        siteid: site,
       },
     ])
       .then(res => {
@@ -218,10 +221,22 @@ const MaterialReceiveDetailScreen = () => {
         />
       )}
       {/* {!allReceived && ( */}
-      <View style={styles.buttonContainer}>
+      {/* <View style={styles.buttonContainer}>
         <ButtonApp
           label="RECEIVE"
           onPress={() => setModalConfirmVisible(true)}
+          size="large"
+          color="primary"
+        />
+      </View> */}
+      <View style={styles.buttonContainer}>
+        <ButtonApp
+          label="GO TO INSPECT"
+          onPress={() =>
+            navigation.navigate('InspectionReceivingPO', {
+              ponum: listrfid[listrfid.length - 1],
+            })
+          }
           size="large"
           color="primary"
         />

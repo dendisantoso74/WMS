@@ -122,7 +122,7 @@ const PickItemScreen = () => {
       serialnumber: serialNumberItem, // need to be make sure this payload is existing because is required
       quantity: Number(pickqty),
       assetnum: item.assetnum,
-      frombin: bin.bin || item.frombin,
+      frombin: bin.bin || item.frombin || suggestedBin?.binnum,
       fromstoreloc: item.location,
       invuselinenum: invuselinenum,
       issueto: maxUser,

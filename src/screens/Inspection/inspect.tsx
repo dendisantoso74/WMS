@@ -58,8 +58,8 @@ const InspectionReceivingApproveScreen = () => {
     orgid: 'BJS',
     inspected: 1,
     receiptquantity: null,
-    acceptedqty: null,
-    rejectedqty: 0,
+    acceptedqty: 0,
+    rejectqty: 0,
     wms_inspectassignedby: '',
     wms_matrectransid: datas?.wms_matrectransid,
   });
@@ -83,7 +83,7 @@ const InspectionReceivingApproveScreen = () => {
   };
 
   const handleApprove = async () => {
-    console.log('Approve button pressed');
+    console.log('Approve button pressed', tempPayload);
     inspectPo(tempPayload)
       .then(res => {
         console.log('Inspect Po response:', res);
@@ -94,7 +94,10 @@ const InspectionReceivingApproveScreen = () => {
             'Inspection approved successfully',
             ToastAndroid.SHORT,
           );
-          navigation.navigate('Inspection');
+          // navigation.navigate('Inspection');
+          navigation.navigate('InspectionReceivingPO', {
+            ponum: ponum,
+          });
         }
       })
       .catch(err => {
@@ -102,7 +105,6 @@ const InspectionReceivingApproveScreen = () => {
         Alert.alert('Error', err?.message || err?.Error?.message);
         ToastAndroid.show('Error approving inspection', ToastAndroid.SHORT);
       });
-    // console.log('tempPayload:', tempPayload);
   };
 
   useEffect(() => {
@@ -129,21 +131,20 @@ const InspectionReceivingApproveScreen = () => {
   useEffect(() => {
     const fetchData2 = async () => {
       const userAsync = await AsyncStorage.getItem('MAXuser');
+      const siteid = await getData('site');
 
       setTempPayload(prev => ({
         ...prev,
-        // orgid: item.orgid,
+        orgid: siteid === 'TJB56' ? 'BJS' : 'BJP',
         polinenum: item.polinenum,
-        // positeid: wms_matrectrans[0].positeid,
-        // siteid: wms_matrectrans[0].positeid,
+        positeid: siteid,
+        siteid: siteid,
         wms_matrectransid: item.wms_matrectransid,
         wms_inspectassignedby: userAsync, // or any value you want to set
         receiptquantity: parseInt(inputRejectedQty + inputAceptedQty, 10),
-        acceptedqty: inputAceptedQty
-          ? parseInt(inputAceptedQty, 10)
-          : wms_matrectrans[0].receiptquantity,
-        inspected: 1, // 1 is code for inspection approved
-        rejectedqty: inputRejectedQty ? parseInt(inputRejectedQty, 10) : 0,
+        acceptedqty: inputAceptedQty ? parseInt(inputAceptedQty, 10) : 0,
+        inspected: 1, // 1 is code for inspection approved and complete waiting to inspect status
+        rejectqty: inputRejectedQty ? parseInt(inputRejectedQty, 10) : 0,
         // rejectedcode: inputRejectedCode || '',
       }));
     };
@@ -244,14 +245,14 @@ const InspectionReceivingApproveScreen = () => {
             // disable={disabled} // Apply disabled prop
           />
         </View>
-        <View className="pt-6">
+        {/* <View className="pt-6">
           <TouchableOpacity
             className="flex-row items-center justify-center rounded-xl "
             style={{backgroundColor: 'red', height: 50, width: '50%'}}>
             <Icon library="Feather" name="plus" size={20} color="white"></Icon>
             <Text className="justify-end text-white ">ADD REJECT</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
 
       <View

@@ -25,9 +25,10 @@ const PutawayScanWoScreen = () => {
   // Fetch list on mount
   useEffect(() => {
     setLoading(true);
-    fetchPutawayMixed('')
+    fetchPutawayMixed()
       .then(res => {
         setRfids(res.member || []);
+        console.log('RFIDs fetched successfully:', res.member);
       })
       .catch(() => {
         ToastAndroid.show('Failed to fetch data', ToastAndroid.SHORT);

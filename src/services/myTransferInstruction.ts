@@ -50,9 +50,9 @@ export const getTransferInstructionByPoNum = async (ponum: string) => {
   console.log('get detail po num:', ponum);
 
   const siteid = await getData('site'); // Uncomment if you need to fetch siteid dynamically
-  console.log('Site ID:', siteid);
-
-  const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=*&oslc.where=siteid="${siteid}" and wms_ponum="${ponum}"`;
+  // transfer instruction is must be in TJB56 site
+  // const siteid = 'TJB56'; // Hardcoded for testing, remove in production
+  const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=*&oslc.where=siteid="TJB56" and wms_ponum="${ponum}"`;
   try {
     const response = await api.get(url, {
       headers: {

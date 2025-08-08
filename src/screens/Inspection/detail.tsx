@@ -13,7 +13,11 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
-import {ReceivePo, ScanPo} from '../../services/materialRecive';
+import {
+  getPoWaitingInspect,
+  ReceivePo,
+  ScanPo,
+} from '../../services/materialRecive';
 import {set} from 'lodash';
 import ModalApp from '../../compnents/ModalApp';
 import {getData} from '../../utils/store';
@@ -31,7 +35,7 @@ const InspectionReceivingScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {ponum} = route.params || {};
-  const {item} = route.params || {};
+  // const {item} = route.params || {};
 
   const [search, setSearch] = useState('');
 
@@ -103,30 +107,27 @@ const InspectionReceivingScreen = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const site = await getData('site');
-      setDatas(item);
-      setPoline(item.wms_matrectrans);
-      setWmsMatrectrans(item.wms_matrectrans);
+    // const fetchData = async () => {
+    //   const site = await getData('site');
+    //   setDatas(item);
+    //   setPoline(item.wms_matrectrans);
+    //   setWmsMatrectrans(item.wms_matrectrans);
+    // };
 
-      // ScanPo(ponum).then((res: any) => {
-      //   console.log('RFIDs fetched successfully:', res.member);
-      //   if (res.member.length === 0) {
-      //     navigation.goBack();
-      //     Alert.alert(
-      //       'Information',
-      //       `${ponum} Not Found at site: ${site} `,
-      //       // [{text: 'OK', onPress: () => navigation.goBack()}],
-      //       // {cancelable: false},
-      //     );
-      //   }
-      //   setDatas(res.member[0]);
-      //   setPoline(res.member[0].poline);
-      //   setWmsMatrectrans(res.member[0].wms_matrectrans);
-      // });
+    const fetchDataPoWINSP = async () => {
+      const res = await getPoWaitingInspect(ponum);
+      if (res.error) {
+        Alert.alert('Error', res.error);
+        return;
+      }
+      // console.log('compareee get, param:', res.member[0]);
+      setDatas(res.member[0]);
+      setPoline(res.member[0].wms_matrectrans);
+      setWmsMatrectrans(res.member[0].wms_matrectrans);
     };
 
-    fetchData();
+    // fetchData();
+    fetchDataPoWINSP();
   }, [modalVisible, tempQuantity]);
 
   // Filter poline based on search input (material code or material name)
@@ -164,7 +165,9 @@ const InspectionReceivingScreen = () => {
     console.log(receiptQty, acceptQty, rejectQty);
 
     const sideBarColor =
-      acceptQty + rejectQty === receiptQty ? '#A4DD00' : 'gray';
+      item.item.rejectqty + item.item.acceptqty === item.item.receiptquantity
+        ? '#A4DD00'
+        : 'gray';
 
     return (
       <TouchableOpacity
@@ -200,8 +203,8 @@ const InspectionReceivingScreen = () => {
           <View className="flex-row justify-between">
             <Text className="w-1/3 ml-3"></Text>
             <Text className="w-1/2 text-right">
-              {acceptQty} {item.item.orderunit} / {rejectQty}{' '}
-              {item.item.orderunit}
+              {item.item.acceptqty} {item.item.orderunit} /{' '}
+              {item.item.rejectqty} {item.item.orderunit}
             </Text>
           </View>
         </View>
@@ -231,21 +234,27 @@ const InspectionReceivingScreen = () => {
         <FlatList
           data={filteredPoline}
           renderItem={renderItem}
-          keyExtractor={item => item.polinenum}
+          keyExtractor={(item, i) => i.toString()}
           contentContainerStyle={styles.listContent}
           style={styles.list}
         />
       )}
-      {/* {!allReceived && ( */}
-      <View style={styles.buttonContainer}>
+      {/* <View style={styles.buttonContainer}>
         <ButtonApp
           label="INSPECT"
           onPress={() => setModalConfirmVisible(true)}
           size="large"
           color="primary"
         />
+      </View> */}
+      <View style={styles.buttonContainer}>
+        <ButtonApp
+          label="GO TO TAG"
+          onPress={() => navigation.navigate('Po Detail', {listrfid: [ponum]})}
+          size="large"
+          color="primary"
+        />
       </View>
-      {/* )} */}
 
       <ModalInputWms
         visible={modalVisible}

@@ -10,14 +10,12 @@ import {
   ToastAndroid,
   Modal,
   Button,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {formatDateTime} from '../../utils/helpers';
 import ButtonApp from '../../compnents/ButtonApp';
-import {set} from 'lodash';
-import {putAway} from '../../services/materialRecive';
 import {getTransferInstructionByPoNum} from '../../services/myTransferInstruction';
 
 const MyTransferInstructionScanScreen = () => {
@@ -32,10 +30,12 @@ const MyTransferInstructionScanScreen = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
   // const status = datas.status;
 
   useEffect(() => {
     // You can fetch any initial data here if needed
+    setLoading(true);
     getTransferInstructionByPoNum(datas.wms_ponum).then(res => {
       if (res.error) {
         console.error(
@@ -47,6 +47,7 @@ const MyTransferInstructionScanScreen = () => {
         setInvuseid(res.member[0].invuseid);
         setInvuse(res.member[0].invuseline);
       }
+      setLoading(false);
     });
   }, [datas]);
 
@@ -145,13 +146,26 @@ const MyTransferInstructionScanScreen = () => {
           style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
-      <FlatList
-        data={invuse}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+      {loading ? (
+        <View style={{flex: 1, marginTop: 32, alignItems: 'center'}}>
+          <ActivityIndicator size="large" color="#3674B5" />
+        </View>
+      ) : (
+        <FlatList
+          data={invuse}
+          renderItem={renderItem}
+          keyExtractor={item => item}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+          ListEmptyComponent={
+            !loading && (
+              <View style={{alignItems: 'center', marginTop: 32}}>
+                <Text style={{color: '#888'}}>No data found.</Text>
+              </View>
+            )
+          }
+        />
+      )}
       <View className="m-4">
         <ButtonApp onPress={() => handleScanRfid()} label="SCAN RFID" />
       </View>

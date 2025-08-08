@@ -17,6 +17,7 @@ import ModalInputRfid from '../../compnents/wms/ModalInputRfid';
 import {set} from 'lodash';
 import {
   completePutaway,
+  fetchPutawayMixed,
   findSuggestedBinPutaway,
   tagItemPutaway,
 } from '../../services/putaway';
@@ -43,13 +44,21 @@ const PutawayMaterialScreen = () => {
   const [suggestedBin, setSuggestedBin] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
+  const getdataPutawayMixed = async () => {
+    setLoading(true);
+    fetchPutawayMixed(item.wonum).then(res => {
+      console.log('tes fetch singgle', res.member[0]);
+      //set invuse that have status retur entered
+      const filteredInvUse = res.member[0].invuse.filter(
+        (inv: any) => inv.status === 'ENTERED' && inv.usetype === 'MIXED',
+      );
+      setInvUse(filteredInvUse);
+      setLoading(false);
+    });
+  };
+
   useEffect(() => {
-    //set invuse that have status retur entered
-    const filteredInvUse = item.invuse.filter(
-      (inv: any) => inv.status === 'ENTERED' && inv.usetype === 'MIXED',
-    );
-    setInvUse(filteredInvUse);
-    console.log('Filtered InvUse:', filteredInvUse);
+    getdataPutawayMixed();
   }, [item.invuse]);
 
   const handlePressItem = async (item: any) => {
@@ -117,6 +126,8 @@ const PutawayMaterialScreen = () => {
       payload.wms_finalbin,
     );
 
+    getdataPutawayMixed();
+
     setModalBinVisible(false);
   };
 
@@ -126,8 +137,10 @@ const PutawayMaterialScreen = () => {
       .then(res => {
         console.log('Complete return response:', res);
         ToastAndroid.show('Return completed successfully', ToastAndroid.SHORT);
+        // getdataPutawayMixed();
         // navigation.goBack();
         // reload the list
+        navigation.navigate('Scan WO Number');
       })
       .catch(err => {
         console.error('Error completing return:', err);
@@ -136,7 +149,9 @@ const PutawayMaterialScreen = () => {
   };
 
   const renderItem = ({item}: {item: string}) => {
-    const sideBarColor = item.invuseline[0]?.serialnumber ? '#A4DD00' : 'blue';
+    console.log('Render item xxx:', item);
+
+    const sideBarColor = item?.invuseline[0]?.serialnumber ? '#A4DD00' : 'blue';
 
     return (
       <TouchableOpacity

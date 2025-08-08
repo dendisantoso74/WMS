@@ -28,8 +28,8 @@ import {checkSerialNumber, taggingPo} from '../../services/materialRecive';
 const TagInspectScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item, invuseid} = route.params;
-  console.log('RFIDs from params:', item, invuseid);
+  const {item, poNumber} = route.params;
+  console.log('RFIDs from params:', item, poNumber);
 
   const [modalTag, setModalTag] = useState(false);
   const [selectTag, setSelectTag] = useState('');
@@ -39,7 +39,7 @@ const TagInspectScreen = () => {
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([
-    '4C5071020190000000091973',
+    '4C5071020190000000085322',
   ]);
 
   useEffect(() => {
@@ -130,11 +130,17 @@ const TagInspectScreen = () => {
       // });
       console.log('Selected Tag:', tag, 'Serial Number:', sn, 'Item:', id);
 
-      await taggingPo(id, sn, tag).then((res: any) => {
-        console.log('Tagging Response:', res);
-      });
+      await taggingPo(id, sn, tag)
+        .then((res: any) => {
+          // console.log('Tagging Response:', res);
+          Alert.alert('Success', `Tag ${tag} selected`);
+          navigation.navigate('Po Detail', {listrfid: poNumber});
+        })
+        .catch(error => {
+          // console.error('Error in tagging:', error.Error.message);
+          ToastAndroid.show(error.Error.message, ToastAndroid.SHORT);
+        });
 
-      Alert.alert('Success', `Tag ${tag} selected`);
       // navigation.goBack();
     } else {
       ToastAndroid.show('Please select a tag', ToastAndroid.SHORT);

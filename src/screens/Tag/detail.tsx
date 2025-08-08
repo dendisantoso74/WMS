@@ -9,12 +9,14 @@ import {
   TextInput,
   ToastAndroid,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {scanPoWtag} from '../../services/materialRecive';
 import {getData} from '../../utils/store';
 import {SerializedItem} from '../../utils/types';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -28,26 +30,32 @@ const TagDetailScreen = () => {
   const [search, setSearch] = useState('');
 
   const [datas, setDatas] = useState([]);
+  const [loading, setLoading] = useState(false); // <-- Add loading state
 
   useEffect(() => {
     console.log('RFIDs from params:', PoNumber);
 
     const fetchData = async () => {
+      setLoading(true);
       const site = await getData('site');
 
-      scanPoWtag(PoNumber).then((res: any) => {
-        console.log('RFIDs fetched successfully:', res.member);
-        if (res.member.length === 0) {
-          navigation.goBack();
-          Alert.alert(
-            'Information',
-            `${PoNumber} Not Found at site: ${site} `,
-            // [{text: 'OK', onPress: () => navigation.goBack()}],
-            // {cancelable: false},
-          );
-        }
-        setDatas(res.member[0].wms_serializeditem);
-      });
+      scanPoWtag(PoNumber)
+        .then((res: any) => {
+          console.log('RFIDs fetched successfully:', res.member);
+          if (res.member.length === 0) {
+            navigation.goBack();
+            Alert.alert(
+              'Information',
+              `${PoNumber} Not Found at site: ${site} `,
+              // [{text: 'OK', onPress: () => navigation.goBack()}],
+              // {cancelable: false},
+            );
+          }
+          setDatas(res.member[0].wms_serializeditem);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     };
     fetchData();
   }, [listrfid]);
@@ -62,6 +70,7 @@ const TagDetailScreen = () => {
         onPress={() =>
           navigation.navigate('Item to Tag', {
             item: item,
+            poNumber: listrfid,
           })
         }>
         <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
@@ -80,6 +89,7 @@ const TagDetailScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate toScreen="Po to Tag" />
       <View className="flex-row p-2 bg-blue-400">
         <Text className="font-bold text-white">PO Number</Text>
         <Text className="ml-10 font-bold text-white">{PoNumber}</Text>
@@ -100,13 +110,26 @@ const TagDetailScreen = () => {
           style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
-      <FlatList
-        data={datas}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+      {loading ? (
+        <View style={{flex: 1, marginTop: 32, alignItems: 'center'}}>
+          <ActivityIndicator size="large" color="#3674B5" />
+        </View>
+      ) : (
+        <FlatList
+          data={datas}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+          ListEmptyComponent={
+            !loading && (
+              <View style={{alignItems: 'center', marginTop: 32}}>
+                <Text style={{color: '#888'}}>No data found.</Text>
+              </View>
+            )
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };

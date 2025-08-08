@@ -62,7 +62,7 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
   showBarcodes = false,
   showRfids = false,
   showDevices = true,
-  promptText = 'Take your device to scan\nPO Number',
+  promptText = 'Take your device to scan',
   iconSource = require('../assets/images/rfid.png'),
   mode = 'multi', // 'rfid' or 'barcode'
 }) => {
@@ -418,8 +418,9 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
                     backgroundColor: '#fafafa',
                   }}
                   placeholderTextColor="#aaa"
+                  autoCapitalize="characters"
                   value={inputId}
-                  onChangeText={text => setInputId(text)}
+                  onChangeText={text => setInputId(text.toUpperCase())}
                   returnKeyType="done" // or "go", "next", "search", etc.
                   onSubmitEditing={() => {
                     onAutoNavigate && onAutoNavigate([inputId]);

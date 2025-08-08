@@ -49,8 +49,10 @@ export const ListRejectCode = async () => {
 export const ListPoWINSP = async () => {
   const site = await getData('site');
 
-  // const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&oslc.select=*&savedQuery=PO:POREV&oslc.where=siteid="${site}" and status="APPR" and receipts!="COMPLETE" and ponum="${site === 'TJB56' ? '%25BJS%25' : '%25BJS%25'}"`;
-  const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&savedQuery=PO:POREV&oslc.select=poid,ponum,vendor,orderdate,status,revisionnum,orgid,siteid,wms_matrectrans{issuetype,rowstamp,receiptquantity,itemnum,description,polinenum,packingslipnum,orderunit,issueunit,quantity,wms_matrectransid,conditioncode,status,rejectqty,acceptqty}&oslc.where=siteid="TJB56" and status="APPR" and receipts!="COMPLETE" and wms_matrectrans.status="WINSP"`;
+  // const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&savedQuery=PO:POREV&oslc.select=poid,ponum,vendor,orderdate,status,revisionnum,orgid,siteid,wms_matrectrans{issuetype,rowstamp,receiptquantity,itemnum,description,polinenum,packingslipnum,orderunit,issueunit,quantity,wms_matrectransid,conditioncode,status,rejectqty,acceptqty}&oslc.where=siteid="TJB56" and status="APPR" and receipts!="COMPLETE" and wms_matrectrans.status="WINSP"`;
+  // simple url just for list
+  const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&savedQuery=PO:POREV&oslc.select=poid,ponum,vendor,orderdate&oslc.where=siteid="${site}" and status="APPR" and receipts!="COMPLETE" and wms_matrectrans.status="WINSP"`;
+
   try {
     const res = await api.get(url);
     return res.data;
@@ -73,6 +75,8 @@ export const ListPoWINSP = async () => {
 // };
 
 export const ReceivePo = async (payload: any[]) => {
+  console.log('Receive Po payload:', payload);
+
   const url = '/maximo/oslc/os/WMS_MXMATRECTRANS?lean=1';
   try {
     const response = await api.post(url, payload, {
@@ -81,8 +85,11 @@ export const ReceivePo = async (payload: any[]) => {
         'Content-Type': 'application/json',
       },
     });
+    console.log('Receive Po response:', response.data);
+
     return response.data;
   } catch (error) {
+    console.error('Error in ReceivePo:', error);
     throw error;
   }
 };
@@ -168,8 +175,11 @@ export const taggingPo = async (
         'Content-Type': 'application/json',
       },
     });
+    console.log('Tagging Response:', response.data);
+
     return response.data;
   } catch (error) {
+    console.error('Error in taggingPo:', error);
     throw error;
   }
 };
@@ -273,6 +283,26 @@ export const completeTi = async (invuseId: string) => {
     const response = await api.post(url, null, {
       headers: {
         'x-method-override': 'PATCH',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPoWaitingInspect = async (ponum: string) => {
+  const siteId = await getData('site');
+
+  // const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&oslc.select=*&savedQuery=PO:POREV&oslc.where=siteid="${siteId}" and status="APPR" and receipts!="COMPLETE" and ponum="${ponum}"`;
+
+  const url = `/maximo/oslc/os/WMS_MXRECEIPT?lean=1&savedQuery=PO:POREV&oslc.select=poid,ponum,vendor,orderdate,status,revisionnum,orgid,siteid,wms_matrectrans{issuetype,rowstamp,receiptquantity,itemnum,description,polinenum,packingslipnum,orderunit,issueunit,quantity,wms_matrectransid,conditioncode,status,rejectqty,acceptqty}&oslc.where=siteid="${siteId}" and status="APPR" and receipts!="COMPLETE" and wms_matrectrans.status="WINSP" and ponum="${ponum}"`;
+
+  try {
+    const response = await api.get(url, {
+      headers: {
+        // 'maxauth': 'YW5kcm9tZWRpYTphbmRyb21lZGlh', // Add if needed
+        // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
     return response.data;

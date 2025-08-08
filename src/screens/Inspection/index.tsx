@@ -65,7 +65,6 @@ const InspectionScreen = () => {
       onPress={() =>
         navigation.navigate('InspectionReceivingPO', {
           ponum: item.ponum,
-          item: item,
         })
       }>
       <View>

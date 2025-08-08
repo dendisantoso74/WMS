@@ -366,7 +366,11 @@ const AppNavigator = () => {
 
           {/* Tag Menu */}
           <Stack.Screen name="Po to Tag" component={TagScreen} />
-          <Stack.Screen name="Po Detail" component={TagDetailScreen} />
+          <Stack.Screen
+            name="Po Detail"
+            options={{title: 'Tagging Item'}}
+            component={TagDetailScreen}
+          />
           <Stack.Screen name="Item to Tag" component={TagInspectScreen} />
 
           <Stack.Screen

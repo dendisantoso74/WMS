@@ -38,7 +38,8 @@ const MyTransferInstructionSubmitScreen = () => {
         );
       } else {
         ToastAndroid.show('Transfer instruction completed', ToastAndroid.SHORT);
-        navigation.goBack();
+        // navigation.goBack();
+        navigation.navigate('My Transfer Instruction Scan');
       }
     });
   };
