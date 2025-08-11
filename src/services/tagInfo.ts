@@ -24,7 +24,7 @@ export const postRemarkAndConditionCode = async (
 ) => {
   try {
     const response = await axios.post(
-      `http://192.168.77.43:9080/maximo/oslc/os/WMS_MXSERIALIZEDITEM/${wmsId}`,
+      `/maximo/oslc/os/WMS_MXSERIALIZEDITEM/${wmsId}`,
       body,
       {
         params: {lean},
