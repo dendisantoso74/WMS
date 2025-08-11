@@ -12,6 +12,7 @@ import MenuCard from '../compnents/MenuCard';
 import {StyleSheet} from 'react-native';
 import {getPersonByLoginId} from '../services/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PreventBackNavigate from '../utils/preventBack';
 
 const HomeWMSScreen = () => {
   const navigation = useNavigation<any>();
@@ -50,6 +51,7 @@ const HomeWMSScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
+      <PreventBackNavigate />
       <ScrollView contentContainerStyle={{paddingBottom: 24}}>
         {/* Header Section */}
         <View className="px-2 pt-6 pb-4 bg-white">
@@ -102,27 +104,29 @@ const HomeWMSScreen = () => {
         </View>
 
         {/* Menu Options */}
-        <View className="px-2 mt-4 space-y-3">
-          {/* Top Row */}
-          <View className="flex-row gap-2 space-x-3">
-            <MenuCard
-              onPress={() => navigation.navigate('Transfer Instruction')}
-              title="Open Transfer Instruction"
-              count={0}
-              icon="arrow-up-right"
-              color="bg-yellow-400"
-              textColor="text-white"
-            />
-            <MenuCard
-              onPress={() => navigation.navigate('My Transfer Instruction')}
-              title="My Transfer Instruction"
-              count={0}
-              icon="file-text"
-              color="bg-green-600"
-              textColor="text-white"
-            />
+        {site === 'TJB56' && (
+          <View className="px-2 mt-4 space-y-3">
+            {/* Top Row */}
+            <View className="flex-row gap-2 space-x-3">
+              <MenuCard
+                onPress={() => navigation.navigate('Transfer Instruction')}
+                title="Open Transfer Instruction"
+                count={0}
+                icon="arrow-up-right"
+                color="bg-yellow-400"
+                textColor="text-white"
+              />
+              <MenuCard
+                onPress={() => navigation.navigate('My Transfer Instruction')}
+                title="My Transfer Instruction"
+                count={0}
+                icon="file-text"
+                color="bg-green-600"
+                textColor="text-white"
+              />
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Menu Options have 3 menu in 1 line */}
         <View className="px-2 mt-4 space-y-3 ">
@@ -149,7 +153,7 @@ const HomeWMSScreen = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="flex-1 bg-white shadow"
+              className="flex-1 bg-white shadow rounded-xl"
               onPress={() => navigation.navigate('Inspection')}>
               <View className="py-3">
                 <View className="flex-row justify-center px-4 mb-3">
@@ -162,72 +166,83 @@ const HomeWMSScreen = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              className="flex-1 bg-white shadow rounded-xl"
-              onPress={() => navigation.navigate('Po to Tag')}>
-              <View className="py-3">
-                <View className="flex-row justify-between px-4 mb-3">
-                  <Icon library="Feather" name="tag" size={24} />
-                  <Text className="mr-4 text-lg font-bold ">0</Text>
-                </View>
+            {site === 'TJB56' && (
+              <TouchableOpacity
+                className="flex-1 bg-white shadow rounded-xl"
+                onPress={() => navigation.navigate('Po to Tag')}>
+                <View className="py-3">
+                  <View className="flex-row justify-between px-4 mb-3">
+                    <Icon library="Feather" name="tag" size={24} />
+                    <Text className="mr-4 text-lg font-bold ">0</Text>
+                  </View>
 
-                <Text className="p-1 ml-5 font-bold text-nowrap">Tag</Text>
-              </View>
-            </TouchableOpacity>
+                  <Text className="p-1 ml-5 font-bold text-nowrap">Tag</Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
         {/* Menu Options */}
-        <View className="px-2 mt-4 space-y-3">
-          {/* Top Row */}
-          <View className="flex-row gap-2 space-x-3">
-            <MenuCard
-              onPress={() => navigation.navigate('Material Issue Scan')}
-              className="px-3"
-              title="Material Issue"
-              // count={0}
-              icon="upload"
-              color="bg-red-400"
-              textColor="text-white"
-            />
+        {site === 'TJB56' && (
+          <View className="px-2 mt-4 space-y-3">
+            {/* Top Row */}
+            <View className="flex-row gap-2 space-x-3">
+              <MenuCard
+                onPress={() => navigation.navigate('Material Issue Scan')}
+                className="px-3"
+                title="Material Issue"
+                // count={0}
+                icon="upload"
+                color="bg-red-400"
+                textColor="text-white"
+              />
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Menu Options have 2 menu in 1 line */}
-        <View className="px-2 mt-4 space-y-3">
-          <View className="flex-row space-x-3" style={styles.shadowCard}>
-            <TouchableOpacity
-              className="w-1/2 bg-blue-400 shadow"
-              style={styles.roundedCard}
-              onPress={() => navigation.navigate('Material Return Scan')}>
-              <View className="py-3">
-                <View className="flex-row justify-between px-4 mb-3">
-                  <Icon library="Feather" name="home" color="white" size={24} />
-                  <Text className="mr-4 text-lg font-bold text-white">0</Text>
+        {site === 'TJB56' && (
+          <View className="px-2 mt-4 space-y-3">
+            <View className="flex-row space-x-3" style={styles.shadowCard}>
+              <TouchableOpacity
+                className="w-1/2 bg-blue-400 shadow"
+                style={styles.roundedCard}
+                onPress={() => navigation.navigate('Material Return Scan')}>
+                <View className="py-3">
+                  <View className="flex-row justify-between px-4 mb-3">
+                    <Icon
+                      library="Feather"
+                      name="home"
+                      color="white"
+                      size={24}
+                    />
+                    <Text className="mr-4 text-lg font-bold text-white">0</Text>
+                  </View>
+
+                  <Text className={'font-bold p-1 text-nowrap text-white'}>
+                    Material Return
+                  </Text>
                 </View>
+              </TouchableOpacity>
 
-                <Text className={'font-bold p-1 text-nowrap text-white'}>
-                  Material Return
-                </Text>
-              </View>
-            </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-white shadow rounded-xl"
+                onPress={() => navigation.navigate('Scan WO Number')}>
+                <View className="py-3">
+                  <View className="flex-row justify-center px-4 mb-3">
+                    <Icon library="Feather" name="tag" size={24} />
+                    <Text className="mr-4 text-lg font-bold">0</Text>
+                  </View>
 
-            <TouchableOpacity
-              className="flex-1 bg-white shadow rounded-xl"
-              onPress={() => navigation.navigate('Scan WO Number')}>
-              <View className="py-3">
-                <View className="flex-row justify-center px-4 mb-3">
-                  <Icon library="Feather" name="tag" size={24} />
-                  <Text className="mr-4 text-lg font-bold">0</Text>
+                  <Text className="p-1 font-bold text-center text-nowrap">
+                    Putaway
+                  </Text>
                 </View>
-
-                <Text className="p-1 font-bold text-center text-nowrap">
-                  Putaway
-                </Text>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Menu Options */}
         <View className="px-2 mt-4 space-y-3">

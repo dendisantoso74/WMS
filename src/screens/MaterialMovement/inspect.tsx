@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,47 +8,240 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
-
-const dummyRfids = ['00000000000000000000'];
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  connectToDevice,
+  getAllDevices,
+  type ZebraResultPayload,
+  type ZebraRfidResultPayload,
+} from 'react-native-zebra-rfid-barcode';
+import {debounce, set} from 'lodash';
+import {
+  createMaterialMovement,
+  getSerializedItemByTagCodes,
+} from '../../services/materialMovement';
+import ModalApp from '../../compnents/ModalApp';
+import {getData} from '../../utils/store';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const MovementSmartScanScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {binInfo} = route.params;
+  console.log('Bin Info from params:', binInfo);
 
-  const [rfids, setRfids] = useState(dummyRfids);
-  const [search, setSearch] = useState('');
+  const [tagItems, setTagItems] = useState('');
+  const [itemInfo, setItemInfo] = useState<any>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [tempPayload, setTempPayload] = useState<any>(null);
+
+  useEffect(() => {
+    getData('MAXuser').then(userData => {
+      console.log('User Data:', userData);
+      setUserData(userData);
+    });
+
+    tagItems &&
+      getSerializedItemByTagCodes([tagItems]).then(res => {
+        console.log('RFID Data Response:', res.member);
+        setItemInfo(res.member);
+        setLoading(false); // Stop loading
+      });
+  }, [tagItems]);
+
+  // rfid scanner
+  const handleRfidEvent = useCallback(
+    debounce((newData: string) => {
+      console.log('RFID Data:', newData);
+      // if newdata is array make popup to select item for set to search
+      setLoading(true); // Start loading
+      // getSerializedItemByTagCodes([newData]).then(res => {
+      //   console.log('RFID Data Response:', res.member);
+      //   setItemInfo(res.member);
+      //   setLoading(false); // Stop loading
+      // });
+
+      setTagItems(newData);
+    }, 200),
+    [],
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const rfidEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_RFID,
+        (e: ZebraRfidResultPayload) => {
+          handleRfidEvent(e.data);
+        },
+      );
+    }, []),
+  );
+
+  const handlePayload = async () => {
+    if (!itemInfo || !binInfo) {
+      ToastAndroid.show('Missing bin or item info', ToastAndroid.SHORT);
+      return;
+    }
+
+    // Build invuseline array from itemInfo
+    const invuseline = itemInfo.map((item: any) => ({
+      linetype: 'ITEM',
+      tositeid: binInfo.siteid || '-',
+      frombin: item.wms_bin,
+      validated: false,
+      fromstoreloc: item.storeroom,
+      quantity: item.qtyserialized,
+      serialnumber: item.serialnumber,
+      toorgid: binInfo.orgid || '-',
+      tostoreloc: binInfo.storeloc || '-',
+      tobin: binInfo.bin,
+      orgid: binInfo.orgid || '-',
+      invuselinenum: item.polinenum || item.invuselinenum || 0,
+      itemnum: item.itemnum,
+      itemsetid: item.itemsetid || '-',
+      usetype: 'TRANSFER',
+      wms_usetype: 'TRANSFER',
+    }));
+
+    // Build main payload
+    const payload = {
+      description: `MATERIAL MOVEMENT ${new Date().toLocaleString()}`,
+      wms_isgenerated: true,
+      siteid: itemInfo[0].siteid || '-',
+      invowner: userData ? userData : 'Unknown User',
+      usetype: 'TRANSFER',
+      fromstoreloc: itemInfo[0].storeroom || '-',
+      status: 'COMPLETE',
+      invuseline,
+    };
+
+    try {
+      // const res = await createMaterialMovement(payload);
+      console.log('Payload:', payload);
+      setTempPayload(payload);
+
+      // ToastAndroid.show('Material movement updated!', ToastAndroid.SHORT);
+      setModalVisible(true);
+      // Optionally navigate or refresh
+    } catch (error) {
+      ToastAndroid.show('Failed to update movement', ToastAndroid.SHORT);
+      setModalVisible(false);
+    }
+  };
+
+  const handleOnConfirm = async () => {
+    createMaterialMovement(tempPayload)
+      .then(res => {
+        console.log('Material movement created:', res);
+        ToastAndroid.show(
+          'Material movement created successfully',
+          ToastAndroid.SHORT,
+        );
+        setModalVisible(false);
+        navigation.navigate('Material Movement');
+      })
+      .catch(err => {
+        setModalVisible(false);
+
+        console.error('Error creating material movement:', err);
+        Alert.alert(
+          'Error',
+          err.Error.message || 'An error occurred while material movement.',
+        );
+      });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className="bg-blue-400 p-2">
-        <Text className="text-white text-center">To Bin : MS-A1L-4-3-3-2</Text>
+      <PreventBackNavigate toScreen="Material Movement" />
+      <View className="p-2 bg-blue-400">
+        <Text className="text-center text-white">To Bin : {binInfo?.bin}</Text>
       </View>
 
-      <View className="bg-blue-200 px-2 py-2 ">
-        <View className="mr-3 flex-row items-center gap-3">
-          <Text className="font-bold text-blue-600">
+      <View className="px-2 py-2 bg-blue-200 ">
+        <View className="flex-row items-center gap-3 mr-3">
+          <Text className="text-blue-600">
             Information : This is smartscan, please scan on material tag
           </Text>
         </View>
       </View>
       <View style={styles.filterContainer}></View>
-      <FlatList
-        data={rfids}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
-      <View style={styles.buttonContainer}>
-        <ButtonApp
-          label="MOVE"
-          size="large"
-          color="primary"
-          onPress={() => navigation.navigate('Movement Page')}
+      {/* FlatList to show scanned tagItems */}
+      {loading ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size="large" color="#3674B5" />
+        </View>
+      ) : (
+        <FlatList
+          data={itemInfo}
+          renderItem={({item, index}) => (
+            <TouchableOpacity
+              disabled
+              style={styles.rfidCard}
+              onPress={() => {}}>
+              <View style={[styles.sideBar, {backgroundColor: 'blue'}]} />
+              <View className="flex-row my-2">
+                <View className="flex-col justify-start">
+                  <Text className="font-bold">
+                    Serial Number : {item.serialnumber}
+                  </Text>
+                  <Text className="">
+                    {item.itemnum} / {item.description}
+                  </Text>
+                  <Text className="">
+                    Qty : {item.qtyserialized} {item.unitserialized}
+                  </Text>
+                  <Text>Bin : {item.wms_bin}</Text>
+                  {/* <Text className="">Putaway Qty : 0 METER</Text> */}
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item, index) => `${item}-${index}`}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+          ListEmptyComponent={
+            <View style={{alignItems: 'center', marginTop: 32}}>
+              <Text style={{color: '#888'}}>No tags scanned yet.</Text>
+            </View>
+          }
         />
-      </View>
+      )}
+      {itemInfo && (
+        <View style={styles.buttonContainer}>
+          <ButtonApp
+            label="MOVE"
+            size="large"
+            color="primary"
+            onPress={() => handlePayload()}
+          />
+        </View>
+      )}
+
+      <ModalApp
+        title="Information"
+        type="confirmation"
+        visible={modalVisible}
+        content="Do you want to update material movement?"
+        onClose={() => setModalVisible(false)}
+        onConfirm={() => {
+          handleOnConfirm();
+          console.log('Material movement confirmed', tempPayload);
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -108,7 +301,7 @@ const styles = StyleSheet.create({
   sideBar: {
     width: 18,
     height: '100%',
-    backgroundColor: '#b0b0b0',
+    backgroundColor: 'blue',
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
     marginRight: 16,

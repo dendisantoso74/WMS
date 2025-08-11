@@ -167,6 +167,8 @@ export const taggingPo = async (
     serialnumber: serialNumber,
     tagcode: tagCode,
   };
+  console.log('Tagging Po payload, item id:', payload, itemId);
+
   try {
     const response = await api.post(url, payload, {
       headers: {

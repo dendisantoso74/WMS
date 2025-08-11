@@ -171,7 +171,7 @@ const InspectionReceivingScreen = () => {
 
     return (
       <TouchableOpacity
-        disabled={acceptQty + rejectQty === receiptQty}
+        disabled={acceptQty + rejectQty === item.item.quantity}
         onPress={() => {
           // setModalVisible(true);
           // setSelectedData(item.item.polinenum);

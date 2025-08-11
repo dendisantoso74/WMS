@@ -39,7 +39,7 @@ const TagInspectScreen = () => {
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([
-    '4C5071020190000000085322',
+    '4C5071020190000000085556',
   ]);
 
   useEffect(() => {
