@@ -12,7 +12,7 @@ export const getPersonByLoginId = async (loginId: string) => {
     loginId +
     '"}';
   try {
-    console.log(`Fetching person data for loginId: ${url}`);
+    console.log(`Fetching person data for loginId: ${loginId}`);
 
     const response = await api.get(url);
     return response.data;

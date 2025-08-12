@@ -26,7 +26,6 @@ const HomeWMSScreen = () => {
     // or initializing services.
     getPersonByLoginId(user).then(res => {
       // Handle the response from getPersonByLoginId;
-      console.log('User Data:', res.member[0]);
       setUserData(res.member[0]);
     });
   }, [user]);

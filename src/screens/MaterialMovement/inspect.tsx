@@ -50,7 +50,6 @@ const MovementSmartScanScreen = () => {
 
   useEffect(() => {
     getData('MAXuser').then(userData => {
-      console.log('User Data:', userData);
       setUserData(userData);
     });
 
@@ -146,10 +145,7 @@ const MovementSmartScanScreen = () => {
     createMaterialMovement(tempPayload)
       .then(res => {
         console.log('Material movement created:', res);
-        ToastAndroid.show(
-          'Material movement created successfully',
-          ToastAndroid.SHORT,
-        );
+        ToastAndroid.show('Material movement successfully', ToastAndroid.SHORT);
         setModalVisible(false);
         navigation.navigate('Material Movement');
       })

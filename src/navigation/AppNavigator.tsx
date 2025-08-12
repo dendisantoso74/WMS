@@ -52,7 +52,6 @@ import DetailMaterialStockOpnameScreen from '../screens/StockOpname/detailmateri
 import MaterialMovementScreen from '../screens/MaterialMovement';
 import MaterialMovementScanScreen from '../screens/MaterialMovement/detail';
 import MovementSmartScanScreen from '../screens/MaterialMovement/inspect';
-import MovementPageScreen from '../screens/MaterialMovement/Movementpage';
 import ScanBinScreen from '../screens/TagBin/scanBin';
 import RegisterBinScreen from '../screens/TagBin/registerBin';
 import BinDetailScreen from '../screens/RetagingItem/binDetail';
@@ -339,11 +338,6 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Movement Smart Scan"
             component={MovementSmartScanScreen}
-            options={{title: 'Material Movement'}}
-          />
-          <Stack.Screen
-            name="Movement Page"
-            component={MovementPageScreen}
             options={{title: 'Material Movement'}}
           />
 

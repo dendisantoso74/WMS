@@ -35,7 +35,6 @@ const MaterialMovementScreen = () => {
   const [search, setSearch] = useState('');
   const [tagBin, setTagBin] = useState('');
   const [binInfo, setBinInfo] = useState<any>(null);
-  const [lastScannedBin, setLastScannedBin] = useState('');
 
   // rfid scanner
   const handleRfidEvent = useCallback(
@@ -109,7 +108,7 @@ const MaterialMovementScreen = () => {
 
       <View style={styles.buttonContainer}>
         <ButtonApp
-          label="Next"
+          label="START SCAN"
           size="large"
           color="primary"
           onPress={() => setIsShowScan(!isShowScan)}
@@ -123,7 +122,7 @@ const MaterialMovementScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
-              Scan RFID Bin
+              Please scan RFID Bin destination
             </Text>
             <View className="flex-row justify-center py-3 align-items-center">
               <Image
