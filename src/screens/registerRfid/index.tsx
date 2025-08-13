@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
@@ -88,9 +89,7 @@ const RegisterRfidScreen = () => {
         onEndReachedThreshold={0.2}
         ListFooterComponent={
           loading ? (
-            <View style={{padding: 16, alignItems: 'center'}}>
-              <Text>Loading...</Text>
-            </View>
+            <ActivityIndicator className="mt-1" size="large" color="#3674B5" />
           ) : null
         }
       />

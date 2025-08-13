@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
@@ -75,7 +76,6 @@ const TransferInstructionScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {console.log('list', transferInstructions)}
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
@@ -92,13 +92,17 @@ const TransferInstructionScreen = () => {
           style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
-      <FlatList
-        data={filteredInstructions}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+      {loading ? (
+        <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
+      ) : (
+        <FlatList
+          data={filteredInstructions}
+          renderItem={renderItem}
+          keyExtractor={item => item}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+        />
+      )}
     </SafeAreaView>
   );
 };

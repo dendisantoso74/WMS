@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
@@ -99,7 +100,7 @@ const InspectionScreen = () => {
         />
       </View>
       {isLoading ? (
-        <Loading visible={true} text="Loading..." />
+        <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
       ) : (
         <FlatList
           data={filteredData}

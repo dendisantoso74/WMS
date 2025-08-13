@@ -8,10 +8,12 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {getTagBinList} from '../../services/tagBin';
 import ButtonApp from '../../compnents/ButtonApp';
 import {useNavigation} from '@react-navigation/native';
+import Icon from '../../compnents/Icon';
 
 const TagBinScreen = () => {
   const navigation = useNavigation<any>();
@@ -91,23 +93,20 @@ const TagBinScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={{padding: 12}}>
+      <View style={{paddingBottom: 4}}>
         <TextInput
-          style={{
-            backgroundColor: '#fff',
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: '#ccc',
-            paddingHorizontal: 12,
-            paddingVertical: 3,
-            fontSize: 14,
-            color: '#222',
-            marginBottom: 8,
-          }}
+          style={styles.filterInput}
           placeholder="Filter by Bin Number"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
+        />
+        <Icon
+          library="Feather"
+          name="search"
+          size={20}
+          color="#b0b0b0"
+          style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
       <FlatList
@@ -120,9 +119,7 @@ const TagBinScreen = () => {
         onEndReachedThreshold={0.2}
         ListFooterComponent={
           loading ? (
-            <View style={{padding: 16, alignItems: 'center'}}>
-              <Text>Loading...</Text>
-            </View>
+            <ActivityIndicator className="mt-1" size="large" color="#3674B5" />
           ) : null
         }
       />
@@ -170,6 +167,19 @@ const styles = StyleSheet.create({
     bottom: 0,
     padding: 16,
     backgroundColor: 'transparent',
+  },
+  filterInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    fontSize: 14,
+    color: '#222',
+    // marginBottom: 4,
+    marginTop: 6,
+    marginHorizontal: 8,
   },
 });
 
