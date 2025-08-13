@@ -81,6 +81,15 @@ const OptionsScreen = () => {
         <Icon name="chevron-right" size={24} color="#888" />
       </TouchableOpacity>
 
+      {/* Connect reader */}
+      <Text style={styles.sectionTitle}>Connect Reader</Text>
+      <TouchableOpacity
+        style={styles.menuRow}
+        onPress={() => navigation.navigate('Reader Connect')}>
+        <Text style={styles.menuText}>Connect to RFID Reader</Text>
+        <Icon name="chevron-right" size={24} color="#888" />
+      </TouchableOpacity>
+
       {/* Language */}
       {/* <Text style={styles.sectionTitle}>Language</Text>
       <TouchableOpacity style={styles.menuRow} onPress={handleChangeLanguage}>

@@ -122,7 +122,7 @@ const MaterialMovementScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
-              Please scan RFID Bin destination
+              Please scan RFID bin destination
             </Text>
             <View className="flex-row justify-center py-3 align-items-center">
               <Image

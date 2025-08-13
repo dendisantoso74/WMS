@@ -55,6 +55,7 @@ import MovementSmartScanScreen from '../screens/MaterialMovement/inspect';
 import ScanBinScreen from '../screens/TagBin/scanBin';
 import RegisterBinScreen from '../screens/TagBin/registerBin';
 import BinDetailScreen from '../screens/RetagingItem/binDetail';
+import ConnectRFIDReader from '../screens/ConnectRFIDReader';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -217,6 +218,20 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Material Receive"
             component={MaterialReceiveScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
           />
           <Stack.Screen
             name="Material Receive Detail"
@@ -259,8 +274,22 @@ const AppNavigator = () => {
           {/*Putaway*/}
           <Stack.Screen
             name="Scan WO Number"
-            options={{title: 'Put Away Material'}}
             component={PutawayScanWoScreen}
+            options={({navigation}) => ({
+              // headerRight: () => (
+              //   <TouchableOpacity
+              //     onPress={() => navigation.navigate('Reader Connect')}
+              //     style={{marginRight: 16}}>
+              //     <Icon
+              //       library="Feather"
+              //       name="bluetooth"
+              //       size={22}
+              //       color="#fff"
+              //     />
+              //   </TouchableOpacity>
+              // ),
+              title: 'Put Away Material',
+            })}
           />
           <Stack.Screen
             name="Put Away Material"
@@ -275,7 +304,21 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Material Issue Scan"
             component={MaterialIssueScanScreen}
-            options={{title: 'Scan WO Number'}}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+              title: 'Scan WO Number',
+            })}
           />
           <Stack.Screen
             name="Material Issue Inspect"
@@ -293,7 +336,21 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Material Return Scan"
             component={MaterialReturnScanScreen}
-            options={{title: 'Scan WO Number'}}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+              title: 'Scan WO Number',
+            })}
           />
           <Stack.Screen
             name="Material Return Detail"
@@ -329,6 +386,20 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Material Movement"
             component={MaterialMovementScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
           />
           <Stack.Screen
             name="Material Movement Scan"
@@ -359,7 +430,25 @@ const AppNavigator = () => {
           />
 
           {/* Tag Menu */}
-          <Stack.Screen name="Po to Tag" component={TagScreen} />
+          <Stack.Screen
+            name="Po to Tag"
+            component={TagScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
+
           <Stack.Screen
             name="Po Detail"
             options={{title: 'Tagging Item'}}
@@ -374,6 +463,7 @@ const AppNavigator = () => {
           />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Options" component={OptionsScreen} />
+          <Stack.Screen name="Reader Connect" component={ConnectRFIDReader} />
         </>
       ) : (
         <>

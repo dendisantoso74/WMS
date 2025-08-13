@@ -295,47 +295,48 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
       <View style={styles.container}>
         <View className="h-full border">
           {showDevices && (
-            <View style={styles.deviceListContainer}>
-              <Text style={styles.deviceListTitle}>
-                Device:
-                {/* {listDevices.length} */}
-              </Text>
-              <FlatList
-                data={listDevices}
-                // horizontal
-                // showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.deviceListContent}
-                // className="border"
-                renderItem={({item}) => (
-                  <TouchableOpacity
-                    onPress={() => connectToDevice(item)}
-                    style={[
-                      styles.deviceCard,
-                      connectedDevice === item && {
-                        borderColor: '#22c55e',
-                        borderWidth: 2,
-                        backgroundColor: '#e0ffe7',
-                      },
-                    ]}
-                    activeOpacity={0.7}>
-                    <Text style={styles.deviceCardText}>{item}</Text>
-                    {connectedDevice === item ? (
-                      <Text
-                        style={{
-                          color: '#22c55e',
-                          fontWeight: 'bold',
-                          marginTop: 4,
-                        }}>
-                        Connected
-                      </Text>
-                    ) : (
-                      <Text style={styles.deviceCardHint}>Tap to connect</Text>
-                    )}
-                  </TouchableOpacity>
-                )}
-                keyExtractor={item => item}
-              />
-            </View>
+            <View className="mt-24"></View>
+            // <View style={styles.deviceListContainer}>
+            //   <Text style={styles.deviceListTitle}>
+            //     Device:
+            //     {/* {listDevices.length} */}
+            //   </Text>
+            //   <FlatList
+            //     data={listDevices}
+            //     // horizontal
+            //     // showsHorizontalScrollIndicator={false}
+            //     contentContainerStyle={styles.deviceListContent}
+            //     // className="border"
+            //     renderItem={({item}) => (
+            //       <TouchableOpacity
+            //         onPress={() => connectToDevice(item)}
+            //         style={[
+            //           styles.deviceCard,
+            //           connectedDevice === item && {
+            //             borderColor: '#22c55e',
+            //             borderWidth: 2,
+            //             backgroundColor: '#e0ffe7',
+            //           },
+            //         ]}
+            //         activeOpacity={0.7}>
+            //         <Text style={styles.deviceCardText}>{item}</Text>
+            //         {connectedDevice === item ? (
+            //           <Text
+            //             style={{
+            //               color: '#22c55e',
+            //               fontWeight: 'bold',
+            //               marginTop: 4,
+            //             }}>
+            //             Connected
+            //           </Text>
+            //         ) : (
+            //           <Text style={styles.deviceCardHint}>Tap to connect</Text>
+            //         )}
+            //       </TouchableOpacity>
+            //     )}
+            //     keyExtractor={item => item}
+            //   />
+            // </View>
           )}
 
           {/* logo scan */}

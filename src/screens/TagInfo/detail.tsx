@@ -12,9 +12,10 @@ import {
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {ScanPo} from '../../services/materialRecive';
-import {tagInfo} from '../../services/tagInfo';
-import {set} from 'lodash';
+import {postRemarkAndConditionCode, tagInfo} from '../../services/tagInfo';
+import {CONDITION_CODE_OPTIONS} from '../../utils/data';
+import {Dropdown} from 'react-native-element-dropdown';
+import ModalApp from '../../compnents/ModalApp';
 
 const TagInfoDetailScreen = () => {
   const navigation = useNavigation<any>();
@@ -25,8 +26,11 @@ const TagInfoDetailScreen = () => {
   const [wmsSerializeditem, setWmsSerializeditem] = useState([]);
   const [wmsBin, setWmsBin] = useState();
   const [loading, setLoading] = useState(false); // <-- Add loading state
+  const [remark, setRemark] = useState('');
+  const [conditionCode, setConditionCode] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
-  useEffect(() => {
+  const getInfo = async () => {
     setLoading(true);
     tagInfo(listrfid[listrfid.length - 1])
       .then((res: any) => {
@@ -50,6 +54,10 @@ const TagInfoDetailScreen = () => {
 
         if (res.member[0]?.wms_serializeditem) {
           setWmsSerializeditem(res.member[0]?.wms_serializeditem[0] || []);
+          setRemark(res.member[0]?.wms_serializeditem[0].remark || '');
+          setConditionCode(
+            res.member[0]?.wms_serializeditem[0].conditioncode || '',
+          );
         }
         if (res.member[0]?.wms_bin) {
           setWmsBin(res.member[0]?.wms_bin[0]);
@@ -58,10 +66,28 @@ const TagInfoDetailScreen = () => {
         console.log('infooooo', res.member[0]);
       })
       .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    getInfo();
   }, []);
 
-  const handleUpdate = () => {
+  const handleUpdate = async (id: string) => {
     // TODO: Implement update logic
+    postRemarkAndConditionCode(id, {
+      remark: remark,
+      conditioncode: conditionCode,
+    })
+      .then(res => {
+        ToastAndroid.show('Update successful', ToastAndroid.SHORT);
+        console.log('Update response:', res);
+        getInfo(); // Refresh data after update
+      })
+      .catch(err => {
+        console.error('Error updating remark and condition code:', err);
+        ToastAndroid.show('Update failed', ToastAndroid.SHORT);
+        Alert.alert('Error', err.Error.message || 'Undientified error');
+      });
   };
 
   return (
@@ -73,7 +99,7 @@ const TagInfoDetailScreen = () => {
       ) : (
         <View style={styles.flexContainer}>
           <ScrollView contentContainerStyle={styles.scrollContent}>
-            <View style={styles.container}>
+            <View className="mt-2" style={styles.container}>
               <Text style={styles.label}>Tag Code</Text>
               <TextInput
                 style={[styles.input, styles.disabledInput]}
@@ -156,17 +182,23 @@ const TagInfoDetailScreen = () => {
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Condition Code</Text>
                     <View style={styles.conditionBox}>
-                      <Text style={styles.conditionText}>
-                        {wmsSerializeditem.conditioncode}
-                      </Text>
+                      <Dropdown
+                        // style={{height: 40, width: '100%'}}
+                        data={CONDITION_CODE_OPTIONS}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Select Condition Code"
+                        value={conditionCode}
+                        onChange={item => setConditionCode(item.value)}
+                      />
                     </View>
                   </View>
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Remark</Text>
                     <TextInput
                       style={[styles.input, styles.remarkInput]}
-                      value={datas?.description ? datas?.description : '-'}
-                      // editable={false}
+                      value={remark}
+                      onChangeText={setRemark}
                       multiline
                     />
                   </View>
@@ -174,16 +206,32 @@ const TagInfoDetailScreen = () => {
               )}
             </View>
           </ScrollView>
-          {/* <View style={styles.buttonContainerFixed}>
-            <ButtonApp
-              label="Update"
-              onPress={handleUpdate}
-              size="large"
-              color="primary"
-            />
-          </View> */}
+          {!wmsBin && (
+            <View style={styles.buttonContainerFixed}>
+              <ButtonApp
+                label="Update"
+                onPress={() =>
+                  // handleUpdate(wmsSerializeditem.wms_serializeditemid)
+                  setModalVisible(true)
+                }
+                size="large"
+                color="primary"
+              />
+            </View>
+          )}
         </View>
       )}
+      <ModalApp
+        visible={modalVisible}
+        content="Do you want to update remark and condition code?"
+        onClose={() => setModalVisible(false)}
+        title="Confirmation"
+        type="confirmation"
+        onConfirm={() => {
+          handleUpdate(wmsSerializeditem.wms_serializeditemid);
+          setModalVisible(false);
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -208,7 +256,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 15,
     marginBottom: 4,
-    marginTop: 10,
+    // marginTop: 10,
     color: '#222',
   },
   input: {

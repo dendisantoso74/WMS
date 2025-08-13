@@ -74,7 +74,7 @@ const MovementSmartScanScreen = () => {
       // });
 
       setTagItems(newData);
-    }, 200),
+    }, 1000),
     [],
   );
 
@@ -190,7 +190,7 @@ const MovementSmartScanScreen = () => {
               onPress={() => {}}>
               <View style={[styles.sideBar, {backgroundColor: 'blue'}]} />
               <View className="flex-row my-2">
-                <View className="flex-col justify-start">
+                <View className="mr-3">
                   <Text className="font-bold">
                     Serial Number : {item.serialnumber}
                   </Text>
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue',
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
-    marginRight: 16,
+    marginRight: 8,
   },
   rfidText: {
     fontSize: 14,

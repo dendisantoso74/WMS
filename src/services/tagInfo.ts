@@ -16,26 +16,24 @@ export const tagInfo = async (id: string) => {
 
 export const postRemarkAndConditionCode = async (
   wmsId: string | number,
-  cookie: string,
-  xMethodOverride: string = 'PATCH',
-  patchType: string = 'MERGE',
-  lean: number = 1,
   body: any,
 ) => {
+  console.log('Posting remark and condition code:', body);
+
   try {
-    const response = await axios.post(
-      `/maximo/oslc/os/WMS_MXSERIALIZEDITEM/${wmsId}`,
+    const response = await api.post(
+      `/maximo/oslc/os/WMS_MXSERIALIZEDITEM/${wmsId}?lean=1`,
       body,
       {
-        params: {lean},
         headers: {
-          Cookie: cookie,
-          'X-Method-Override': xMethodOverride,
-          'Patch-Type': patchType,
+          'x-method-override': 'PATCH',
+          'Patch-Type': 'MERGE',
           'Content-Type': 'application/json',
         },
       },
     );
+    console.log('Response from postRemarkAndConditionCode:', response.data);
+
     return response.data;
   } catch (error) {
     console.error('Error updating remark and condition code:', error);

@@ -23,3 +23,10 @@ export const ElocatorData = [
     bus_category: null,
   },
 ];
+
+export const CONDITION_CODE_OPTIONS = [
+  {label: 'NEW', value: 'NEW'},
+  // {label: 'REFURBISHED', value: 'REFURBISHED'},
+  // {label: 'REPAIRED', value: 'REPAIRED'},
+  // {label: 'DAMAGED', value: 'DAMAGED'},
+];
