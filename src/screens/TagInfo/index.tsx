@@ -16,9 +16,10 @@ const TagInfoScreen = () => {
         onDevicesChange={devices => console.log('Devices:', devices)}
         autoNavigate={true}
         mode="rfid"
-        onAutoNavigate={rfids =>
-          navigation.navigate('Tag Info Detail', {listrfid: rfids})
-        }
+        onAutoNavigate={rfids => {
+          navigation.navigate('Tag Info Detail', {listrfid: rfids});
+          console.log('Navigating with RFIDs:', rfids);
+        }}
       />
     </SafeAreaView>
   );

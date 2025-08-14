@@ -1,4 +1,4 @@
-import {debounce} from 'lodash';
+import {debounce, uniq} from 'lodash';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
@@ -138,39 +138,14 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
   const bottomSheetStyle = {
     transform: [{translateY: pan.y}],
   };
-  // useEffect(() => {
-  //   getListRfidDevices();
-
-  //   const barcodeEvent = ZebraEventEmitter.addListener(
-  //     ZebraEvent.ON_BARCODE,
-  //     (e: ZebraResultPayload) => {
-  //       handleBarcodeEvent(e.data);
-  //     },
-  //   );
-
-  //   const rfidEvent = ZebraEventEmitter.addListener(
-  //     ZebraEvent.ON_RFID,
-  //     (e: ZebraRfidResultPayload) => {
-  //       handleRfidEvent(e.data);
-  //     },
-  //   );
-
-  //   const deviceConnectEvent = ZebraEventEmitter.addListener(
-  //     ZebraEvent.ON_DEVICE_CONNECTED,
-  //     (e: ZebraResultPayload) => {
-  //       ToastAndroid.show(e.data, ToastAndroid.SHORT);
-  //     },
-  //   );
-
-  //   return () => {
-  //     barcodeEvent.remove();
-  //     rfidEvent.remove();
-  //     deviceConnectEvent.remove();
-  //   };
-  // }, []);
 
   useFocusEffect(
     React.useCallback(() => {
+      setListDevices([]);
+      setListBarcodes([]);
+      setListRfid([]);
+      setConnectedDevice(null);
+
       getListRfidDevices();
 
       const barcodeEvent = ZebraEventEmitter.addListener(

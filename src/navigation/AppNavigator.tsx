@@ -239,7 +239,25 @@ const AppNavigator = () => {
           />
 
           {/* Tag Info Menu */}
-          <Stack.Screen name="TagInfo" component={TagInfoScreen} />
+          <Stack.Screen
+            name="TagInfo"
+            component={TagInfoScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+              title: 'Tag Info',
+            })}
+          />
           <Stack.Screen
             name="Tag Info Detail"
             component={TagInfoDetailScreen}

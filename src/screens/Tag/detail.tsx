@@ -18,19 +18,28 @@ import {getData} from '../../utils/store';
 import {SerializedItem} from '../../utils/types';
 import PreventBackNavigate from '../../utils/preventBack';
 
-const dummyRfids = ['00000000000000000000'];
-
 const TagDetailScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {listrfid} = route.params;
   const PoNumber = listrfid[listrfid.length - 1];
-
-  const [rfids, setRfids] = useState(dummyRfids);
+  const [activeFilter, setActiveFilter] = useState<
+    'ALL' | 'TAGGED' | 'UNTAGGED'
+  >('UNTAGGED');
   const [search, setSearch] = useState('');
 
   const [datas, setDatas] = useState([]);
   const [loading, setLoading] = useState(false); // <-- Add loading state
+
+  const filteredData = React.useMemo(() => {
+    if (activeFilter === 'TAGGED') {
+      return datas.filter((item: any) => !!item.tagcode);
+    }
+    if (activeFilter === 'UNTAGGED') {
+      return datas.filter((item: any) => !item.tagcode);
+    }
+    return datas;
+  }, [activeFilter, datas]);
 
   useEffect(() => {
     console.log('RFIDs from params:', PoNumber);
@@ -109,6 +118,38 @@ const TagDetailScreen = () => {
           color="#b0b0b0"
           style={{position: 'absolute', right: 12, top: 12}}
         />
+        <View className="flex-row gap-2 mx-3 my-1 max-w-fit">
+          <TouchableOpacity onPress={() => setActiveFilter('ALL')}>
+            <Text
+              className={`px-3 border rounded-md ${
+                activeFilter === 'ALL'
+                  ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
+                  : 'border-blue-200 bg-blue-50'
+              }`}>
+              All
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveFilter('TAGGED')}>
+            <Text
+              className={`px-3 border rounded-md ${
+                activeFilter === 'TAGGED'
+                  ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
+                  : 'border-blue-200 bg-blue-50'
+              }`}>
+              Tagged
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveFilter('UNTAGGED')}>
+            <Text
+              className={`px-3 border rounded-md ${
+                activeFilter === 'UNTAGGED'
+                  ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
+                  : 'border-blue-200 bg-blue-50'
+              }`}>
+              Untagged
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
       {loading ? (
         <View style={{flex: 1, marginTop: 32, alignItems: 'center'}}>
@@ -116,7 +157,7 @@ const TagDetailScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={datas}
+          data={filteredData}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.listContent}
