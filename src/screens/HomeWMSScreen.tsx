@@ -200,6 +200,22 @@ const HomeWMSScreen = () => {
           </View>
         )}
 
+        {/* Menu Options */}
+        <View className="px-2 mt-4 space-y-3">
+          {/* Top Row */}
+          <View className="flex-row gap-2 space-x-3">
+            <MenuCard
+              className="px-3"
+              title="Material Movement"
+              // count={0}
+              icon="move"
+              color="bg-green-400"
+              textColor="text-white"
+              onPress={() => navigation.navigate('Material Movement')}
+            />
+          </View>
+        </View>
+
         {/* Menu Options have 2 menu in 1 line */}
         {site === 'TJB56' && (
           <View className="px-2 mt-4 space-y-3">
@@ -326,22 +342,6 @@ const HomeWMSScreen = () => {
                 </Text>
               </View>
             </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Menu Options */}
-        <View className="px-2 mt-4 space-y-3">
-          {/* Top Row */}
-          <View className="flex-row gap-2 space-x-3">
-            <MenuCard
-              className="px-3"
-              title="Material Movement"
-              // count={0}
-              icon="move"
-              color="bg-green-400"
-              textColor="text-white"
-              onPress={() => navigation.navigate('Material Movement')}
-            />
           </View>
         </View>
 

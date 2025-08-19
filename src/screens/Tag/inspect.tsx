@@ -21,7 +21,7 @@ import {
   type ZebraResultPayload,
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
-import {debounce} from 'lodash';
+import {debounce, uniq} from 'lodash';
 import {generateSerialNumber} from '../../utils/helpers';
 import {checkSerialNumber, taggingPo} from '../../services/materialRecive';
 
@@ -38,9 +38,7 @@ const TagInspectScreen = () => {
   // RFID SCANNER
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
-  const [listRfid, setListRfid] = useState<string[]>([
-    '4C5071020190000000085556',
-  ]);
+  const [listRfid, setListRfid] = useState<string[]>([]);
 
   useEffect(() => {
     getListRfidDevices();
@@ -55,7 +53,7 @@ const TagInspectScreen = () => {
     const rfidEvent = ZebraEventEmitter.addListener(
       ZebraEvent.ON_RFID,
       (e: ZebraRfidResultPayload) => {
-        handleRfidEvent(e.data);
+        handleRfidEvent(uniq(e.data));
       },
     );
 
@@ -75,11 +73,7 @@ const TagInspectScreen = () => {
 
   const handleRfidEvent = useCallback(
     debounce((newData: string[]) => {
-      setListRfid(prev => {
-        // Merge and remove duplicates
-        const merged = [...prev, ...newData];
-        return Array.from(new Set(merged));
-      });
+      setListRfid(newData);
     }, 200),
     [],
   );
@@ -175,7 +169,7 @@ const TagInspectScreen = () => {
       </View>
 
       {/* section rfid scanner */}
-      <View
+      {/* <View
         style={{
           maxHeight: 200,
           borderWidth: 1,
@@ -199,7 +193,7 @@ const TagInspectScreen = () => {
             </TouchableOpacity>
           )}
         />
-      </View>
+      </View> */}
       {/* end Section RFID scanner */}
 
       <Text className="my-2 font-bold text-center text-gray-400">
@@ -230,7 +224,7 @@ const TagInspectScreen = () => {
           );
         }}
         visible={modalTag}
-        title="Information"
+        title="Confirmation"
         type="confirmation"
         onClose={() => {
           setModalTag(false);

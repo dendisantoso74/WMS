@@ -31,7 +31,7 @@ const ModalApp: React.FC<ModalAppProps> = ({
       setLoading(false);
       setButtonDisabled(false); // Re-enable the button when modal closes
       onClose();
-    }, 10000); // Simulate a 2-second loading process
+    }, 2000); // Simulate a 2-second loading process
   };
 
   const handleCancel = () => {
@@ -42,13 +42,15 @@ const ModalApp: React.FC<ModalAppProps> = ({
 
   const handleYes = () => {
     setButtonDisabled(true); // Disable the button
+    setLoading(true);
     if (onConfirm) {
       onConfirm(); // Execute the function passed from the parent
     }
     setTimeout(() => {
       setButtonDisabled(false); // Re-enable the button when modal closes
+      setLoading(false);
       onClose();
-    }, 10000); // Simulate a 2-second loading process
+    }, 2000); // Simulate a 2-second loading process
   };
 
   // Determine modal size based on the size prop
@@ -72,49 +74,42 @@ const ModalApp: React.FC<ModalAppProps> = ({
       onRequestClose={onClose}>
       <View style={styles.modalBackground}>
         <View style={[styles.modalContainer, getModalSize()]}>
-          {loading ? (
-            <>
-              <ActivityIndicator size="large" color="#0000ff" />
-              <Text>Loading...</Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.modalTitle}>{title}</Text>
-              <Text style={styles.modalContent}>{content}</Text>
-              <View
-                style={[
-                  styles.buttonContainer,
-                  type === 'confirmation' && styles.buttonContainerConfirmation,
-                ]}>
-                {type === 'confirmation' && (
-                  <>
-                    <ButtonApp
-                      label="No"
-                      color="danger"
-                      onPress={handleCancel}
-                      style={styles.button}
-                      disabled={buttonDisabled} // Disable the button
-                    />
-                    <ButtonApp
-                      label={loading ? 'Loading...' : 'Yes'} // Show "Loading..." when disabled
-                      onPress={handleYes}
-                      style={styles.button}
-                      disabled={buttonDisabled} // Disable the button
-                    />
-                  </>
-                )}
-                {type === 'alert' && (
+          <>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <Text style={styles.modalContent}>{content}</Text>
+            <View
+              style={[
+                styles.buttonContainer,
+                type === 'confirmation' && styles.buttonContainerConfirmation,
+              ]}>
+              {type === 'confirmation' && (
+                <>
                   <ButtonApp
-                    label="OK"
-                    color="secondary"
-                    onPress={handleOk}
+                    label="No"
+                    color="danger"
+                    onPress={handleCancel}
                     style={styles.button}
                     disabled={buttonDisabled} // Disable the button
                   />
-                )}
-              </View>
-            </>
-          )}
+                  <ButtonApp
+                    label={loading ? 'Loading...' : 'Yes'} // Show "Loading..." when disabled
+                    onPress={handleYes}
+                    style={styles.button}
+                    disabled={buttonDisabled} // Disable the button
+                  />
+                </>
+              )}
+              {type === 'alert' && (
+                <ButtonApp
+                  label="OK"
+                  color="secondary"
+                  onPress={handleOk}
+                  style={styles.button}
+                  disabled={buttonDisabled} // Disable the button
+                />
+              )}
+            </View>
+          </>
         </View>
       </View>
     </Modal>

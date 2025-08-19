@@ -56,6 +56,7 @@ import ScanBinScreen from '../screens/TagBin/scanBin';
 import RegisterBinScreen from '../screens/TagBin/registerBin';
 import BinDetailScreen from '../screens/RetagingItem/binDetail';
 import ConnectRFIDReader from '../screens/ConnectRFIDReader';
+import ScanPoInspect from '../screens/Inspection/scanPoInspect';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -427,14 +428,42 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Movement Smart Scan"
             component={MovementSmartScanScreen}
-            options={{title: 'Material Movement'}}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
           />
 
           {/* inspection menu */}
           <Stack.Screen
             name="Inspection"
             component={InspectionScreen}
-            options={{title: 'PO to Inspect'}}
+            // component={ScanPoInspect}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+              title: 'PO to Inspect',
+            })}
           />
           <Stack.Screen
             name="InspectionReceivingPO"
@@ -472,7 +501,24 @@ const AppNavigator = () => {
             options={{title: 'Tagging Item'}}
             component={TagDetailScreen}
           />
-          <Stack.Screen name="Item to Tag" component={TagInspectScreen} />
+          <Stack.Screen
+            name="Item to Tag"
+            component={TagInspectScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
 
           <Stack.Screen
             name="List"

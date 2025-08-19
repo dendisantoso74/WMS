@@ -26,7 +26,13 @@ export const ElocatorData = [
 
 export const CONDITION_CODE_OPTIONS = [
   {label: 'NEW', value: 'NEW'},
-  // {label: 'REFURBISHED', value: 'REFURBISHED'},
-  // {label: 'REPAIRED', value: 'REPAIRED'},
+  {label: 'REFURBISHED', value: 'REFURBISHED'},
+  {label: 'REPAIRED', value: 'REPAIRED'},
   // {label: 'DAMAGED', value: 'DAMAGED'},
+];
+
+export const FILTER_OPTIONS = [
+  {label: 'All', value: 'ALL'},
+  {label: 'DONE', value: 'DONE'},
+  {label: 'NOT DONE', value: 'NOT DONE'},
 ];

@@ -13,14 +13,8 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ModalInputWms from '../../compnents/wms/ModalInputWms';
-import {
-  getPoWaitingInspect,
-  ReceivePo,
-  ScanPo,
-} from '../../services/materialRecive';
-import {set} from 'lodash';
+import {getPoWaitingInspect, ReceivePo} from '../../services/materialRecive';
 import ModalApp from '../../compnents/ModalApp';
-import {getData} from '../../utils/store';
 import {
   getAcceptQuantityByPoline,
   getQuantityByPolineInspect,
@@ -28,8 +22,8 @@ import {
   getRejectQuantityByPoline,
 } from '../../utils/helpers';
 import PreventBackNavigate from '../../utils/preventBack';
-
-const dummyRfids = ['00000000000000000000'];
+import {FILTER_OPTIONS} from '../../utils/data';
+import {set} from 'lodash';
 
 const InspectionReceivingScreen = () => {
   const navigation = useNavigation<any>();
@@ -39,15 +33,29 @@ const InspectionReceivingScreen = () => {
 
   const [search, setSearch] = useState('');
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfirmVisible, setModalConfirmVisible] = useState(false);
 
-  const [datas, setDatas] = useState([]);
   const [selectedData, setSelectedData] = useState<string | null>(null);
   const [poline, setPoline] = useState([]);
   const [wmsMatrectrans, setWmsMatrectrans] = useState([]);
   const [tempQuantity, setTempQuantity] = useState(0);
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'DONE' | 'NOT DONE'>(
+    'NOT DONE',
+  );
+  const [totalItem, setTotalItem] = useState(0);
+  const [totalDoneItem, setTotalDoneItem] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Helper: check if item is fully inspected (accept + reject = quantity)
+  const isDone = (item: any) =>
+    item.acceptqty + item.rejectqty === item.quantity;
+
+  // Calculate totals when poline changes
+  useEffect(() => {
+    setTotalItem(poline.length || 0);
+    setTotalDoneItem(poline.filter(isDone).length || 0);
+  }, [poline]);
 
   const handleReceive = (quantity: number, item: any) => {
     console.log('Temp Quantity:', quantity, 'Poline:', item);
@@ -107,34 +115,47 @@ const InspectionReceivingScreen = () => {
   };
 
   useEffect(() => {
-    // const fetchData = async () => {
-    //   const site = await getData('site');
-    //   setDatas(item);
-    //   setPoline(item.wms_matrectrans);
-    //   setWmsMatrectrans(item.wms_matrectrans);
-    // };
-
     const fetchDataPoWINSP = async () => {
+      setIsLoading(true);
       const res = await getPoWaitingInspect(ponum);
+      console.log('fetchDataPoWINSP response:', res.member.length);
+
+      if (res.member.length === 0) {
+        Alert.alert(
+          'Information',
+          `${ponum} Not Found`,
+          // [{text: 'OK', onPress: () => navigation.goBack()}],
+          // {cancelable: false},
+        );
+        navigation.goBack();
+        return;
+      }
+
       if (res.error) {
         Alert.alert('Error', res.error);
         return;
       }
       // console.log('compareee get, param:', res.member[0]);
-      setDatas(res.member[0]);
       setPoline(res.member[0].wms_matrectrans);
       setWmsMatrectrans(res.member[0].wms_matrectrans);
+      setIsLoading(false);
     };
 
     // fetchData();
     fetchDataPoWINSP();
   }, [modalVisible, tempQuantity]);
 
-  // Filter poline based on search input (material code or material name)
+  // Filter poline based on chip and search input
   const filteredPoline = poline?.filter(item => {
     const code = item.itemnum?.toLowerCase() ?? '';
     const name = item.description?.toLowerCase() ?? '';
     const searchText = search.toLowerCase();
+
+    // Filter by chip
+    if (activeFilter === 'DONE' && !isDone(item)) return false;
+    if (activeFilter === 'NOT DONE' && isDone(item)) return false;
+
+    // Filter by search
     return code.includes(searchText) || name.includes(searchText);
   });
 
@@ -219,13 +240,42 @@ const InspectionReceivingScreen = () => {
         <Text className="font-bold text-white">PO Number</Text>
         <Text className="ml-10 font-bold text-white">{ponum}</Text>
       </View>
-      <TextInput
-        style={styles.filterInput}
-        placeholder="Enter Material Code or Material Name"
-        placeholderTextColor="#b0b0b0"
-        value={search}
-        onChangeText={setSearch}
-      />
+      <View>
+        <TextInput
+          style={styles.filterInput}
+          placeholder="Enter Material Code or Material Name"
+          placeholderTextColor="#b0b0b0"
+          value={search}
+          onChangeText={setSearch}
+        />
+        <Icon
+          library="Feather"
+          name="search"
+          size={20}
+          color="#b0b0b0"
+          style={{position: 'absolute', right: 20, top: 12}}
+        />
+        {/* Filter chips with totals */}
+        <View className="flex-row gap-2 mx-3 my-1 max-w-fit">
+          {FILTER_OPTIONS.map(opt => (
+            <TouchableOpacity
+              key={opt.value}
+              onPress={() => setActiveFilter(opt.value as any)}>
+              <Text
+                className={`px-3 border rounded-md ${
+                  activeFilter === opt.value
+                    ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
+                    : 'border-blue-200 bg-blue-50'
+                }`}>
+                {opt.label}
+                {opt.value === 'ALL' && ` (${totalItem})`}
+                {opt.value === 'DONE' && ` (${totalDoneItem})`}
+                {opt.value === 'NOT DONE' && ` (${totalItem - totalDoneItem})`}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
       {filteredPoline?.length === 0 ? (
         <View style={{alignItems: 'center', marginTop: 40}}>
           <Text style={{color: '#888', fontSize: 16}}>No data found</Text>
@@ -272,7 +322,7 @@ const InspectionReceivingScreen = () => {
           poline?.find(item => item.polinenum === selectedData)?.orderqty -
             getReceiptQuantityByPoline(wmsMatrectrans, selectedData) || ''
         }
-        total={3}
+        total={0}
         onClose={() => setModalVisible(false)}
         onReceive={e =>
           handleReceive(
@@ -285,7 +335,7 @@ const InspectionReceivingScreen = () => {
       <ModalApp
         visible={modalConfirmVisible}
         title="Receive Material"
-        content={`Do you want to update the receiving?`}
+        content="Do you want to update the receiving?"
         type="confirmation"
         onClose={() => setModalConfirmVisible(false)}
         onConfirm={() => handleConfirmReceiveAll()}

@@ -25,10 +25,12 @@ const TagBinScreen = () => {
   const [search, setSearch] = useState('');
   const pageSize = 10;
 
-  const fetchBins = async (page: number) => {
+  const fetchBins = async (page: number, searchValue: string = '*') => {
     setLoading(true);
     try {
-      const res = await getTagBinList('*', pageSize, page);
+      const res = await getTagBinList('*', pageSize, page, searchValue);
+      console.log('BIN fetched successfully:', res, searchValue);
+
       const newBins = Array.isArray(res.member) ? res.member : [];
       setBins(prev =>
         page === 1
@@ -58,14 +60,20 @@ const TagBinScreen = () => {
     if (!loading && hasMore) {
       const nextPage = pageNo + 1;
       setPageNo(nextPage);
-      fetchBins(nextPage);
+      fetchBins(nextPage, search === '' ? '*' : search);
     }
   };
 
   // Filter bins by bin number
-  const filteredBins = bins.filter(item =>
-    item.bin?.toLowerCase().includes(search.toLowerCase()),
-  );
+  // const filteredBins = bins.filter(item =>
+  //   item.bin?.toLowerCase().includes(search.toLowerCase()),
+  // );
+
+  // --- Add this function to handle search on Enter key ---
+  const handleSearchSubmit = () => {
+    setPageNo(1);
+    fetchBins(1, search === '' ? '*' : search);
+  };
 
   const handleRegisterNew = () => {
     // TODO: Implement register new RFID logic
@@ -96,21 +104,23 @@ const TagBinScreen = () => {
       <View style={{paddingBottom: 4}}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Filter by Bin Number"
+          placeholder="Search Bin"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
+          onSubmitEditing={handleSearchSubmit} // <-- Trigger search on Enter
+          returnKeyType="search"
         />
         <Icon
           library="Feather"
           name="search"
           size={20}
           color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
+          style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
       <FlatList
-        data={filteredBins}
+        data={bins}
         renderItem={renderItem}
         keyExtractor={item => item.wms_binid?.toString()}
         contentContainerStyle={styles.listContent}

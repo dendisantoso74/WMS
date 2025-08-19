@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Modal,
   View,
@@ -24,12 +24,22 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
   material,
   orderQty,
   remainingQty,
-  total = 0,
+  total,
   orderunit,
   onClose,
   onReceive,
 }) => {
   const [count, setCount] = useState(total);
+  console.log('ModalInputWms count:', remainingQty);
+
+  // Reset count when modal is closed or opened with a new total
+  useEffect(() => {
+    if (!visible) {
+      setCount(0);
+    } else {
+      setCount(remainingQty);
+    }
+  }, [visible, total]);
 
   const handleDecrease = () => {
     if (count > 0) setCount(count - 1);
@@ -40,9 +50,16 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
   };
 
   const handleInputChange = (text: string) => {
-    // Only allow numbers, fallback to 1 if empty or invalid
+    // Only allow numbers, fallback to 0 if empty or invalid
     const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
-    setCount(isNaN(num) ? 1 : num);
+    const max = Number(remainingQty);
+    if (isNaN(num)) {
+      setCount(0);
+    } else if (num > max) {
+      setCount(max);
+    } else {
+      setCount(num);
+    }
   };
 
   const handleReceive = () => {

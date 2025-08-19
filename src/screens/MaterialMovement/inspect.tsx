@@ -228,10 +228,10 @@ const MovementSmartScanScreen = () => {
       )}
 
       <ModalApp
-        title="Information"
+        title="Confirmation"
         type="confirmation"
         visible={modalVisible}
-        content="Do you want to update material movement?"
+        content="Are you sure you want to move material?"
         onClose={() => setModalVisible(false)}
         onConfirm={() => {
           handleOnConfirm();

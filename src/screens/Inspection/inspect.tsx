@@ -11,14 +11,13 @@ import {
   Alert,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
-import ModalInputWms from '../../compnents/wms/ModalInputWms';
 import {Dropdown} from 'react-native-element-dropdown';
 import {getData} from '../../utils/store';
 import {inspectPo, ListRejectCode} from '../../services/materialRecive';
 import {getPersonByLoginId} from '../../services/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ModalApp from '../../compnents/ModalApp';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -46,6 +45,7 @@ const InspectionReceivingApproveScreen = () => {
   const [poline, setPoline] = useState([]);
   const [wmsMatrectrans, setWmsMatrectrans] = useState([]);
   const [tempQuantity, setTempQuantity] = useState(0);
+  const [modalConfirmVisible, setModalConfirmVisible] = useState(false);
   // Initial payload
   const [tempPayload, setTempPayload] = useState({
     externalrefid: ponum,
@@ -104,6 +104,9 @@ const InspectionReceivingApproveScreen = () => {
         console.error('Error in handleApprove:', err);
         Alert.alert('Error', err?.message || err?.Error?.message);
         ToastAndroid.show('Error approving inspection', ToastAndroid.SHORT);
+      })
+      .finally(() => {
+        setModalConfirmVisible(false);
       });
   };
 
@@ -152,19 +155,49 @@ const InspectionReceivingApproveScreen = () => {
     fetchData2();
   }, [inputAceptedQty, inputRejectedQty, inputRejectedCode]);
 
+  // Add this function inside your component:
+  const handleInputAcceptedChange = (text: string) => {
+    // Only allow numbers, fallback to 0 if empty or invalid
+    const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
+    // Max is item.receiptquantity - inputRejectedQty
+    const max = item.receiptquantity - inputRejectedQty;
+    if (isNaN(num)) {
+      setInputAcceptedQty(0);
+    } else if (num > max) {
+      setInputAcceptedQty(max);
+    } else {
+      setInputAcceptedQty(num);
+    }
+  };
+
+  const handleInputRejectedChange = (text: string) => {
+    // Only allow numbers, fallback to 0 if empty or invalid
+    const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
+    // Max is item.receiptquantity - inputAceptedQty
+    const max = item.receiptquantity - inputAceptedQty;
+    if (isNaN(num)) {
+      setInputRejectedQty(0);
+    } else if (num > max) {
+      setInputRejectedQty(max);
+    } else {
+      setInputRejectedQty(num);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {console.log('tempPayload:', tempPayload)}
       <View className="w-full bg-blue-400 ">
         <View className="flex-row my-1 ml-2">
-          <Text className="font-bold text-white">Material</Text>
-          <Text className="ml-10 font-bold text-white">
-            : {datas.description}
+          <Text className="w-20 font-bold text-white">Material</Text>
+          <Text className="text-white ">
+            : {datas.itemnum} / {datas.description}
           </Text>
         </View>
+
         <View className="flex-row my-1 ml-2">
-          <Text className="font-bold text-white">Order QTY</Text>
-          <Text className="ml-10 font-bold text-white">
+          <Text className="w-20 font-bold text-white">Order QTY</Text>
+          <Text className="text-white ">
             : {datas.quantity} {datas.orderunit}
           </Text>
         </View>
@@ -183,10 +216,19 @@ const InspectionReceivingApproveScreen = () => {
               <Text style={styles.circleBtnText}>-</Text>
             </TouchableOpacity>
             <View style={styles.countBox}>
-              <Text style={styles.countText}>{inputAceptedQty}</Text>
+              {/* <Text style={styles.countText}>{inputAceptedQty}</Text> */}
+              <TextInput
+                style={[styles.countText, {textAlign: 'center'}]}
+                keyboardType="numeric"
+                value={inputAceptedQty.toString()}
+                onChangeText={handleInputAcceptedChange}
+                maxLength={item.receiptquantity.toString().length}
+              />
             </View>
             <TouchableOpacity
-              disabled={inputAceptedQty === item.receiptquantity}
+              disabled={
+                inputRejectedQty + inputAceptedQty === item.receiptquantity
+              }
               style={styles.circleBtn}
               onPress={handleIncrease}>
               <Text style={styles.circleBtnText}>+</Text>
@@ -211,10 +253,19 @@ const InspectionReceivingApproveScreen = () => {
               <Text style={styles.circleBtnText}>-</Text>
             </TouchableOpacity>
             <View style={styles.countBox}>
-              <Text style={styles.countText}>{inputRejectedQty}</Text>
+              {/* <Text style={styles.countText}>{inputRejectedQty}</Text> */}
+              <TextInput
+                style={[styles.countText, {textAlign: 'center'}]}
+                keyboardType="numeric"
+                value={inputRejectedQty.toString()}
+                onChangeText={handleInputRejectedChange}
+                maxLength={item.receiptquantity.toString().length}
+              />
             </View>
             <TouchableOpacity
-              disabled={inputRejectedQty === item.receiptquantity}
+              disabled={
+                inputRejectedQty + inputAceptedQty === item.receiptquantity
+              }
               style={styles.circleBtn}
               onPress={handleIncreaseReject}>
               <Text style={styles.circleBtnText}>+</Text>
@@ -261,11 +312,26 @@ const InspectionReceivingApproveScreen = () => {
       >
         <ButtonApp
           label="Approve"
-          onPress={handleApprove}
+          onPress={() => {
+            setModalConfirmVisible(true);
+          }}
           size="large"
           color="primary"
         />
       </View>
+
+      {/* modal confirm */}
+      <ModalApp
+        visible={modalConfirmVisible}
+        title="Confirmation"
+        content="Do you want to approve the inspection?"
+        type="confirmation"
+        onClose={() => setModalConfirmVisible(false)}
+        onConfirm={() => {
+          // Handle confirmation logic
+          handleApprove();
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -385,12 +451,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    paddingVertical: 8,
+    // paddingVertical: 8,
   },
   countText: {
-    fontSize: 28,
-    color: '#222',
-    fontWeight: '500',
+    fontSize: 24,
+    paddingVertical: 5,
   },
   dropdown: {
     width: '50%',

@@ -10,12 +10,19 @@ import {
   ToastAndroid,
   ActivityIndicator,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {ListPoWINSP} from '../../services/materialRecive';
 import {formatDateTime} from '../../utils/helpers';
 import Loading from '../../compnents/Loading';
 import PreventBackNavigate from '../../utils/preventBack';
+import ModalApp from '../../compnents/ModalApp';
+import {debounce} from 'lodash';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  ZebraResultPayload,
+} from 'react-native-zebra-rfid-barcode';
 
 const dummyRfids = ['00000000000000000000'];
 
@@ -27,6 +34,25 @@ const InspectionScreen = () => {
   const [datas, setDatas] = useState<any[]>([]); // Adjust type as needed
   const [filteredData, setFilteredData] = useState<any[]>([]); // Store filtered data for display
   const [isLoading, setIsloading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Listen for barcode scan event from Zebra reader
+      const barcodeEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_BARCODE,
+        (e: ZebraResultPayload) => {
+          if (e?.data) {
+            setSearch(e.data);
+            handleSearch(e.data);
+          }
+        },
+      );
+      return () => {
+        barcodeEvent.remove();
+      };
+    }, [datas]),
+  );
 
   const fetchPOWINSP = async () => {
     setIsloading(true);
@@ -96,7 +122,7 @@ const InspectionScreen = () => {
           name="search"
           size={20}
           color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
+          style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
       {isLoading ? (

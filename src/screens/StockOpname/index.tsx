@@ -26,12 +26,12 @@ const StockOpnameListScreen = () => {
       onPress={() => navigation.navigate('Detail Stock Opname')}>
       <View>
         <View className="my-2">
-          <Text className="font-bold px-4">
+          <Text className="px-4 font-bold">
             PHYSICAL STOCK TAKING DECEMBER 2020
           </Text>
-          <Text className="font-semibold px-4">15-Des-2020 15:12</Text>
+          <Text className="px-4 font-semibold">15-Des-2020 15:12</Text>
           <Text className="px-4">BUDIMAN</Text>
-          <Text className="font-bold px-4">ENTERED</Text>
+          <Text className="px-4 font-bold">ENTERED</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -52,7 +52,7 @@ const StockOpnameListScreen = () => {
           name="search"
           size={20}
           color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
+          style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
       <FlatList

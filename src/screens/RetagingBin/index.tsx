@@ -16,6 +16,7 @@ import {getTagBinList} from '../../services/tagBin';
 import ButtonApp from '../../compnents/ButtonApp';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
+import {retagSerializedItem} from '../../services/retagingItem';
 
 const RetagingBinScreen = () => {
   const navigation = useNavigation<any>();
@@ -84,20 +85,17 @@ const RetagingBinScreen = () => {
 
   const handleModalSubmit = async () => {
     console.log('Input value:', inputValue, selectedItem);
-    // await retagSerializedItem(
-    //   selectedItem.wms_serializeditem[0].wms_serializeditemid,
-    //   inputValue,
-    // ).then(res => {
-    //   console.log('Retagging response:', res);
-    //   if (res.error) {
-    //     console.error('Error retagging item:', res.error);
-    //   } else {
-    //     Alert.alert('Success', 'Item retagged successfully!');
-    //     console.log('Item retagged successfully:', res);
-    //     setModalVisible(false);
-    //     setInputValue('');
-    //   }
-    // });
+    await retagSerializedItem(1917, '4C5071020190000000085358').then(res => {
+      console.log('Retagging response:', res);
+      if (res.error) {
+        console.error('Error retagging item:', res.error);
+      } else {
+        Alert.alert('Success', 'Item retagged successfully!');
+        console.log('Item retagged successfully:', res);
+        setModalVisible(false);
+        setInputValue('');
+      }
+    });
   };
 
   const renderItem = ({item}: {item: any}) => (
@@ -124,7 +122,7 @@ const RetagingBinScreen = () => {
           name="search"
           size={20}
           color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
+          style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
       <FlatList

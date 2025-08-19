@@ -89,7 +89,7 @@ const TransferInstructionScreen = () => {
           name="search"
           size={20}
           color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
+          style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
       {loading ? (

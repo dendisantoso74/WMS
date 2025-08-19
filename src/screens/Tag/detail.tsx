@@ -30,6 +30,8 @@ const TagDetailScreen = () => {
 
   const [datas, setDatas] = useState([]);
   const [loading, setLoading] = useState(false); // <-- Add loading state
+  const [totalItem, setTotalItem] = useState(0);
+  const [totalUnTagged, setTotalUnTagged] = useState(0);
 
   const filteredData = React.useMemo(() => {
     if (activeFilter === 'TAGGED') {
@@ -60,7 +62,10 @@ const TagDetailScreen = () => {
               // {cancelable: false},
             );
           }
-          setDatas(res.member[0].wms_serializeditem);
+          const items = res.member[0].wms_serializeditem;
+          setDatas(items);
+          setTotalItem(items.length);
+          setTotalUnTagged(items.filter((item: any) => !item.tagcode).length);
         })
         .finally(() => {
           setLoading(false);
@@ -106,7 +111,7 @@ const TagDetailScreen = () => {
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Material Code "
+          placeholder="Enter Material Code or Material Name"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
@@ -116,8 +121,9 @@ const TagDetailScreen = () => {
           name="search"
           size={20}
           color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
+          style={{position: 'absolute', right: 20, top: 12}}
         />
+        {/* chip filter tag untag */}
         <View className="flex-row gap-2 mx-3 my-1 max-w-fit">
           <TouchableOpacity onPress={() => setActiveFilter('ALL')}>
             <Text
@@ -126,7 +132,7 @@ const TagDetailScreen = () => {
                   ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
                   : 'border-blue-200 bg-blue-50'
               }`}>
-              All
+              All ({totalItem})
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setActiveFilter('TAGGED')}>
@@ -136,7 +142,7 @@ const TagDetailScreen = () => {
                   ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
                   : 'border-blue-200 bg-blue-50'
               }`}>
-              Tagged
+              Tagged ({totalItem - totalUnTagged})
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setActiveFilter('UNTAGGED')}>
@@ -146,7 +152,7 @@ const TagDetailScreen = () => {
                   ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
                   : 'border-blue-200 bg-blue-50'
               }`}>
-              Untagged
+              Untagged ({totalUnTagged})
             </Text>
           </TouchableOpacity>
         </View>

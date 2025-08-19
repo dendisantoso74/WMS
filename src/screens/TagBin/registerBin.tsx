@@ -1,5 +1,5 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,15 +9,17 @@ import {
   SafeAreaView,
   TextInput,
   Pressable,
+  ToastAndroid,
 } from 'react-native';
-
-const DUMMY_RFID = '0000000000D9014000000022';
-const DUMMY_BINS = [
-  {bin: 'MS-A1L-4-3-3-1', rack: 'MS-A1L', area: 'MS-AREA'},
-  {bin: 'MS-A1L-4-3-3-2', rack: 'MS-A1L', area: 'MS-AREA'},
-  {bin: 'MS-A1L-4-3-4-1', rack: 'MS-A1L', area: 'MS-AREA'},
-  {bin: 'MS-A1L-4-3-4-2', rack: 'MS-A1L', area: 'MS-AREA'},
-];
+import ModalApp from '../../compnents/ModalApp';
+import {
+  getBinUntagList,
+  localSearchByBin,
+  registerTagToBin,
+} from '../../services/tagBin';
+import Icon from '../../compnents/Icon';
+import {generateSerialNumber} from '../../utils/helpers';
+import {set} from 'lodash';
 
 const RegisterBinScreen = () => {
   const navigation = useNavigation<any>();
@@ -27,47 +29,117 @@ const RegisterBinScreen = () => {
   const [search, setSearch] = useState('');
   const [selectedBin, setSelectedBin] = useState<string | null>(null);
 
-  const filteredBins = DUMMY_BINS.filter(item =>
-    item.bin.toLowerCase().includes(search.toLowerCase()),
-  );
+  const [modalVisible, setModalVisible] = useState(false);
+  const [bins, setBins] = useState<any[]>([]); // Use dummy data for now
+  const [serialNumbers, setSerialNumbers] = useState<string>(''); // Use dummy data for now
+
+  const [allBins, setAllBins] = useState<any[]>([]); // Store all bins for local search
+
+  useEffect(() => {
+    getBinUntagList().then(data => {
+      const binList = data.member || [];
+      setAllBins(binList);
+      setBins(binList); // Show all bins initially
+    });
+  }, []);
+
+  useEffect(() => {
+    // Local search by bin or tagcode
+    setBins(localSearchByBin(allBins, search));
+  }, [search, allBins]);
+
+  const handleOnPress = async item => {
+    setSelectedBin(item);
+    setModalVisible(true);
+    const SN = generateSerialNumber();
+    setSerialNumbers(SN);
+  };
+
+  const handleConfirm = async () => {
+    registerTagToBin(selectedBin?.wms_binid, Tag, serialNumbers)
+      .then(res => {
+        console.log('Tag registered successfully:', res);
+        ToastAndroid.show(
+          `Registered ${Tag} to ${selectedBin?.bin}`,
+          ToastAndroid.SHORT,
+        );
+        navigation.goBack();
+      })
+      .catch(err => {
+        console.error('Error registering tag to bin:', err);
+        ToastAndroid.show(
+          `Failed to register ${Tag} to ${selectedBin?.bin}`,
+          ToastAndroid.SHORT,
+        );
+      });
+    // if (selectedBin) {
+    //   ToastAndroid.show(
+    //     `Registered ${Tag} to ${selectedBin?.bin}`,
+    //     ToastAndroid.SHORT,
+    //   );
+    // }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>RFID TAG</Text>
-        <Text style={styles.headerRfid}>{Tag}</Text>
+        <Text className="font-bold text-white">RFID TAG : </Text>
+        <Text className="text-white">{Tag}</Text>
       </View>
-      <View style={styles.inputContainer}>
+      <View>
         <TextInput
-          style={styles.input}
+          style={styles.filterInput}
           placeholder="Search Bin"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
+          autoCapitalize="characters"
+        />
+        <Icon
+          library="Feather"
+          name="search"
+          size={20}
+          color="#b0b0b0"
+          style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
-      <Text style={styles.sectionTitle}>RFID</Text>
+      <Text style={styles.sectionTitle}>BIN</Text>
       <FlatList
-        data={filteredBins}
+        data={bins}
         keyExtractor={item => item.bin}
         renderItem={({item}) => (
           <TouchableOpacity
             style={[
               styles.binCard,
-              selectedBin === item.bin && styles.selectedBinCard,
+              // selectedBin === item.bin && styles.selectedBinCard,
             ]}
-            onPress={() => setSelectedBin(item.bin)}>
-            <Text style={styles.binText}>{item.bin}</Text>
-            <Text style={styles.binText}>{item.rack}</Text>
-            <Text style={styles.binText}>{item.area}</Text>
+            onPress={() => handleOnPress(item)}>
+            <Text style={styles.binText}>BIN : {item.bin}</Text>
+            <Text style={styles.binText}>RACK : {item.wms_rack}</Text>
+            <Text style={styles.binText}>AREA : {item.wms_area}</Text>
           </TouchableOpacity>
         )}
         contentContainerStyle={styles.listContent}
         style={styles.list}
+        ListEmptyComponent={
+          <View style={{alignItems: 'center', marginTop: 32}}>
+            <Text style={{color: '#888'}}>No bins found.</Text>
+          </View>
+        }
       />
-      <Pressable style={styles.button} onPress={() => {}}>
+      {/* <Pressable style={styles.button} onPress={() => {}}>
         <Text style={styles.buttonText}>TAG</Text>
-      </Pressable>
+      </Pressable> */}
+      <ModalApp
+        visible={modalVisible}
+        title="Confirmation"
+        content={`Are you sure you want to tag ${Tag} to bin ${selectedBin?.bin}?`}
+        onClose={() => setModalVisible(false)}
+        type="confirmation"
+        onConfirm={() => {
+          handleConfirm();
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -134,7 +206,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.08,
     shadowRadius: 2,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
   },
   selectedBinCard: {
     borderColor: '#285a8d',
@@ -160,6 +233,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     letterSpacing: 1,
+  },
+  filterInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    fontSize: 14,
+    color: '#222',
+    // marginBottom: 4,
+    marginTop: 6,
+    marginHorizontal: 8,
   },
 });
 

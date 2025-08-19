@@ -18,15 +18,12 @@ import {formatDateTime} from '../../utils/helpers';
 import {getData} from '../../utils/store';
 import {assignTransferInstruction} from '../../services/materialRecive';
 
-const dummyRfids = ['00000000000000000000'];
-
 const TransferInstructionAssignScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item} = route.params;
   console.log('item from params:', item);
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
   const [invuse, setInvuse] = useState([]);
   const [maxUser, setMaxUser] = useState('');
@@ -113,7 +110,7 @@ const TransferInstructionAssignScreen = () => {
           name="search"
           size={20}
           color="#b0b0b0"
-          style={{position: 'absolute', right: 12, top: 12}}
+          style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
       <FlatList

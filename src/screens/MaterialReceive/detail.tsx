@@ -20,8 +20,6 @@ import ModalApp from '../../compnents/ModalApp';
 import {getData} from '../../utils/store';
 import {getReceiptQuantityByPoline} from '../../utils/helpers';
 
-const dummyRfids = ['00000000000000000000'];
-
 const MaterialReceiveDetailScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
@@ -29,7 +27,6 @@ const MaterialReceiveDetailScreen = () => {
 
   const [search, setSearch] = useState('');
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfirmVisible, setModalConfirmVisible] = useState(false);
 
@@ -38,12 +35,14 @@ const MaterialReceiveDetailScreen = () => {
   const [poline, setPoline] = useState([]);
   const [wmsMatrectrans, setWmsMatrectrans] = useState([]);
   const [tempQuantity, setTempQuantity] = useState(0);
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'DONE' | 'NOT DONE'>(
+    'NOT DONE',
+  );
+  const [totalItem, setTotalItem] = useState(0);
+  const [totalDoneItem, setTotalDoneItem] = useState(0);
 
   const handleReceive = async (quantity: number, item: any) => {
     const site = await getData('site');
-    console.log('------------receive site', site);
-
-    console.log('Temp Quantity:', quantity, 'Poline:', item);
     ReceivePo([
       {
         // Assuming ReceivePo expects an array of poline changes
@@ -128,6 +127,23 @@ const MaterialReceiveDetailScreen = () => {
     fetchData();
   }, [modalVisible, tempQuantity]);
 
+  useEffect(() => {
+    // Set totalItem and totalDoneItem when poline or wmsMatrectrans changes
+    if (poline && Array.isArray(poline)) {
+      setTotalItem(poline.length);
+
+      // Count items where receiptQty === orderqty (fully received)
+      const doneCount = poline.filter(item => {
+        const receiptQty = getReceiptQuantityByPoline(
+          wmsMatrectrans,
+          item.polinenum,
+        );
+        return receiptQty === item.orderqty;
+      }).length;
+      setTotalDoneItem(doneCount);
+    }
+  }, [poline, wmsMatrectrans]);
+
   // Helper: check if all items are fully received (all sideBarColor would be green)
   const allReceived =
     poline?.length > 0 &&
@@ -144,6 +160,17 @@ const MaterialReceiveDetailScreen = () => {
     const code = item.itemnum?.toLowerCase() ?? '';
     const name = item.description?.toLowerCase() ?? '';
     const searchText = search.toLowerCase();
+    const receiptQty = getReceiptQuantityByPoline(
+      wmsMatrectrans,
+      item.polinenum,
+    );
+
+    // Filter by chip
+    if (activeFilter === 'DONE' && receiptQty !== item.orderqty) return false;
+    if (activeFilter === 'NOT DONE' && receiptQty === item.orderqty)
+      return false;
+
+    // Filter by search
     return code.includes(searchText) || name.includes(searchText);
   });
 
@@ -200,13 +227,55 @@ const MaterialReceiveDetailScreen = () => {
           {listrfid[listrfid.length - 1]}
         </Text>
       </View>
-      <TextInput
-        style={styles.filterInput}
-        placeholder="Enter Material Code or Material Name"
-        placeholderTextColor="#b0b0b0"
-        value={search}
-        onChangeText={setSearch}
-      />
+      <View>
+        <TextInput
+          style={styles.filterInput}
+          placeholder="Enter Material Code or Material Name"
+          placeholderTextColor="#b0b0b0"
+          value={search}
+          onChangeText={setSearch}
+        />
+        <Icon
+          library="Feather"
+          name="search"
+          size={20}
+          color="#b0b0b0"
+          style={{position: 'absolute', right: 20, top: 12}}
+        />
+        {/* chip filter tag untag */}
+        <View className="flex-row gap-2 mx-3 my-1 max-w-fit">
+          <TouchableOpacity onPress={() => setActiveFilter('ALL')}>
+            <Text
+              className={`px-3 border rounded-md ${
+                activeFilter === 'ALL'
+                  ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
+                  : 'border-blue-200 bg-blue-50'
+              }`}>
+              All ({totalItem})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveFilter('DONE')}>
+            <Text
+              className={`px-3 border rounded-md ${
+                activeFilter === 'DONE'
+                  ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
+                  : 'border-blue-200 bg-blue-50'
+              }`}>
+              DONE ({totalDoneItem})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveFilter('NOT DONE')}>
+            <Text
+              className={`px-3 border rounded-md ${
+                activeFilter === 'NOT DONE'
+                  ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
+                  : 'border-blue-200 bg-blue-50'
+              }`}>
+              NOT DONE ({totalItem - totalDoneItem})
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
       {filteredPoline.length === 0 ? (
         <View style={{alignItems: 'center', marginTop: 40}}>
           <Text style={{color: '#888', fontSize: 16}}>No data found</Text>
