@@ -21,8 +21,12 @@ import {
   scanWoForReturn,
 } from '../../services/materialReturn';
 import PreventBackNavigate from '../../utils/preventBack';
-
-const dummyRfids = ['00000000000000000000'];
+import rfid from '../../assets/images/rfid.png'; // Adjust the path as necessary
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  type ZebraRfidResultPayload,
+} from 'react-native-zebra-rfid-barcode';
 
 const MaterialReturnDetailScreen = () => {
   const navigation = useNavigation<any>();
@@ -38,7 +42,6 @@ const MaterialReturnDetailScreen = () => {
 
   const [search, setSearch] = useState('');
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
   const [returnInvuseId, setReturnInvuseId] = useState('');
 
@@ -90,56 +93,66 @@ const MaterialReturnDetailScreen = () => {
 
   useEffect(() => {
     //this will create invuse header for return and then get the list
-    createInvUseReturnHeader(woNum).then(x => {
-      scanWoForReturn(woNum).then((res: any) => {
-        if (res.member.length === 0) {
-          navigation.goBack();
-          Alert.alert(
-            'No Data',
-            'No data found for this PO number.',
-            // [{text: 'OK', onPress: () => navigation.goBack()}],
-            // {cancelable: false},
-          );
-        }
-        setDatas(res.member[0]);
-        console.log('Work order details:', res);
-        // setreturnn invuse id
-        const returnInvuse = getReturnInvuse(res.member[0]);
-        setReturnInvuseId(returnInvuse.invuseid);
-        console.log('Return invuse:', returnInvuse);
+    createInvUseReturnHeader(woNum)
+      .then(x => {
+        scanWoForReturn(woNum).then((res: any) => {
+          if (res.member.length === 0) {
+            navigation.goBack();
+            Alert.alert(
+              'No Data',
+              'No data found for this WO number.',
+              // [{text: 'OK', onPress: () => navigation.goBack()}],
+              // {cancelable: false},
+            );
+          }
+          setDatas(res.member[0]);
+          console.log('Work order details:', res);
+          // setreturnn invuse id
+          const returnInvuse = getReturnInvuse(res.member[0]);
+          setReturnInvuseId(returnInvuse.invuseid);
+          console.log('Return invuse:', returnInvuse);
 
-        // Filter only items that have invuseline and it's not empty
-        const filteredInvUse = res.member[0].invuse.filter(
-          (item: any) =>
-            Array.isArray(item.invuseline) && item.invuseline.length > 0,
-        );
-        setWoList(filteredInvUse);
-        setWoListIssue(
-          filteredInvUse.filter((item: any) => item.usetype === 'ISSUE'),
-        );
-        setWoListReturn(
-          res.member[0].invuse.filter(
+          // Filter only items that have invuseline and it's not empty
+          const filteredInvUse = res.member[0].invuse.filter(
             (item: any) =>
-              item.usetype === 'MIXED' && item.status === 'ENTERED',
-          ),
-        );
+              Array.isArray(item.invuseline) && item.invuseline.length > 0,
+          );
+          setWoList(filteredInvUse);
+          setWoListIssue(
+            filteredInvUse.filter((item: any) => item.usetype === 'ISSUE'),
+          );
+          setWoListReturn(
+            res.member[0].invuse.filter(
+              (item: any) =>
+                item.usetype === 'MIXED' && item.status === 'ENTERED',
+            ),
+          );
 
-        //set header return
-        const mixedInvuse = datas.invuse?.find(
-          (inv: any) => inv.usetype === 'MIXED' && inv.status !== 'COMPLETE',
-        );
-        setHeaderReturn(mixedInvuse);
-        console.log('Mixed Invuse:', mixedInvuse);
+          //set header return
+          const mixedInvuse = datas.invuse?.find(
+            (inv: any) => inv.usetype === 'MIXED' && inv.status !== 'COMPLETE',
+          );
+          setHeaderReturn(mixedInvuse);
+          console.log('Mixed Invuse:', mixedInvuse);
 
-        // Enrich matusetrans with invuseid
-        const enrichedMatusetrans = enrichMatusetransWithInvuseid(
-          res.member[0].matusetrans,
-          res.member[0].invuse,
-        );
+          // Enrich matusetrans with invuseid
+          const enrichedMatusetrans = enrichMatusetransWithInvuseid(
+            res.member[0].matusetrans,
+            res.member[0].invuse,
+          );
 
-        setWoListmatusetrans(enrichedMatusetrans);
+          setWoListmatusetrans(enrichedMatusetrans);
+        });
+      })
+      .catch(err => {
+        navigation.goBack();
+        Alert.alert(
+          'No Data',
+          'No data found for this WO number.',
+          // [{text: 'OK', onPress: () => navigation.goBack()}],
+          // {cancelable: false},
+        );
       });
-    });
   }, []);
 
   const handleComplete = async (returnInvuseId: string) => {
@@ -157,7 +170,20 @@ const MaterialReturnDetailScreen = () => {
     //     );
     //   });
     // ToastAndroid.show('Return completed successfully', ToastAndroid.SHORT);
-    Alert.alert('Information', 'Go to Putaway to complete the return');
+    // Alert.alert('Information', 'Go to Putaway to complete the return')
+    Alert.alert(
+      'Information',
+      'Go to Putaway to complete the return',
+      [
+        {
+          text: 'OK',
+          onPress: () =>
+            navigation.navigate('Put Away Material', {item: datas}), // <-- Navigate on OK
+          // onPress: () => console.log('Navigating to Putaway'),
+        },
+      ],
+      {cancelable: false},
+    );
   };
 
   const renderItem = ({item}: {item: string}) => {
@@ -184,7 +210,7 @@ const MaterialReturnDetailScreen = () => {
         }
         style={styles.rfidCard}>
         <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
-        <View className="my-2">
+        <View className="my-2 mr-4">
           <View className="flex-row justify-between">
             <Text className="font-bold">{item.itemnum}</Text>
             <Text className=""></Text>
@@ -204,7 +230,7 @@ const MaterialReturnDetailScreen = () => {
               {item.wms_unit} */}
             </Text>
           </View>
-          <Text>{returnInvuseId}</Text>
+          {/* <Text>{returnInvuseId}</Text> */}
         </View>
       </TouchableOpacity>
     );
@@ -214,10 +240,6 @@ const MaterialReturnDetailScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <PreventBackNavigate toScreen="Material Return Scan" />
       <View className="flex-row p-2 bg-blue-400">
-        {console.log('issue list:', woListIssue)}
-        {console.log('return list:', woListReturn)}
-        {console.log('woListmatusetrans list:', woListmatusetrans)}
-
         <View>
           <Text className="font-bold text-white">WO Number</Text>
           <Text className="font-bold text-white">WO Date</Text>

@@ -34,14 +34,27 @@ const TagDetailScreen = () => {
   const [totalUnTagged, setTotalUnTagged] = useState(0);
 
   const filteredData = React.useMemo(() => {
+    let filtered = datas;
+
+    // Filter by tag status
     if (activeFilter === 'TAGGED') {
-      return datas.filter((item: any) => !!item.tagcode);
+      filtered = filtered.filter((item: any) => !!item.tagcode);
+    } else if (activeFilter === 'UNTAGGED') {
+      filtered = filtered.filter((item: any) => !item.tagcode);
     }
-    if (activeFilter === 'UNTAGGED') {
-      return datas.filter((item: any) => !item.tagcode);
+
+    // Local search by material code or material name
+    if (search.trim() !== '') {
+      const searchText = search.toLowerCase();
+      filtered = filtered.filter(
+        (item: any) =>
+          (item.itemnum?.toLowerCase().includes(searchText) ?? false) ||
+          (item.description?.toLowerCase().includes(searchText) ?? false),
+      );
     }
-    return datas;
-  }, [activeFilter, datas]);
+
+    return filtered;
+  }, [activeFilter, datas, search]);
 
   useEffect(() => {
     console.log('RFIDs from params:', PoNumber);
@@ -89,7 +102,7 @@ const TagDetailScreen = () => {
         }>
         <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
         <View className="my-2">
-          <View className="flex-col">
+          <View className="flex-col mr-1">
             <Text className="font-bold">{item.itemnum}</Text>
             <Text className="font-bold">{item.description}</Text>
             <Text className="font-bold">Tag code: {item?.tagcode}</Text>

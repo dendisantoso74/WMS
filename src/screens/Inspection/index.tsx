@@ -24,12 +24,9 @@ import {
   ZebraResultPayload,
 } from 'react-native-zebra-rfid-barcode';
 
-const dummyRfids = ['00000000000000000000'];
-
 const InspectionScreen = () => {
   const navigation = useNavigation<any>();
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
   const [datas, setDatas] = useState<any[]>([]); // Adjust type as needed
   const [filteredData, setFilteredData] = useState<any[]>([]); // Store filtered data for display
@@ -134,6 +131,11 @@ const InspectionScreen = () => {
           keyExtractor={item => item.poid}
           contentContainerStyle={styles.listContent}
           style={styles.list}
+          ListEmptyComponent={
+            <View style={{flex: 1, alignItems: 'center', marginTop: 20}}>
+              <Text>No items found</Text>
+            </View>
+          }
         />
       )}
     </SafeAreaView>

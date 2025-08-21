@@ -10,8 +10,6 @@ import {
   ToastAndroid,
   ActivityIndicator,
 } from 'react-native';
-import {getTagBinList} from '../../services/tagBin';
-import ButtonApp from '../../compnents/ButtonApp';
 import {useNavigation} from '@react-navigation/native';
 import {fetchRetaggingItems} from '../../services/retagingItem';
 import Icon from '../../compnents/Icon';
@@ -29,7 +27,9 @@ const RetagingItemScreen = () => {
   const fetchBins = async (page: number) => {
     setLoading(true);
     try {
-      const res = await fetchRetaggingItems(page);
+      const res = await fetchRetaggingItems('*', '*', page);
+      console.log('Fetched bins:', res);
+
       const newBins = Array.isArray(res.member) ? res.member : [];
       setBins(prev =>
         page === 1
@@ -63,18 +63,20 @@ const RetagingItemScreen = () => {
     }
   };
 
-  // Filter bins by bin number
-  const filteredBins = bins.filter(item =>
-    item.bin?.toLowerCase().includes(search.toLowerCase()),
+  const handleSearch = async (bin: string) => {
+    const res = await fetchRetaggingItems(bin);
+    console.log('Search text:', res.member);
+    setBins(res.member || []);
+  };
+
+  // Filter bins by bin number or tagcode
+  const filteredBins = bins.filter(
+    item =>
+      (item.bin?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
+      (item.tagcode?.toLowerCase().includes(search.toLowerCase()) ?? false),
   );
 
   const handleRegisterNew = () => {
-    // TODO: Implement register new RFID logic
-    // For now, just add a dummy
-    // setRfids(prev => [
-    //   ...prev,
-    //   `4C50710201900000000${Math.floor(Math.random() * 1000000)}`,
-    // ]);
     ToastAndroid.show(
       'Register new RFID Bin is not ready.',
       ToastAndroid.SHORT,
@@ -86,11 +88,11 @@ const RetagingItemScreen = () => {
     <TouchableOpacity
       onPress={() => navigation.navigate('Bin Detail', {item})}
       style={styles.binCard}>
-      {/* <Text style={styles.binText}>Tag: {item.tagcode}</Text> */}
+      <Text style={styles.binText}>Tag: {item.tagcode}</Text>
       <Text style={styles.binText}>Bin: {item.bin}</Text>
       <Text style={styles.binText}>Zone: {item.wms_zone}</Text>
       <Text style={styles.binText}>Store: {item.storeloc}</Text>
-      {/* <Text style={styles.binText}>Qty: {item.curbal}</Text> */}
+      <Text style={styles.binText}>Qty: {item.curbal}</Text>
     </TouchableOpacity>
   );
 
@@ -99,10 +101,11 @@ const RetagingItemScreen = () => {
       <View style={{paddingBottom: 4}}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Filter by Bin Number"
+          placeholder="Search Bin"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
+          onSubmitEditing={() => handleSearch(search)}
         />
         <Icon
           library="Feather"
@@ -120,11 +123,11 @@ const RetagingItemScreen = () => {
         style={styles.list}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.2}
-        ListFooterComponent={
-          loading ? (
-            <ActivityIndicator className="mt-1" size="large" color="#3674B5" />
-          ) : null
-        }
+        // ListFooterComponent={
+        //   loading ? (
+        //     <ActivityIndicator className="mt-1" size="large" color="#3674B5" />
+        //   ) : null
+        // }
       />
     </SafeAreaView>
   );
@@ -172,7 +175,6 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     fontSize: 14,
     color: '#222',
-    // marginBottom: 4,
     marginTop: 6,
     marginHorizontal: 8,
   },

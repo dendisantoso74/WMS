@@ -17,9 +17,6 @@ import {debounce, set} from 'lodash';
 import {
   ZebraEvent,
   ZebraEventEmitter,
-  connectToDevice,
-  getAllDevices,
-  type ZebraResultPayload,
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
 import {getBinByTagCode} from '../../services/materialMovement';

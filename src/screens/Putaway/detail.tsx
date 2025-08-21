@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,16 @@ import {
   TextInput,
   ToastAndroid,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
 import {formatDateTime, generateSerialNumber} from '../../utils/helpers';
 import ModalInputRfid from '../../compnents/wms/ModalInputRfid';
-import {set} from 'lodash';
+import {debounce, set} from 'lodash';
 import {
   completePutaway,
   fetchPutawayMixed,
@@ -24,6 +28,12 @@ import {
 import {checkSerialNumber} from '../../services/materialRecive';
 import {changeInvUseStatusComplete} from '../../services/materialReturn';
 import {findBinByTagCode} from '../../services/materialIssue';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  type ZebraRfidResultPayload,
+} from 'react-native-zebra-rfid-barcode';
+import rfid from '../../assets/images/rfid.png'; // Adjust the path as necessary
 
 const PutawayMaterialScreen = () => {
   const navigation = useNavigation<any>();
@@ -43,6 +53,37 @@ const PutawayMaterialScreen = () => {
   const [loading, setLoading] = useState(false);
   const [suggestedBin, setSuggestedBin] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  // rfid scanner
+  const handleRfidEvent = useCallback(
+    debounce((newData: string) => {
+      console.log('RFID Data:', newData);
+      // if newdata is array make popup to select item for set to search
+
+      if (modalValueItem) {
+        setModalValueBin(newData[0]);
+      }
+
+      setModalValueItem(newData[0]);
+    }, 200),
+    [],
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const rfidEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_RFID,
+        (e: ZebraRfidResultPayload) => {
+          handleRfidEvent(e.data);
+        },
+      );
+
+      // Clean up listeners when screen is unfocused
+      return () => {
+        rfidEvent.remove();
+      };
+    }, []),
+  );
 
   const getdataPutawayMixed = async () => {
     setLoading(true);
@@ -150,12 +191,14 @@ const PutawayMaterialScreen = () => {
 
   const renderItem = ({item}: {item: string}) => {
     console.log('Render item xxx:', item);
-
-    const sideBarColor = item?.invuseline[0]?.serialnumber ? '#A4DD00' : 'blue';
+    const invuseline = Array.isArray(item.invuseline)
+      ? item.invuseline[0]
+      : undefined;
+    const sideBarColor = invuseline?.serialnumber ? '#A4DD00' : 'blue';
 
     return (
       <TouchableOpacity
-        disabled={!!item.invuseline[0]?.serialnumber}
+        disabled={!!invuseline?.serialnumber}
         style={styles.rfidCard}
         onPress={() => {
           setModalItemVisible(true);

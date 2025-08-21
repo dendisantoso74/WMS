@@ -48,6 +48,7 @@ export const completeIssue = async (invuseId: string) => {
     });
     return response.data;
   } catch (error) {
+    console.error('Error in completeIssue:', error);
     throw error;
   }
 };

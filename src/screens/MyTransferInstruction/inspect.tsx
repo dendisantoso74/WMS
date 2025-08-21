@@ -8,14 +8,15 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  Alert,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
 import {completeTransferInstruction} from '../../services/myTransferInstruction';
 import {putAway} from '../../services/materialRecive';
-
-const dummyRfids = ['00000000000000000000'];
+import ModalApp from '../../compnents/ModalApp';
+import {set} from 'lodash';
 
 const MyTransferInstructionSubmitScreen = () => {
   const navigation = useNavigation<any>();
@@ -23,9 +24,12 @@ const MyTransferInstructionSubmitScreen = () => {
   const {item, invuseid, tobin} = route.params;
   console.log('INVUSEID:', invuseid);
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
   const [completedIds, setCompletedIds] = useState<string[]>([]);
+  const [modalCompleteVisible, setModalCompleteVisible] = useState(false);
+  const [modalPutawayVisible, setModalPutawayVisible] = useState(false);
+  const [idTemp, setIdTemp] = useState('');
+  const [itemnum, setItemnum] = useState('');
 
   const handleComplete = () => {
     console.log('Complete pressed', item);
@@ -39,26 +43,38 @@ const MyTransferInstructionSubmitScreen = () => {
       } else {
         ToastAndroid.show('Transfer instruction completed', ToastAndroid.SHORT);
         // navigation.goBack();
-        navigation.navigate('My Transfer Instruction Scan');
+        navigation.navigate('My Transfer Instruction');
       }
     });
   };
 
+  const handleConfirmPutaway = (invuselineid, itemnum) => {
+    setModalPutawayVisible(true);
+    setIdTemp(invuselineid);
+    setItemnum(itemnum);
+  };
+
   const handleModalSubmit = async invuselineid => {
-    putAway(invuselineid, tobin).then(res => {
-      if (res.error) {
-        console.error('Error in put away:', res.error);
-        ToastAndroid.show('Error in put away', ToastAndroid.SHORT);
-      } else {
-        ToastAndroid.show('Put away successful', ToastAndroid.SHORT);
-        setCompletedIds(prev => [...prev, invuselineid]);
-        // navigation.navigate('My Transfer Instruction Submit', {
-        //   item: invuse,
-        //   invuseid: datas.invuseid,
-        //   tobin: inputValue,
-        // });
-      }
-    });
+    putAway(invuselineid, tobin)
+      .then(res => {
+        if (res.error) {
+          console.error('Error in put away:', res.error);
+          ToastAndroid.show('Error in put away', ToastAndroid.SHORT);
+        } else {
+          ToastAndroid.show('Put away successful', ToastAndroid.SHORT);
+          setCompletedIds(prev => [...prev, invuselineid]);
+          // navigation.navigate('My Transfer Instruction Submit', {
+          //   item: invuse,
+          //   invuseid: datas.invuseid,
+          //   tobin: inputValue,
+          // });
+        }
+      })
+      .catch(err => {
+        console.error('Error in put away:', err);
+        // ToastAndroid.show('Error in put away', ToastAndroid.SHORT);
+        Alert.alert('Error', err.Error.message);
+      });
   };
 
   const renderItem = ({item}) => {
@@ -67,7 +83,8 @@ const MyTransferInstructionSubmitScreen = () => {
       <TouchableOpacity
         style={styles.rfidCard}
         onPress={
-          () => handleModalSubmit(item.invuselineid)
+          // () => handleModalSubmit(item.invuselineid)
+          () => handleConfirmPutaway(item.invuselineid, item.itemnum)
           // console.log('My Transfer Instruction Submit', item.invuselineid)
         }>
         <View
@@ -76,12 +93,12 @@ const MyTransferInstructionSubmitScreen = () => {
             {backgroundColor: isCompleted ? '#A4DD00' : 'gray'},
           ]}
         />
-        {console.log('item:', item)}
-        <View className="flex-row my-2">
-          <View className="flex-col justify-start">
+        <View className="flex-row my-2 mr-3">
+          <View className="flex-col justify-start mr-3">
             <Text className="text-sm">Serial Number: {item.serialnumber}</Text>
             <Text className="text-sm">
-              {item.invuselineid} / {item.description}
+              {/* {item.invuselineid}  */}
+              {item.itemnum}/ {item.description}
             </Text>
             <Text className="text-sm">
               TI Qty : {item.quantity} {item.wms_unit}
@@ -90,11 +107,11 @@ const MyTransferInstructionSubmitScreen = () => {
               Putaway Qty : {item.receivedqty} {item.wms_unit}
             </Text>
           </View>
-          <View className="">
+          {/* <View className="">
             <View className="bg-red-500 border border-red-500 rounded-full">
               <Icon library="Feather" name="x" size={15} color="white"></Icon>
             </View>
-          </View>
+          </View> */}
         </View>
       </TouchableOpacity>
     );
@@ -110,11 +127,11 @@ const MyTransferInstructionSubmitScreen = () => {
           <Text className="font-bold text-white">{tobin}</Text>
         </View>
       </View>
-      <View className="px-2 py-2 bg-blue-200">
+      {/* <View className="px-2 py-2 bg-blue-200">
         <Text className="font-bold text-blue-600">
           Information : This is smartscan, please scan on material tag
         </Text>
-      </View>
+      </View> */}
       <View style={styles.filterContainer}></View>
       <FlatList
         data={item}
@@ -125,12 +142,31 @@ const MyTransferInstructionSubmitScreen = () => {
       />
       <View style={styles.buttonContainer}>
         <ButtonApp
-          onPress={() => handleComplete()}
+          // onPress={() => handleComplete()}
+          // onPress={handleComplete}
+          onPress={() => setModalCompleteVisible(true)}
           label="Complete"
           size="large"
           color="primary"
         />
       </View>
+      <ModalApp
+        title="Confirmation"
+        content="Are you sure you want to complete this Putaway?"
+        onClose={() => setModalCompleteVisible(false)}
+        type="confirmation"
+        visible={modalCompleteVisible}
+        onConfirm={() => handleComplete()}
+      />
+
+      <ModalApp
+        title="Confirmation"
+        content={`Are you sure you want to Putaway this item (${itemnum})?`}
+        onClose={() => setModalPutawayVisible(false)}
+        type="confirmation"
+        visible={modalPutawayVisible}
+        onConfirm={() => handleModalSubmit(idTemp)}
+      />
     </SafeAreaView>
   );
 };

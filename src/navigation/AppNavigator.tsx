@@ -211,10 +211,44 @@ const AppNavigator = () => {
 
           {/* Retaging Item Menu */}
           <Stack.Screen name="RetagingItem" component={RetagingItemScreen} />
-          <Stack.Screen name="Bin Detail" component={BinDetailScreen} />
+          <Stack.Screen
+            name="Bin Detail"
+            component={BinDetailScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
 
           {/* Retaging Bin Menu */}
-          <Stack.Screen name="RetagingBin" component={RetagingBinScreen} />
+          <Stack.Screen
+            name="RetagingBin"
+            component={RetagingBinScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
           {/* Material Receive Menu */}
           <Stack.Screen
             name="Material Receive"
@@ -267,6 +301,20 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Transfer Instruction"
             component={TransferInstructionScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
           />
           <Stack.Screen
             name="Transfer Instruction Assign"
@@ -277,6 +325,20 @@ const AppNavigator = () => {
           <Stack.Screen
             name="My Transfer Instruction"
             component={MyTransferInstructionScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
           />
           <Stack.Screen
             name="My Transfer Instruction Scan"
@@ -295,24 +357,38 @@ const AppNavigator = () => {
             name="Scan WO Number"
             component={PutawayScanWoScreen}
             options={({navigation}) => ({
-              // headerRight: () => (
-              //   <TouchableOpacity
-              //     onPress={() => navigation.navigate('Reader Connect')}
-              //     style={{marginRight: 16}}>
-              //     <Icon
-              //       library="Feather"
-              //       name="bluetooth"
-              //       size={22}
-              //       color="#fff"
-              //     />
-              //   </TouchableOpacity>
-              // ),
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
               title: 'Put Away Material',
             })}
           />
           <Stack.Screen
             name="Put Away Material"
             component={PutawayMaterialScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
           />
           <Stack.Screen
             name="Scan Material"

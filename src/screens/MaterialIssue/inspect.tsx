@@ -101,7 +101,8 @@ const MaterialIssueInspectScreen = () => {
     // console.log('Put to stage pressed', invUse[0]?.status);
 
     if (invUse[0]?.status === 'STAGED') {
-      console.log('Already staged');
+      console.log('Already staged', invUse[0]?.invuseid);
+
       completeIssue(invUse[0]?.invuseid).then(res => {
         console.log('Complete issue response:', res);
         ToastAndroid.show('Issue completed successfully', ToastAndroid.SHORT);

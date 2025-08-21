@@ -10,11 +10,16 @@ import {
   ToastAndroid,
   ActivityIndicator,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {fetchAssignedTransferInstructions} from '../../services/myTransferInstruction';
 import {formatDateTime} from '../../utils/helpers';
 // import {useIsFocused} from '@react-navigation/native';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  ZebraResultPayload,
+} from 'react-native-zebra-rfid-barcode';
 
 const MyTransferInstructionScreen = () => {
   const navigation = useNavigation<any>();
@@ -72,6 +77,40 @@ const MyTransferInstructionScreen = () => {
     </TouchableOpacity>
   );
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // Listen for barcode scan event from Zebra reader
+      const barcodeEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_BARCODE,
+        (e: ZebraResultPayload) => {
+          if (e?.data) {
+            setSearch(e.data);
+            handleSearch(e.data);
+          }
+        },
+      );
+      return () => {
+        barcodeEvent.remove();
+      };
+    }, [assignedInstructions]),
+  );
+
+  const handleSearch = (text: string) => {
+    setSearch(text);
+    if (text.trim() === '') {
+      setFilteredInstructions(assignedInstructions);
+    } else {
+      // Filter the list based on the search text
+      const filtered = assignedInstructions.filter(item =>
+        item?.wms_ponum?.toLowerCase().includes(text.toLowerCase()),
+      );
+      setFilteredInstructions(filtered);
+      if (filtered.length === 0) {
+        ToastAndroid.show('No items found', ToastAndroid.SHORT);
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.filterContainer}>
@@ -99,6 +138,11 @@ const MyTransferInstructionScreen = () => {
           keyExtractor={item => item.invusenum}
           contentContainerStyle={styles.listContent}
           style={styles.list}
+          ListEmptyComponent={
+            <View style={{flex: 1, alignItems: 'center', marginTop: 20}}>
+              <Text>No items found</Text>
+            </View>
+          }
         />
       )}
     </SafeAreaView>

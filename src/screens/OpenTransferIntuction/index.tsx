@@ -10,17 +10,19 @@ import {
   ToastAndroid,
   ActivityIndicator,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {getListTransferInstructions} from '../../services/transferInstruction';
 import {formatDateTime} from '../../utils/helpers';
-
-const dummyRfids = ['00000000000000000000'];
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  ZebraResultPayload,
+} from 'react-native-zebra-rfid-barcode';
 
 const TransferInstructionScreen = () => {
   const navigation = useNavigation<any>();
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
   const [transferInstructions, setTransferInstructions] = useState<any[]>([]);
   const [filteredInstructions, setFilteredInstructions] = useState<any[]>([]);
@@ -56,6 +58,40 @@ const TransferInstructionScreen = () => {
       );
     }
   }, [search, transferInstructions]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Listen for barcode scan event from Zebra reader
+      const barcodeEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_BARCODE,
+        (e: ZebraResultPayload) => {
+          if (e?.data) {
+            setSearch(e.data);
+            handleSearch(e.data);
+          }
+        },
+      );
+      return () => {
+        barcodeEvent.remove();
+      };
+    }, [transferInstructions]),
+  );
+
+  const handleSearch = (text: string) => {
+    setSearch(text);
+    if (text.trim() === '') {
+      setFilteredInstructions(transferInstructions);
+    } else {
+      // Filter the list based on the search text
+      const filtered = transferInstructions.filter(item =>
+        item?.wms_ponum.toLowerCase().includes(text.toLowerCase()),
+      );
+      setFilteredInstructions(filtered);
+      if (filtered.length === 0) {
+        ToastAndroid.show('No items found', ToastAndroid.SHORT);
+      }
+    }
+  };
 
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
@@ -101,6 +137,11 @@ const TransferInstructionScreen = () => {
           keyExtractor={item => item}
           contentContainerStyle={styles.listContent}
           style={styles.list}
+          ListEmptyComponent={
+            <View style={{flex: 1, alignItems: 'center', marginTop: 20}}>
+              <Text>No items found</Text>
+            </View>
+          }
         />
       )}
     </SafeAreaView>

@@ -129,7 +129,7 @@ const DetailMaterialReturnScreen = () => {
         </View>
       </View>
 
-      <View className="px-3 mt-4">
+      <View className="px-3 mt-4 mr-5">
         <View className="flex-row items-center ">
           <Text className="w-1/3 font-bold">Return Qty</Text>
           <TouchableOpacity style={styles.circleBtn} onPress={handleDecrease}>
@@ -145,12 +145,12 @@ const DetailMaterialReturnScreen = () => {
             <Text style={styles.circleBtnText}>+</Text>
           </TouchableOpacity>
         </View>
-        <View className="flex-row items-center mt-5">
+        {/* <View className="flex-row items-center mt-5">
           <Text className="w-1/3 font-bold">Suggestion Bin</Text>
           <View className="w-2/3 py-2 ml-5 bg-gray-200">
             <Text className="ml-2 font-bold text-left ">{suggestBin}</Text>
           </View>
-        </View>
+        </View> */}
         <View className="flex-row items-center mt-5">
           <Text className="w-1/3 font-bold">Condition Code</Text>
           <View className="w-2/3 py-2 ml-5 bg-gray-200">
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   circleBtnText: {
-    fontSize: 28,
+    fontSize: 22,
     color: '#ffffff',
     fontWeight: 'bold',
   },

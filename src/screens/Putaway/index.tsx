@@ -10,15 +10,20 @@ import {
   ToastAndroid,
   ActivityIndicator,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {fetchPutawayMixed} from '../../services/putaway';
 import {formatDateTime} from '../../utils/helpers';
-import Loading from '../../compnents/Loading';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  ZebraResultPayload,
+} from 'react-native-zebra-rfid-barcode';
 
 const PutawayScanWoScreen = () => {
   const navigation = useNavigation<any>();
   const [rfids, setRfids] = useState<any[]>([]);
+  const [filteredDatas, setFilteredDatas] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -38,12 +43,29 @@ const PutawayScanWoScreen = () => {
   }, []);
 
   // Local search filter
-  const filteredRfids = rfids.filter(item =>
-    search === ''
-      ? true
-      : item.wonum?.toString().toLowerCase().includes(search.toLowerCase()) ||
-        item.description?.toLowerCase().includes(search.toLowerCase()),
-  );
+  // const filteredRfids = rfids.filter(item =>
+  //   search === ''
+  //     ? true
+  //     : item.wonum?.toString().toLowerCase().includes(search.toLowerCase()) ||
+  //       item.description?.toLowerCase().includes(search.toLowerCase()),
+  // );
+
+  useEffect(() => {
+    if (!search) {
+      setFilteredDatas(rfids);
+    } else {
+      setFilteredDatas(
+        rfids.filter(
+          (item: any) =>
+            item.wonum
+              ?.toString()
+              .toLowerCase()
+              .includes(search.toLowerCase()) ||
+            item.description?.toLowerCase().includes(search.toLowerCase()),
+        ),
+      );
+    }
+  }, [search, rfids]);
 
   const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
@@ -61,15 +83,57 @@ const PutawayScanWoScreen = () => {
     </TouchableOpacity>
   );
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // Listen for barcode scan event from Zebra reader
+      const barcodeEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_BARCODE,
+        (e: ZebraResultPayload) => {
+          if (e?.data) {
+            // setSearch(e.data);
+            handleSearch(e.data);
+          }
+        },
+      );
+      return () => {
+        barcodeEvent.remove();
+      };
+    }, [rfids]),
+  );
+
+  const handleSearch = (text: string) => {
+    setSearch(text);
+    if (text.trim() === '') {
+      setFilteredDatas(rfids);
+    } else {
+      const filtered = rfids.filter(
+        item =>
+          item.wonum?.toString().toLowerCase().includes(text.toLowerCase()) ||
+          item.description?.toLowerCase().includes(text.toLowerCase()),
+      );
+      setFilteredDatas(filtered);
+      if (filtered.length === 0) {
+        ToastAndroid.show('No items found', ToastAndroid.SHORT);
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.filterContainer}>
+      <View>
         <TextInput
           style={styles.filterInput}
           placeholder="Enter WO number or description"
           placeholderTextColor="#b0b0b0"
           value={search}
-          onChangeText={setSearch}
+          onChangeText={handleSearch}
+        />
+        <Icon
+          library="Feather"
+          name="search"
+          size={20}
+          color="#b0b0b0"
+          style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
       {loading ? (
@@ -78,11 +142,9 @@ const PutawayScanWoScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filteredRfids}
+          data={filteredDatas}
           renderItem={renderItem}
-          keyExtractor={item =>
-            item.wonum?.toString() || Math.random().toString()
-          }
+          keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.listContent}
           style={styles.list}
           ListEmptyComponent={

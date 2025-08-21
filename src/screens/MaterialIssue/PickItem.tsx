@@ -64,7 +64,8 @@ const PickItemScreen = () => {
       console.log('RFID Data:', newData);
       // if newdata is array make popup to select item for set to search
 
-      setSearch(newData);
+      setSearch(newData[0]);
+      searchSerialNumber(newData[0]);
     }, 200),
     [],
   );
@@ -246,8 +247,10 @@ const PickItemScreen = () => {
                 style={styles.filterInput}
                 placeholder="0"
                 placeholderTextColor="#b0b0b0"
+                // value={item?.stagedqty.toString()}
                 value={storeqty}
                 onChangeText={setStoreqty}
+                // editable={false}
               />
               <Text>{item?.wms_unit}</Text>
             </View>

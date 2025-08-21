@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,25 @@ import {
   Modal,
   Button,
   ActivityIndicator,
+  Image,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import rfid from '../../assets/images/rfid.png'; // Adjust the path as necessary
 import Icon from '../../compnents/Icon';
 import {formatDateTime} from '../../utils/helpers';
 import ButtonApp from '../../compnents/ButtonApp';
 import {getTransferInstructionByPoNum} from '../../services/myTransferInstruction';
+import {debounce, set} from 'lodash';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  type ZebraRfidResultPayload,
+} from 'react-native-zebra-rfid-barcode';
+import {getBinByTagCode} from '../../services/materialMovement';
 
 const MyTransferInstructionScanScreen = () => {
   const navigation = useNavigation<any>();
@@ -31,6 +44,9 @@ const MyTransferInstructionScanScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [tagBin, setTagBin] = useState('');
+  const [binInfo, setBinInfo] = useState<any>(null);
   // const status = datas.status;
 
   useEffect(() => {
@@ -79,6 +95,50 @@ const MyTransferInstructionScanScreen = () => {
     console.log('Input value:', datas.invuseline[0].invuselineid, inputValue);
   };
 
+  const filteredInvuse = invuse?.filter(item => {
+    const code = (item.itemnum || '').toLowerCase();
+    const name = (item.description || '').toLowerCase();
+    const searchText = search?.toLowerCase();
+    return code.includes(searchText) || name.includes(searchText);
+  });
+
+  // rfid scanner
+  const handleRfidEvent = useCallback(
+    debounce((newData: string) => {
+      console.log('RFID Data:', newData);
+      // if newdata is array make popup to select item for set to search
+
+      // setSearch(newData);
+      setTagBin(newData);
+      newData && findBin(newData[0]);
+    }, 200),
+    [],
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const rfidEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_RFID,
+        (e: ZebraRfidResultPayload) => {
+          handleRfidEvent(e.data);
+        },
+      );
+
+      // Clean up listeners when screen is unfocused
+      return () => {
+        rfidEvent.remove();
+      };
+    }, []),
+  );
+
+  const findBin = useCallback(async (tag: string) => {
+    console.log('Finding bin for tag move:', tag);
+
+    const bin = await getBinByTagCode(tag);
+    setBinInfo(bin.member[0]);
+    console.log('Found bin:', bin.member[0]);
+  }, []);
+
   const renderItem = ({item}) => (
     <TouchableOpacity
       style={styles.rfidCard}
@@ -99,7 +159,7 @@ const MyTransferInstructionScanScreen = () => {
         ]}
       />
       <View className="my-2">
-        <View className="flex-col justify-start">
+        <View className="flex-col justify-start mr-5">
           <Text className="font-bold">Bin : {item.tobin}</Text>
           <Text className="font-bold">
             {item?.itemnum} / {item?.description}
@@ -152,9 +212,9 @@ const MyTransferInstructionScanScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={invuse}
+          data={filteredInvuse}
           renderItem={renderItem}
-          keyExtractor={item => item}
+          keyExtractor={(item, i) => i.toString()}
           contentContainerStyle={styles.listContent}
           style={styles.list}
           ListEmptyComponent={
@@ -170,7 +230,7 @@ const MyTransferInstructionScanScreen = () => {
         <ButtonApp onPress={() => handleScanRfid()} label="SCAN RFID" />
       </View>
 
-      <Modal
+      {/* <Modal
         visible={modalVisible}
         transparent
         animationType="slide"
@@ -195,6 +255,62 @@ const MyTransferInstructionScanScreen = () => {
               <Button title="Cancel" onPress={() => setModalVisible(false)} />
               <View style={{width: 12}} />
               <Button title="Submit" onPress={handleModalSubmit} />
+            </View>
+          </View>
+        </View>
+      </Modal> */}
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
+              Please scan RFID bin destination
+            </Text>
+            <View className="flex-row justify-center py-3 align-items-center">
+              <Image
+                source={rfid}
+                style={{width: 100, height: 100, resizeMode: 'contain'}}
+              />
+            </View>
+            <TextInput
+              // editable={false}
+              style={styles.input}
+              placeholder="Scan Bin"
+              value={tagBin || search[0]}
+              onChangeText={setTagBin}
+              onSubmitEditing={e => findBin(e.nativeEvent.text)}
+            />
+
+            {/* <Text>{binInfo ? `Bin Info: ${JSON.stringify(binInfo)}` : ''}</Text> */}
+            {binInfo && <Text>Bin : {binInfo.bin}</Text>}
+            {/* <Text>Tag : {binInfo && binInfo.tagcode}</Text> */}
+
+            <View
+              style={{
+                // flexDirection: 'row',
+                // justifyContent: 'flex-end',
+                marginTop: 16,
+              }}>
+              {/* <Button title="Cancel" onPress={() => setIsShowScan(false)} /> */}
+              {/* <View style={{width: 12}} /> */}
+              {binInfo && (
+                <Button
+                  title="Next"
+                  onPress={() => {
+                    setModalVisible(false);
+
+                    navigation.navigate('My Transfer Instruction Submit', {
+                      item: invuse,
+                      invuseid: invuseid,
+                      tobin: binInfo.bin,
+                    });
+                  }}
+                />
+              )}
             </View>
           </View>
         </View>

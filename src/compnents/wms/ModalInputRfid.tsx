@@ -1,5 +1,14 @@
 import React from 'react';
-import {Modal, View, Text, TextInput, Button, StyleSheet} from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Image,
+} from 'react-native';
+import rfid from '../../assets/images/rfid.png'; // Adjust the path as necessary
 
 interface ModalInputRfidProps {
   visible: boolean;
@@ -36,6 +45,12 @@ const ModalInputRfid: React.FC<ModalInputRfidProps> = ({
         <Text style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
           {title}
         </Text>
+        <View className="flex-row justify-center py-3 align-items-center">
+          <Image
+            source={rfid}
+            style={{width: 100, height: 100, resizeMode: 'contain'}}
+          />
+        </View>
         <TextInput
           style={styles.input}
           placeholder={placeholder}

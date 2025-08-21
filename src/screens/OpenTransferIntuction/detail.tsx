@@ -59,13 +59,20 @@ const TransferInstructionAssignScreen = () => {
     });
   };
 
+  const filteredInvuse = invuse.filter(item => {
+    const code = (item.itemnum || '').toLowerCase();
+    const name = (item.description || '').toLowerCase();
+    const searchText = search.toLowerCase();
+    return code.includes(searchText) || name.includes(searchText);
+  });
+
   const renderItem = ({item}: {item: string}) => (
     <View
       style={styles.rfidCard}
       // onPress={() => navigation.navigate('Inspection Receiving Detail')}
     >
       <View style={[styles.sideBar, {backgroundColor: 'blue'}]} />
-      <View className="my-2">
+      <View className="my-2 mr-1">
         <View className="flex-col justify-start">
           <Text className="font-bold">Bin : {item.tobin}</Text>
           <Text className="font-bold">
@@ -114,7 +121,7 @@ const TransferInstructionAssignScreen = () => {
         />
       </View>
       <FlatList
-        data={invuse}
+        data={filteredInvuse}
         renderItem={renderItem}
         keyExtractor={item => item.invuselinenum}
         contentContainerStyle={styles.listContent}

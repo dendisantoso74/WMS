@@ -82,10 +82,7 @@ const TagBinScreen = () => {
     //   ...prev,
     //   `4C50710201900000000${Math.floor(Math.random() * 1000000)}`,
     // ]);
-    ToastAndroid.show(
-      'Register new RFID Bin is not ready.',
-      ToastAndroid.SHORT,
-    );
+
     navigation.navigate('TagBin Scan');
   };
 
