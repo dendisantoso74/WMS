@@ -58,6 +58,7 @@ const PickItemScreen = () => {
   const [storeqty, setStoreqty] = useState('');
   const [pickqty, setPickqty] = useState('');
   const [serialNumberItem, setSerialNumberItem] = useState('');
+  const [findItem, setFindItem] = useState([]);
 
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
@@ -157,7 +158,7 @@ const PickItemScreen = () => {
     // }
 
     // You can now use this payload for your API call
-    console.log('invuseid, Payload:', invinvUseId, payload, item);
+    console.log('invuseid, Payload, item:', invinvUseId, payload, item);
     await pickItem(invinvUseId, payload)
       .then(res => {
         console.log('Pick item response:', res);
@@ -180,7 +181,9 @@ const PickItemScreen = () => {
     // const result = await findBinByTagCode(search);
     const result = await getItemSNByTagCode(tagcode).then(res => {
       console.log('Tag Info:', res.member[0]);
-      setSerialNumberItem(res.member[0].wms_serializeditem);
+      setSerialNumberItem(res.member[0].serialnumber);
+      setFindItem(res.member[0]);
+      setStoreqty(res.member[0].qtystored);
     });
 
     setBin(result.member[0]);
@@ -227,6 +230,7 @@ const PickItemScreen = () => {
               // numberOfLines={2}
               // ellipsizeMode="tail"
               >
+                <Text className="font-bold">{item?.itemnum}</Text>/
                 {item?.description}
               </Text>
             </View>
@@ -242,16 +246,21 @@ const PickItemScreen = () => {
           <View className="flex-row items-center w-full mt-3">
             <Text className="w-1/2 font-bold">Stored Qty</Text>
             <View className="flex-row items-center ">
-              <TextInput
+              {/* <TextInput
                 className="w-24 text-center"
                 style={styles.filterInput}
-                placeholder="0"
+                // placeholder="0"
                 placeholderTextColor="#b0b0b0"
                 // value={item?.stagedqty.toString()}
                 value={storeqty}
                 onChangeText={setStoreqty}
                 // editable={false}
-              />
+              /> */}
+              <View className="w-1/2 py-2 ">
+                <Text className="font-bold text-center ">
+                  {findItem?.qtystored}
+                </Text>
+              </View>
               <Text>{item?.wms_unit}</Text>
             </View>
           </View>
@@ -274,7 +283,7 @@ const PickItemScreen = () => {
             <Text className="w-1/2 font-bold">Bin</Text>
             <View className="w-1/2 py-2 ">
               <Text className="font-bold text-center ">
-                {suggestedBin?.binnum}
+                {findItem?.wms_bin}
               </Text>
             </View>
           </View>

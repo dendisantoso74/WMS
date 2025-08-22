@@ -116,7 +116,8 @@ export const generateIssueHeader = async (wonum: string) => {
 };
 
 export const getItemSNByTagCode = async (tagcode: string) => {
-  const url = `/maximo/oslc/os/WMS_MXRFID?lean=1&oslc.select=*&oslc.where=tagcode="${tagcode}"`;
+  // const url = `/maximo/oslc/os/WMS_MXRFID?lean=1&oslc.select=*&oslc.where=tagcode="${tagcode}"`;
+  const url = `/maximo/oslc/os/WMS_MXSERIALIZEDITEM?lean=1&oslc.select=*&oslc.where=tagcode="${tagcode}"`;
   try {
     const response = await api.get(url, {
       headers: {

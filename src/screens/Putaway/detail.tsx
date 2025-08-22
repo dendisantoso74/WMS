@@ -22,6 +22,7 @@ import {debounce, set} from 'lodash';
 import {
   completePutaway,
   fetchPutawayMixed,
+  fetchPutawayMixedSingle,
   findSuggestedBinPutaway,
   tagItemPutaway,
 } from '../../services/putaway';
@@ -87,7 +88,7 @@ const PutawayMaterialScreen = () => {
 
   const getdataPutawayMixed = async () => {
     setLoading(true);
-    fetchPutawayMixed(item.wonum).then(res => {
+    fetchPutawayMixedSingle(item.wonum).then(res => {
       console.log('tes fetch singgle', res.member[0]);
       //set invuse that have status retur entered
       const filteredInvUse = res.member[0].invuse.filter(
@@ -109,7 +110,7 @@ const PutawayMaterialScreen = () => {
     setSerialNumber(SN);
 
     const bin = await findSuggestedBinPutaway(
-      item.invuseline[0]?.itemnum,
+      item.invuseline[item.invuseline.length - 1]?.itemnum,
       item.fromstoreloc,
     );
     setSuggestedBin(bin.member[0]?.binnum || '');
@@ -135,11 +136,17 @@ const PutawayMaterialScreen = () => {
 
     const payload = {
       // tag item
-      invuselineid: selectedItem.invuseline[0].invuselineid,
+      invuselineid:
+        selectedItem.invuseline[selectedItem.invuseline.length - 1]
+          ?.invuselineid,
       tagcode: modalValueItem,
       serialnumber: serialNumber,
+      // tess hardcode serial number for testing
+      // serialnumber: '3070B0BFD595D3001446F4F7',
+
       // tag bin
-      frombin: selectedItem.invuseline[0].frombin,
+      frombin:
+        selectedItem.invuseline[selectedItem.invuseline.length - 1]?.frombin,
       wms_finalbin: bin?.member[0]?.bin,
       wms_status: 'COMPLETE',
     };
@@ -173,8 +180,8 @@ const PutawayMaterialScreen = () => {
   };
 
   const handleCompletereturn = async () => {
-    console.log('Complete button pressed', invUse[0].invuseid);
-    changeInvUseStatusComplete(invUse[0].invuseid)
+    console.log('Complete button pressed', invUse[invUse.length - 1]?.invuseid);
+    changeInvUseStatusComplete(invUse[invUse.length - 1]?.invuseid)
       .then(res => {
         console.log('Complete return response:', res);
         ToastAndroid.show('Return completed successfully', ToastAndroid.SHORT);
@@ -192,7 +199,7 @@ const PutawayMaterialScreen = () => {
   const renderItem = ({item}: {item: string}) => {
     console.log('Render item xxx:', item);
     const invuseline = Array.isArray(item.invuseline)
-      ? item.invuseline[0]
+      ? item.invuseline[item.invuseline.length - 1]
       : undefined;
     const sideBarColor = invuseline?.serialnumber ? '#A4DD00' : 'blue';
 
@@ -208,27 +215,39 @@ const PutawayMaterialScreen = () => {
         <View className="flex-col w-10/12 my-1">
           <View className="flex-row justify-between">
             <Text className="font-bold">
-              {item.invuseline ? item.invuseline[0]?.itemnum : '-'}
+              {item.invuseline
+                ? item.invuseline[item.invuseline.length - 1]?.itemnum
+                : '-'}
             </Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="font-bold">
-              {item.invuseline ? item.invuseline[0]?.description : '-'}
+              {item.invuseline
+                ? item.invuseline[item.invuseline.length - 1]?.description
+                : '-'}
             </Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="font-bold text-left ">
-              {item.invuseline ? item.invuseline[0]?.frombin : '-'}
+              {item.invuseline
+                ? item.invuseline[item.invuseline.length - 1]?.frombin
+                : '-'}
             </Text>
             <Text className="text-right ">Return</Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="font-bold text-left ">
-              {item.invuseline ? item.invuseline[0]?.fromconditioncode : '-'}
+              {item.invuseline
+                ? item.invuseline[item.invuseline.length - 1]?.fromconditioncode
+                : '-'}
             </Text>
             <Text className="text-right ">
-              {item.invuseline ? item.invuseline[0]?.quantity : '-'}{' '}
-              {item.invuseline ? item.invuseline[0]?.wms_unit : '-'}
+              {item.invuseline
+                ? item.invuseline[item.invuseline.length - 1]?.quantity
+                : '-'}{' '}
+              {item.invuseline
+                ? item.invuseline[item.invuseline.length - 1]?.wms_unit
+                : '-'}
             </Text>
           </View>
         </View>

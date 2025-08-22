@@ -19,6 +19,7 @@ import {
   ZebraEventEmitter,
   ZebraResultPayload,
 } from 'react-native-zebra-rfid-barcode';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const PutawayScanWoScreen = () => {
   const navigation = useNavigation<any>();
@@ -120,6 +121,7 @@ const PutawayScanWoScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate />
       <View>
         <TextInput
           style={styles.filterInput}

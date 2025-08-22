@@ -42,16 +42,16 @@ const DetailMaterialScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className="flex-row p-2 bg-blue-400">
-        <View>
-          <Text className="font-bold text-white">Material</Text>
-          <Text className="font-bold text-white">Reserve Qty</Text>
-        </View>
-        <View>
-          <Text className="ml-10 font-bold text-white">
+      <View className="p-2 bg-blue-400">
+        <View className="flex flex-row justify-start">
+          <Text className="w-1/4 font-bold text-white">Material</Text>
+          <Text className="w-4/6 font-bold text-white">
             {item?.description}
           </Text>
-          <Text className="ml-10 font-bold text-white">
+        </View>
+        <View className="flex flex-row mr-4">
+          <Text className="w-1/4 font-bold text-white">Reserve Qty</Text>
+          <Text className="font-bold text-white">
             {item?.reservedqty} {item?.wms_unit}
           </Text>
         </View>

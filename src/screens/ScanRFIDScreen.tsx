@@ -70,7 +70,7 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<string | null>(null);
-  const [inputId, setInputId] = useState<string>('PO-BJS-25-1673-MMT');
+  const [inputId, setInputId] = useState<string>('');
 
   const pan = useRef(
     new Animated.ValueXY({x: 0, y: SCREEN_HEIGHT - 50}),

@@ -100,10 +100,10 @@ const MaterialIssueInspectScreen = () => {
   const handlePutToStage = async () => {
     // console.log('Put to stage pressed', invUse[0]?.status);
 
-    if (invUse[0]?.status === 'STAGED') {
-      console.log('Already staged', invUse[0]?.invuseid);
+    if (invUse[invUse.length - 1]?.status === 'STAGED') {
+      console.log('Already staged', invUse[invUse.length - 1]?.invuseid);
 
-      completeIssue(invUse[0]?.invuseid).then(res => {
+      completeIssue(invUse[invUse.length - 1]?.invuseid).then(res => {
         console.log('Complete issue response:', res);
         ToastAndroid.show('Issue completed successfully', ToastAndroid.SHORT);
         fetchWo();
@@ -111,7 +111,7 @@ const MaterialIssueInspectScreen = () => {
     } else {
       console.log('Not staged');
 
-      putToStage(invUse[0]?.invuseid).then(res => {
+      putToStage(invUse[invUse.length - 1]?.invuseid).then(res => {
         console.log('Put to stage response:', res);
         ToastAndroid.show('Put to stage successfully', ToastAndroid.SHORT);
         fetchWo();
@@ -130,7 +130,7 @@ const MaterialIssueInspectScreen = () => {
           navigation.navigate('Detail Material Issue', {
             item: item,
             invuselinenum: index + 1,
-            invinvUseId: invUse[0]?.invuseid,
+            invinvUseId: invUse[invUse.length - 1]?.invuseid,
           })
         }
         style={styles.rfidCard}>
@@ -155,11 +155,11 @@ const MaterialIssueInspectScreen = () => {
               {/* {item?.conditioncode} */}
             </Text>
             <Text className="w-1/2 text-right">
-              {invUse[0]?.status === 'STAGED'
+              {invUse[invUse.length - 1]?.status === 'STAGED'
                 ? item?.reservedqty - item?.stagedqty
                 : item?.reservedqty - item?.pendingqty}
               {item?.wms_unit} / {''}
-              {invUse[0]?.status === 'STAGED'
+              {invUse[invUse.length - 1]?.status === 'STAGED'
                 ? item?.stagedqty
                 : item?.pendingqty}
               {item?.wms_unit}
@@ -202,9 +202,13 @@ const MaterialIssueInspectScreen = () => {
       {invreserve && (
         <View style={styles.buttonContainer}>
           <ButtonApp
-            label={invUse[0]?.status === 'STAGED' ? 'COMPLETE' : 'PUT TO STAGE'}
+            label={
+              invUse[invUse.length - 1]?.status === 'STAGED'
+                ? 'COMPLETE'
+                : 'PUT TO STAGE'
+            }
             onPress={() => handlePutToStage()}
-            disabled={invUse[0]?.status === 'COMPLETE'}
+            disabled={invUse[invUse.length - 1]?.status === 'COMPLETE'}
             size="large"
             color="primary"
           />

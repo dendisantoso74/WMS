@@ -47,7 +47,10 @@ const TagInfoDetailScreen = () => {
 
         if (res.member[0].status === 'Blank') {
           navigation.goBack();
-          ToastAndroid.show('RFID Blank', ToastAndroid.SHORT);
+          ToastAndroid.show(
+            `${listrfid[listrfid.length - 1]} RFID Blank`,
+            ToastAndroid.SHORT,
+          );
           setLoading(false);
           return;
         }
