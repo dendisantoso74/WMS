@@ -110,7 +110,7 @@ const HomeWMSScreen = () => {
               <MenuCard
                 onPress={() => navigation.navigate('Transfer Instruction')}
                 title="Open Transfer Instruction"
-                count={0}
+                // count={0}
                 icon="arrow-up-right"
                 color="bg-yellow-400"
                 textColor="text-white"
@@ -118,7 +118,7 @@ const HomeWMSScreen = () => {
               <MenuCard
                 onPress={() => navigation.navigate('My Transfer Instruction')}
                 title="My Transfer Instruction"
-                count={0}
+                // count={0}
                 icon="file-text"
                 color="bg-green-600"
                 textColor="text-white"
@@ -172,7 +172,7 @@ const HomeWMSScreen = () => {
                 <View className="py-3">
                   <View className="flex-row justify-between px-4 mb-3">
                     <Icon library="Feather" name="tag" size={24} />
-                    <Text className="mr-4 text-lg font-bold ">0</Text>
+                    {/* <Text className="mr-4 text-lg font-bold ">0</Text> */}
                   </View>
 
                   <Text className="p-1 ml-5 font-bold text-nowrap">Tag</Text>
@@ -232,7 +232,7 @@ const HomeWMSScreen = () => {
                       color="white"
                       size={24}
                     />
-                    <Text className="mr-4 text-lg font-bold text-white">0</Text>
+                    {/* <Text className="mr-4 text-lg font-bold text-white">0</Text> */}
                   </View>
 
                   <Text className={'font-bold p-1 text-nowrap text-white'}>
@@ -247,7 +247,7 @@ const HomeWMSScreen = () => {
                 <View className="py-3">
                   <View className="flex-row justify-center px-4 mb-3">
                     <Icon library="Feather" name="tag" size={24} />
-                    <Text className="mr-4 text-lg font-bold">0</Text>
+                    {/* <Text className="mr-4 text-lg font-bold">0</Text> */}
                   </View>
 
                   <Text className="p-1 font-bold text-center text-nowrap">
@@ -264,13 +264,14 @@ const HomeWMSScreen = () => {
           {/* Top Row */}
           <View className="flex-row gap-2 space-x-3">
             <MenuCard
-              onPress={() => navigation.navigate('Stock Opname List')}
+              // onPress={() => navigation.navigate('Stock Opname List')}
               className="px-3"
               title="Stock Opname"
-              count={0}
+              // count={0}
               icon="archive"
               color="bg-orange-400"
               textColor="text-white"
+              disabled={true}
             />
           </View>
         </View>
@@ -285,7 +286,7 @@ const HomeWMSScreen = () => {
               <View className="py-3">
                 <View className="flex-row justify-between px-4 mb-3">
                   <Icon library="Feather" name="cast" color="white" size={24} />
-                  <Text className={'text-lg font-bold mr-4 text-white'}>0</Text>
+                  {/* <Text className={'text-lg font-bold mr-4 text-white'}>0</Text> */}
                 </View>
 
                 <Text className="p-1 font-bold text-white text-nowrap">
@@ -320,7 +321,7 @@ const HomeWMSScreen = () => {
               <View className="py-3">
                 <View className="flex-row justify-between px-4 mb-3">
                   <Icon library="Feather" name="cast" color="white" size={24} />
-                  <Text className={'text-lg font-bold mr-4 text-white'}>0</Text>
+                  {/* <Text className={'text-lg font-bold mr-4 text-white'}>0</Text> */}
                 </View>
 
                 <Text className={'font-bold p-1 text-nowrap text-white'}>

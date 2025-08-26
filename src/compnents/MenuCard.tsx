@@ -11,6 +11,7 @@ type MenuCardProps = {
   className?: string;
   iconColor?: string;
   onPress?: () => void;
+  disabled?: boolean;
 };
 
 const MenuCard = ({
@@ -22,11 +23,13 @@ const MenuCard = ({
   className = '',
   iconColor = 'white',
   onPress,
+  disabled = false,
 }: MenuCardProps) => (
   <TouchableOpacity
     className={`flex-1 rounded-xl ${color} ${className}`}
     style={styles.shadow}
-    onPress={onPress}>
+    onPress={onPress}
+    disabled={disabled}>
     <View className="py-3">
       <View className="flex-row justify-between px-4 mb-3">
         <Icon library="Feather" name={icon} color={iconColor} size={24} />

@@ -40,7 +40,7 @@ const TagDetailScreen = () => {
     if (activeFilter === 'TAGGED') {
       filtered = filtered.filter((item: any) => !!item.tagcode);
     } else if (activeFilter === 'UNTAGGED') {
-      filtered = filtered.filter((item: any) => !item.tagcode);
+      filtered = filtered?.filter((item: any) => !item.tagcode);
     }
 
     // Local search by material code or material name

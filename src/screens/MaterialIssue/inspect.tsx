@@ -44,6 +44,8 @@ const MaterialIssueInspectScreen = () => {
   const [datas, setDatas] = useState<WoDetail[]>([]); // <-- Use WoDetail[] type
   const [invUse, setInvUse] = useState([]); // <-- Use WoDetail[] type
   const [invreserve, setInvreserve] = useState([]); // <-- Use WoDetail[] type
+  const [invreserveid, setInvreserveid] = useState([]);
+  const [invreserveIndex, setInvreserveIndex] = useState(0);
 
   const handleReceive = () => {
     setModalVisible(true);
@@ -68,8 +70,23 @@ const MaterialIssueInspectScreen = () => {
           setInvUse(res.member[0].invuse);
 
           console.log('Work order details:', res);
-          console.log('Filtered inventory use:', res.member[0].invuse);
 
+          // search entered index of array
+          let enteredIndex = res.member[0].invuse.findIndex(
+            (item: any) => item.status === 'ENTERED',
+          );
+          if (enteredIndex === -1) {
+            enteredIndex = res.member[0].invuse.findIndex(
+              (item: any) => item.status === 'STAGED',
+            );
+          }
+          // search inv with status entered
+          const enteredInv = res.member[0].invuse.filter(
+            (item: any) => item.status === 'ENTERED',
+          );
+          console.log('Entered inventory:', enteredInv, enteredIndex);
+          setInvreserveIndex(enteredIndex);
+          setInvreserveid(enteredInv[0]?.invuseid);
           // Process the work order details as needed
         }
       })
@@ -100,10 +117,10 @@ const MaterialIssueInspectScreen = () => {
   const handlePutToStage = async () => {
     // console.log('Put to stage pressed', invUse[0]?.status);
 
-    if (invUse[invUse.length - 1]?.status === 'STAGED') {
-      console.log('Already staged', invUse[invUse.length - 1]?.invuseid);
+    if (invUse[invreserveIndex]?.status === 'STAGED') {
+      console.log('Already staged', invUse[invreserveIndex]?.invuseid);
 
-      completeIssue(invUse[invUse.length - 1]?.invuseid).then(res => {
+      completeIssue(invUse[invreserveIndex]?.invuseid).then(res => {
         console.log('Complete issue response:', res);
         ToastAndroid.show('Issue completed successfully', ToastAndroid.SHORT);
         fetchWo();
@@ -111,7 +128,7 @@ const MaterialIssueInspectScreen = () => {
     } else {
       console.log('Not staged');
 
-      putToStage(invUse[invUse.length - 1]?.invuseid).then(res => {
+      putToStage(invUse[invreserveIndex]?.invuseid).then(res => {
         console.log('Put to stage response:', res);
         ToastAndroid.show('Put to stage successfully', ToastAndroid.SHORT);
         fetchWo();
@@ -130,7 +147,8 @@ const MaterialIssueInspectScreen = () => {
           navigation.navigate('Detail Material Issue', {
             item: item,
             invuselinenum: index + 1,
-            invinvUseId: invUse[invUse.length - 1]?.invuseid,
+            invinvUseId: invreserveid,
+            indexInvEntered: invreserveIndex,
           })
         }
         style={styles.rfidCard}>
@@ -153,13 +171,14 @@ const MaterialIssueInspectScreen = () => {
           <View className="flex-row justify-between">
             <Text className="w-1/3 font-bold">
               {/* {item?.conditioncode} */}
+              {item?.invreserveid}
             </Text>
             <Text className="w-1/2 text-right">
-              {invUse[invUse.length - 1]?.status === 'STAGED'
+              {invUse[invreserveIndex]?.status === 'STAGED'
                 ? item?.reservedqty - item?.stagedqty
                 : item?.reservedqty - item?.pendingqty}
               {item?.wms_unit} / {''}
-              {invUse[invUse.length - 1]?.status === 'STAGED'
+              {invUse[invreserveIndex]?.status === 'STAGED'
                 ? item?.stagedqty
                 : item?.pendingqty}
               {item?.wms_unit}
@@ -203,12 +222,12 @@ const MaterialIssueInspectScreen = () => {
         <View style={styles.buttonContainer}>
           <ButtonApp
             label={
-              invUse[invUse.length - 1]?.status === 'STAGED'
+              invUse[invreserveIndex]?.status === 'STAGED'
                 ? 'COMPLETE'
                 : 'PUT TO STAGE'
             }
             onPress={() => handlePutToStage()}
-            disabled={invUse[invUse.length - 1]?.status === 'COMPLETE'}
+            disabled={invUse[invreserveIndex]?.status === 'COMPLETE'}
             size="large"
             color="primary"
           />

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Text, StyleSheet, SafeAreaView} from 'react-native';
 import ScanRFIDScreen from '../ScanRFIDScreen';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 const TagInfoScreen = () => {
   const navigation = useNavigation<any>();

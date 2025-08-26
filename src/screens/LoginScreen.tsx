@@ -99,7 +99,7 @@ const LoginScreen = () => {
         .catch(err => {
           setIsAuthenticated(false);
 
-          Alert.alert('Failed', err?.detail || err);
+          Alert.alert('Failed', err?.Error.message || err?.detail || err);
           console.log('error login', err);
 
           setLoading(false);

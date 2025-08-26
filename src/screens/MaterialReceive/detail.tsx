@@ -9,6 +9,7 @@ import {
   TextInput,
   Alert,
   ToastAndroid,
+  Switch,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
@@ -40,44 +41,119 @@ const MaterialReceiveDetailScreen = () => {
   );
   const [totalItem, setTotalItem] = useState(0);
   const [totalDoneItem, setTotalDoneItem] = useState(0);
+  // Add a state for split option (checkbox, switch, etc.)
+  const [split, setSplit] = useState(false);
 
+  // const handleReceive = async (quantity: number, item: any) => {
+  //   const site = await getData('site');
+  //   ReceivePo([
+  //     {
+  //       // Assuming ReceivePo expects an array of poline changes
+  //       inspected: 0,
+  //       orderunit: item.orderunit,
+  //       orgid: site === 'TJB56' ? 'BJS' : 'BJP',
+  //       polinenum: item.polinenum,
+  //       ponum: listrfid[listrfid.length - 1],
+  //       porevisionnum: 0,
+  //       receiptquantity: quantity,
+  //       siteid: site,
+  //     },
+  //   ])
+  //     .then(res => {
+  //       if (res.error) {
+  //         Alert.alert('Error', res.error);
+  //       } else {
+  //         console.log('ReceivePo response:', res);
+  //         // Alert.alert('Success', 'Material received');
+  //         ToastAndroid.show(
+  //           `Material received: ${item.itemnum} - ${quantity} ${item.orderunit}`,
+  //           ToastAndroid.SHORT,
+  //         );
+  //         fetchData();
+  //         setModalVisible(false);
+
+  //         // navigation.goBack();
+  //       }
+  //     })
+  //     .catch(err => {
+  //       console.error('Error in ReceivePo:', err);
+  //       Alert.alert('Error', 'Failed to receive material');
+  //     });
+  //   setModalVisible(false);
+  //   setTempQuantity(quantity);
+  // };
+
+  // Update handleReceive to support split logic:
   const handleReceive = async (quantity: number, item: any) => {
     const site = await getData('site');
-    ReceivePo([
-      {
-        // Assuming ReceivePo expects an array of poline changes
-        inspected: 0,
-        orderunit: item.orderunit,
-        orgid: site === 'TJB56' ? 'BJS' : 'BJP',
-        polinenum: item.polinenum,
-        ponum: listrfid[listrfid.length - 1],
-        porevisionnum: 0,
-        receiptquantity: quantity,
-        siteid: site,
-      },
-    ])
-      .then(res => {
-        if (res.error) {
-          Alert.alert('Error', res.error);
-        } else {
-          console.log('ReceivePo response:', res);
-          // Alert.alert('Success', 'Material received');
-          ToastAndroid.show(
-            `Material received: ${item.itemnum} - ${quantity} ${item.orderunit}`,
-            ToastAndroid.SHORT,
-          );
-          fetchData();
-          setModalVisible(false);
+    console.log('value split', split);
 
-          // navigation.goBack();
+    if (split) {
+      console.log('masuk split');
+
+      // Split: send multiple requests, each with receiptquantity = 1
+      for (let i = 0; i < quantity; i++) {
+        try {
+          await ReceivePo([
+            {
+              inspected: 0,
+              orderunit: item.orderunit,
+              orgid: site === 'TJB56' ? 'BJS' : 'BJP',
+              polinenum: item.polinenum,
+              ponum: listrfid[listrfid.length - 1],
+              porevisionnum: 0,
+              receiptquantity: 1,
+              siteid: site,
+            },
+          ]);
+        } catch (err) {
+          console.error('Error in split ReceivePo:', err);
+          Alert.alert('Error', 'Failed to receive material (split mode)');
+          break;
         }
-      })
-      .catch(err => {
-        console.error('Error in ReceivePo:', err);
-        Alert.alert('Error', 'Failed to receive material');
-      });
-    setModalVisible(false);
-    setTempQuantity(quantity);
+      }
+      ToastAndroid.show(
+        `Material received (split): ${item.itemnum} - ${quantity} x 1 ${item.orderunit}`,
+        ToastAndroid.SHORT,
+      );
+      fetchData();
+      setModalVisible(false);
+      setTempQuantity(quantity);
+    } else {
+      // Not split: existing logic
+      console.log('NO split');
+
+      ReceivePo([
+        {
+          inspected: 0,
+          orderunit: item.orderunit,
+          orgid: site === 'TJB56' ? 'BJS' : 'BJP',
+          polinenum: item.polinenum,
+          ponum: listrfid[listrfid.length - 1],
+          porevisionnum: 0,
+          receiptquantity: quantity,
+          siteid: site,
+        },
+      ])
+        .then(res => {
+          if (res.error) {
+            Alert.alert('Error', res.error);
+          } else {
+            ToastAndroid.show(
+              `Material received: ${item.itemnum} - ${quantity} ${item.orderunit}`,
+              ToastAndroid.SHORT,
+            );
+            fetchData();
+            setModalVisible(false);
+          }
+        })
+        .catch(err => {
+          console.error('Error in ReceivePo:', err);
+          Alert.alert('Error', 'Failed to receive material');
+        });
+      setModalVisible(false);
+      setTempQuantity(quantity);
+    }
   };
 
   const handleConfirmReceiveAll = async () => {
@@ -311,8 +387,10 @@ const MaterialReceiveDetailScreen = () => {
         />
       </View>
       {/* )} */}
-
       <ModalInputWms
+        // canSplit
+        // split={split}
+        // onSplitChange={setSplit}
         visible={modalVisible}
         material={
           poline.find(item => item.polinenum === selectedData)?.description ||
@@ -339,7 +417,6 @@ const MaterialReceiveDetailScreen = () => {
           )
         }
       />
-
       <ModalApp
         visible={modalConfirmVisible}
         title="Receive Material"

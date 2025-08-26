@@ -11,9 +11,6 @@ import {
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import ModalInputWms from '../../compnents/wms/ModalInputWms';
-
-const dummyRfids = ['00000000000000000000'];
 
 const DetailMaterialScreen = () => {
   const navigation = useNavigation<any>();
@@ -23,7 +20,6 @@ const DetailMaterialScreen = () => {
 
   const [search, setSearch] = useState('');
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleReceive = () => {

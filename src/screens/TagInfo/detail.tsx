@@ -16,6 +16,7 @@ import {postRemarkAndConditionCode, tagInfo} from '../../services/tagInfo';
 import {CONDITION_CODE_OPTIONS} from '../../utils/data';
 import {Dropdown} from 'react-native-element-dropdown';
 import ModalApp from '../../compnents/ModalApp';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const TagInfoDetailScreen = () => {
   const navigation = useNavigation<any>();
@@ -35,7 +36,9 @@ const TagInfoDetailScreen = () => {
     tagInfo(listrfid[listrfid.length - 1])
       .then((res: any) => {
         if (res.member.length === 0) {
-          navigation.goBack();
+          navigation.navigate('TagInfo');
+
+          // navigation.goBack();
           Alert.alert(
             'No Data',
             'No data found for this PO number.',
@@ -46,7 +49,9 @@ const TagInfoDetailScreen = () => {
         setDatas(res.member[0]);
 
         if (res.member[0].status === 'Blank') {
-          navigation.goBack();
+          navigation.navigate('TagInfo');
+
+          // navigation.goBack();
           ToastAndroid.show(
             `${listrfid[listrfid.length - 1]} RFID Blank`,
             ToastAndroid.SHORT,
@@ -95,6 +100,7 @@ const TagInfoDetailScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate toScreen="TagInfo" />
       {loading ? (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator size="large" color="#3674B5" />

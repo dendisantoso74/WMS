@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  Switch,
 } from 'react-native';
 
 type ModalInputWmsProps = {
@@ -17,6 +18,9 @@ type ModalInputWmsProps = {
   orderunit?: string;
   onClose: () => void;
   onReceive: (total: number) => void;
+  canSplit?: boolean;
+  split?: boolean;
+  onSplitChange?: (val: boolean) => void;
 };
 
 const ModalInputWms: React.FC<ModalInputWmsProps> = ({
@@ -28,6 +32,9 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
   orderunit,
   onClose,
   onReceive,
+  canSplit = false, // <-- default value
+  split = false, // <-- default value
+  onSplitChange,
 }) => {
   const [count, setCount] = useState(total);
   console.log('ModalInputWms count:', remainingQty);
@@ -94,6 +101,14 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
                 {remainingQty} {orderunit ? orderunit : ''}
               </Text>
             </View>
+            {canSplit && (
+              <View style={styles.row}>
+                <Text style={styles.label}>Split Receive</Text>
+                <Text style={styles.value}>
+                  <Switch value={split} onValueChange={onSplitChange} />
+                </Text>
+              </View>
+            )}
           </View>
           <View style={styles.counterRow}>
             <TouchableOpacity
