@@ -55,6 +55,8 @@ const PutawayMaterialScreen = () => {
   const [suggestedBin, setSuggestedBin] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
+  const [filteredInvUse, setFilteredInvUse] = useState([]);
+
   // rfid scanner
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
@@ -98,6 +100,23 @@ const PutawayMaterialScreen = () => {
       setLoading(false);
     });
   };
+
+  useEffect(() => {
+    if (!search) {
+      setFilteredInvUse(invUse);
+    } else {
+      const filtered = invUse.filter((item: any) => {
+        const invuseline = Array.isArray(item.invuseline)
+          ? item.invuseline[item.invuseline.length - 1]
+          : undefined;
+        return (
+          invuseline?.itemnum?.toLowerCase().includes(search.toLowerCase()) ||
+          invuseline?.description?.toLowerCase().includes(search.toLowerCase())
+        );
+      });
+      setFilteredInvUse(filtered);
+    }
+  }, [search, invUse]);
 
   useEffect(() => {
     getdataPutawayMixed();
@@ -286,7 +305,7 @@ const PutawayMaterialScreen = () => {
         />
       </View>
       <FlatList
-        data={invUse}
+        data={filteredInvUse}
         renderItem={renderItem}
         keyExtractor={(item, i) => i.toString()}
         contentContainerStyle={styles.listContent}

@@ -44,6 +44,7 @@ const MaterialReturnDetailScreen = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [returnInvuseId, setReturnInvuseId] = useState('');
+  const [filteredMatusetrans, setFilteredMatusetrans] = useState<any[]>([]);
 
   const handleReceive = () => {
     setModalVisible(true);
@@ -90,6 +91,22 @@ const MaterialReturnDetailScreen = () => {
 
   // Usage example:
   // returnInvuse will be the invuse object or 'not found'
+
+  useEffect(() => {
+    if (!search) {
+      setFilteredMatusetrans(woListmatusetrans);
+    } else {
+      const filtered = woListmatusetrans.filter((item: any) => {
+        const itemnum = item.itemnum?.toLowerCase() || '';
+        const description = item.description?.toLowerCase() || '';
+        return (
+          itemnum.includes(search.toLowerCase()) ||
+          description.includes(search.toLowerCase())
+        );
+      });
+      setFilteredMatusetrans(filtered);
+    }
+  }, [search, woListmatusetrans]);
 
   useEffect(() => {
     //this will create invuse header for return and then get the list
@@ -216,7 +233,7 @@ const MaterialReturnDetailScreen = () => {
             <Text className=""></Text>
           </View>
 
-          <Text className="font-bold">{item.description}</Text>
+          <Text className="mr-2 font-bold">{item.description}</Text>
           <View className="flex-row justify-between">
             <Text className="w-1/3 ml-3 text-lg font-bold"></Text>
             <Text className="w-1/2 text-right">Issue / Return</Text>
@@ -251,19 +268,33 @@ const MaterialReturnDetailScreen = () => {
           </Text>
         </View>
       </View>
-      <TextInput
-        style={styles.filterInput}
-        placeholder="Enter Material Code or Material Name"
-        placeholderTextColor="#b0b0b0"
-        value={search}
-        onChangeText={setSearch}
-      />
+      <View>
+        <TextInput
+          style={styles.filterInput}
+          placeholder="Enter Material Code or Material Name"
+          placeholderTextColor="#b0b0b0"
+          value={search}
+          onChangeText={setSearch}
+        />
+        <Icon
+          library="Feather"
+          name="search"
+          size={20}
+          color="#b0b0b0"
+          style={{position: 'absolute', right: 20, top: 12}}
+        />
+      </View>
       <FlatList
-        data={woListmatusetrans}
+        data={filteredMatusetrans}
         renderItem={renderItem}
         keyExtractor={(item, i) => i.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
+        ListEmptyComponent={
+          <View style={{alignItems: 'center', marginTop: 32}}>
+            <Text style={{color: '#888'}}>No data found</Text>
+          </View>
+        }
       />
       {
         <View style={styles.buttonContainer}>

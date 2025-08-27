@@ -51,11 +51,13 @@ const TransferInstructionScreen = () => {
     if (!search) {
       setFilteredInstructions(transferInstructions);
     } else {
-      setFilteredInstructions(
-        transferInstructions.filter((item: any) =>
-          item.wms_ponum?.toLowerCase().includes(search.toLowerCase()),
-        ),
+      const filtered = transferInstructions.filter((item: any) =>
+        item.wms_ponum?.toLowerCase().includes(search.toLowerCase()),
       );
+      setFilteredInstructions(filtered);
+      if (filtered.length === 0 && search.trim() !== '') {
+        ToastAndroid.show('No items found', ToastAndroid.SHORT);
+      }
     }
   }, [search, transferInstructions]);
 
@@ -79,18 +81,18 @@ const TransferInstructionScreen = () => {
 
   const handleSearch = (text: string) => {
     setSearch(text);
-    if (text.trim() === '') {
-      setFilteredInstructions(transferInstructions);
-    } else {
-      // Filter the list based on the search text
-      const filtered = transferInstructions.filter(item =>
-        item?.wms_ponum.toLowerCase().includes(text.toLowerCase()),
-      );
-      setFilteredInstructions(filtered);
-      if (filtered.length === 0) {
-        ToastAndroid.show('No items found', ToastAndroid.SHORT);
-      }
-    }
+    // if (text.trim() === '') {
+    //   setFilteredInstructions(transferInstructions);
+    // } else {
+    //   // Filter the list based on the search text
+    //   const filtered = transferInstructions.filter(item =>
+    //     item?.wms_ponum.toLowerCase().includes(text.toLowerCase()),
+    //   );
+    //   setFilteredInstructions(filtered);
+    //   if (filtered.length === 0) {
+    //     ToastAndroid.show('No items found', ToastAndroid.SHORT);
+    //   }
+    // }
   };
 
   const renderItem = ({item}: {item: string}) => (
@@ -119,6 +121,7 @@ const TransferInstructionScreen = () => {
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
+          autoCapitalize="characters"
         />
         <Icon
           library="Feather"
@@ -134,7 +137,7 @@ const TransferInstructionScreen = () => {
         <FlatList
           data={filteredInstructions}
           renderItem={renderItem}
-          keyExtractor={item => item}
+          keyExtractor={(item, i) => i.toString()}
           contentContainerStyle={styles.listContent}
           style={styles.list}
           ListEmptyComponent={

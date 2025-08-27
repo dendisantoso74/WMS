@@ -46,6 +46,7 @@ const MaterialIssueInspectScreen = () => {
   const [invreserve, setInvreserve] = useState([]); // <-- Use WoDetail[] type
   const [invreserveid, setInvreserveid] = useState([]);
   const [invreserveIndex, setInvreserveIndex] = useState(0);
+  const [filteredInvreserve, setFilteredInvreserve] = useState([]);
 
   const handleReceive = () => {
     setModalVisible(true);
@@ -73,16 +74,19 @@ const MaterialIssueInspectScreen = () => {
 
           // search entered index of array
           let enteredIndex = res.member[0].invuse.findIndex(
-            (item: any) => item.status === 'ENTERED',
+            (item: any) =>
+              item.status === 'ENTERED' && item.usetype === 'ISSUE',
           );
           if (enteredIndex === -1) {
             enteredIndex = res.member[0].invuse.findIndex(
-              (item: any) => item.status === 'STAGED',
+              (item: any) =>
+                item.status === 'STAGED' && item.usetype === 'ISSUE',
             );
           }
           // search inv with status entered
           const enteredInv = res.member[0].invuse.filter(
-            (item: any) => item.status === 'ENTERED',
+            (item: any) =>
+              item.status === 'ENTERED' && item.usetype === 'ISSUE',
           );
           console.log('Entered inventory:', enteredInv, enteredIndex);
           setInvreserveIndex(enteredIndex);
@@ -94,6 +98,22 @@ const MaterialIssueInspectScreen = () => {
         console.error('Error in getWorkOrderDetails:', err);
       });
   };
+
+  useEffect(() => {
+    if (!search) {
+      setFilteredInvreserve(invreserve);
+    } else {
+      const filtered = invreserve.filter((item: any) => {
+        const itemnum = item.itemnum?.toLowerCase() || '';
+        const description = item.description?.toLowerCase() || '';
+        return (
+          itemnum.includes(search.toLowerCase()) ||
+          description.includes(search.toLowerCase())
+        );
+      });
+      setFilteredInvreserve(filtered);
+    }
+  }, [search, invreserve]);
 
   useEffect(() => {
     console.log('RFIDs from params:', woNumber);
@@ -151,7 +171,8 @@ const MaterialIssueInspectScreen = () => {
             indexInvEntered: invreserveIndex,
           })
         }
-        style={styles.rfidCard}>
+        style={styles.rfidCard}
+        disabled={item?.reservedqty === item?.pendingqty + item?.stagedqty}>
         <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
         <View className="my-2">
           <View className="flex-row justify-between">
@@ -204,19 +225,33 @@ const MaterialIssueInspectScreen = () => {
           </Text>
         </View>
       </View>
-      <TextInput
-        style={styles.filterInput}
-        placeholder="Enter Material Code or Material Name"
-        placeholderTextColor="#b0b0b0"
-        value={search}
-        onChangeText={setSearch}
-      />
+      <View>
+        <TextInput
+          style={styles.filterInput}
+          placeholder="Enter Material Code or Material Name"
+          placeholderTextColor="#b0b0b0"
+          value={search}
+          onChangeText={setSearch}
+        />
+        <Icon
+          library="Feather"
+          name="search"
+          size={20}
+          color="#b0b0b0"
+          style={{position: 'absolute', right: 20, top: 12}}
+        />
+      </View>
       <FlatList
-        data={invreserve}
+        data={filteredInvreserve}
         renderItem={renderItem}
         keyExtractor={item => item.invreserveid}
         contentContainerStyle={styles.listContent}
         style={styles.list}
+        ListEmptyComponent={
+          <View style={{alignItems: 'center', marginTop: 32}}>
+            <Text style={{color: '#888'}}>No data found</Text>
+          </View>
+        }
       />
       {invreserve && (
         <View style={styles.buttonContainer}>
