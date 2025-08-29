@@ -20,6 +20,7 @@ import {
   ZebraEventEmitter,
   ZebraResultPayload,
 } from 'react-native-zebra-rfid-barcode';
+import {getData} from '../../utils/store';
 
 const MyTransferInstructionScreen = () => {
   const navigation = useNavigation<any>();
@@ -33,10 +34,13 @@ const MyTransferInstructionScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      const userMX = await getData('MAXuser');
       try {
         // Replace 'TAUFIQ MA' with the actual invowner if needed
-        const res = await fetchAssignedTransferInstructions('TAUFIQ MA');
+        const res = await fetchAssignedTransferInstructions(userMX);
         const instructions = Array.isArray(res.member) ? res.member : [];
+        console.log('Fetched instructions:', instructions);
+
         setAssignedInstructions(instructions);
         setFilteredInstructions(instructions);
       } catch (e) {

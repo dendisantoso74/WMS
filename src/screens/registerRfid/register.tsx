@@ -23,11 +23,8 @@ import {debounce} from 'lodash';
 import {registerRfid} from '../../services/registerRfid';
 import {getData} from '../../utils/store';
 
-const dummyRfids = ['4C5071020190000000081386', '4C5071020190000000081350'];
-
 const AddRfidScreen = () => {
   const navigation = useNavigation<any>();
-  const [rfids, setRfids] = useState(dummyRfids);
 
   // RFID SCANNER
   const [listDevices, setListDevices] = useState<string[]>([]);
@@ -140,7 +137,7 @@ const AddRfidScreen = () => {
           Please scan on tags
         </Text>
       </View>
-      <Text style={[styles.text, styles.title]}>
+      {/* <Text style={[styles.text, styles.title]}>
         Devices Scanner: {listDevices.length}
       </Text>
       <FlatList
@@ -153,7 +150,7 @@ const AddRfidScreen = () => {
             <Text style={styles.text}>{item}</Text>
           </TouchableOpacity>
         )}
-      />
+      /> */}
 
       <FlatList
         data={listRfid}

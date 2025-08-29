@@ -219,19 +219,13 @@ const RetagingBinScreen = () => {
               }}>
               {/* <Button title="Cancel" onPress={() => setModalVisible(false)} /> */}
               {/* <View style={{width: 12}} /> */}
-              {inputValue ||
-                (tag && (
-                  // <Button
-                  //   title="Submit"
-                  //   onPress={() => setModalConfirmVisible(true)}
-                  // />
-
-                  <ButtonApp
-                    label="SUBMIT"
-                    color="primary"
-                    onPress={() => setModalConfirmVisible(true)}
-                  />
-                ))}
+              {inputValue || tag ? (
+                <ButtonApp
+                  label="SUBMIT"
+                  color="primary"
+                  onPress={() => setModalConfirmVisible(true)}
+                />
+              ) : null}
             </View>
           </View>
         </View>

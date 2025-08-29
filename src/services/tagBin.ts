@@ -1,15 +1,16 @@
 import {getData} from '../utils/store';
 import api from './api';
 
+const siteid = 'TJB56';
+
 export const getTagBinList = async (
   tagcode: string = '*',
   pageSize: number = 10,
   pageNo: number = 1,
   bin: string = '*',
 ) => {
-  const siteid = await getData('site');
   const url = `/maximo/oslc/os/WMS_MXBIN?lean=1&oslc.select=*&oslc.where=siteid="${siteid}" and tagcode="${tagcode}" and bin="${bin}"&oslc.pageSize=${pageSize}&pageno=${pageNo}`;
-  console.log('payload getTagBinList:', url);
+  console.log('payload getTagBinList:', tagcode, pageNo, pageSize, bin);
   try {
     const response = await api.get(url, {
       headers: {
@@ -27,7 +28,7 @@ export const getBinUntagList = async (
   pageSize: number = 100,
   pageNo: number = 1,
 ) => {
-  const siteid = await getData('site');
+  // const siteid = await getData('site');
   const url = `/maximo/oslc/os/WMS_MXBIN?lean=1&oslc.select=*&oslc.where=siteid="${siteid}" and tagcode!="*" and bin="${bin}"&oslc.pageSize=${pageSize}&pageno=${pageNo}`;
   try {
     const response = await api.get(url, {

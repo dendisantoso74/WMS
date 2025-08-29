@@ -18,6 +18,7 @@ import {
   receiveMaterial,
 } from '../../services/materialReturn';
 import PreventBackNavigate from '../../utils/preventBack';
+import {getData} from '../../utils/store';
 
 const DetailMaterialReturnScreen = () => {
   const navigation = useNavigation<any>();
@@ -27,6 +28,9 @@ const DetailMaterialReturnScreen = () => {
   const [search, setSearch] = useState('');
   const [count, setCount] = useState(0);
   const [suggestBin, setSuggestBin] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userMX, setUserMX] = useState('');
+  const [remark, setRemark] = useState('');
 
   const handleDecrease = () => {
     if (count > 1) setCount(count - 1);
@@ -36,11 +40,30 @@ const DetailMaterialReturnScreen = () => {
     setCount(count + 1);
   };
 
-  const [modalVisible, setModalVisible] = useState(false);
-
   const handleReceive = () => {
     setModalVisible(true);
   };
+
+  const handleInputCount = (text: string) => {
+    // Only allow numbers, fallback to 0 if empty or invalid
+    const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
+    // Max is item.receiptquantity - inputAceptedQty
+    const max = item.qtyrequested;
+    if (isNaN(num)) {
+      setCount(0);
+    } else if (num > max) {
+      setCount(max);
+    } else {
+      setCount(num);
+    }
+  };
+
+  useEffect(() => {
+    setCount(item.qtyrequested);
+    getData('MAXuser').then(res => {
+      setUserMX(res);
+    });
+  }, [item]);
 
   const buildReturnPayload = (
     item: any,
@@ -61,14 +84,14 @@ const DetailMaterialReturnScreen = () => {
           item.invuselinenum ||
           0,
         issueid: item.matusetransid,
-        issueto: 'TAUFIQ MA',
+        issueto: userMX,
         itemnum: item.itemnum,
         itemsetid: item.itemsetid,
         linetype: item.linetype,
         orgid: item.orgid,
         quantity: count,
         refwo: item.refwo,
-        remark: '',
+        remark: remark,
         toorgid: 'BJS',
         tositeid: 'TJB56',
         usetype: 'RETURN',
@@ -108,10 +131,6 @@ const DetailMaterialReturnScreen = () => {
     console.log('Suggested Bin:', res.member[0].binnum);
   };
 
-  // useEffect(() => {
-  //   suggestedBin();
-  // }, [item]);
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="p-2 bg-blue-400">
@@ -142,7 +161,14 @@ const DetailMaterialReturnScreen = () => {
             <Text style={styles.circleBtnText}>-</Text>
           </TouchableOpacity>
           <View style={styles.countBox} className="w-36">
-            <Text style={styles.countText}>{count}</Text>
+            {/* <Text style={styles.countText}>{count}</Text> */}
+            <TextInput
+              style={[styles.countText, {textAlign: 'center'}]}
+              keyboardType="numeric"
+              value={count.toString()}
+              onChangeText={handleInputCount}
+              // maxLength={item.receiptquantity.toString().length}
+            />
           </View>
           <TouchableOpacity
             disabled={count == item.qtyrequested}
@@ -167,7 +193,12 @@ const DetailMaterialReturnScreen = () => {
         </View>
         <View className="flex-row items-center mt-5">
           <Text className="w-1/3 font-bold">Remark</Text>
-          <TextInput className="w-2/3 py-2 ml-5 border rounded"></TextInput>
+          <TextInput
+            multiline
+            placeholder=""
+            className="w-2/3 py-2 ml-5 border rounded"
+            value={remark}
+            onChangeText={setRemark}></TextInput>
         </View>
       </View>
 
@@ -295,9 +326,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   countText: {
-    fontSize: 28,
-    color: '#222',
-    fontWeight: '500',
+    fontSize: 20,
+    paddingVertical: 0,
   },
 });
 

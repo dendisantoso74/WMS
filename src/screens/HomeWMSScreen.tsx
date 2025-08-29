@@ -1,10 +1,11 @@
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import Icon from '../compnents/Icon';
 import {useNavigation} from '@react-navigation/native';
@@ -20,6 +21,47 @@ const HomeWMSScreen = () => {
   const [site, setSite] = React.useState<string | null>(null);
   const [org, setOrg] = React.useState<string | null>(null);
   const [user, setUser] = React.useState<string | null>(null);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  // Fetch user data
+  const fetchUserData = useCallback(async () => {
+    if (user) {
+      const res = await getPersonByLoginId(user);
+      setUserData(res.member[0]);
+    }
+  }, [user]);
+
+  const fetchData = async () => {
+    try {
+      const siteAsync = await AsyncStorage.getItem('site');
+      const orgAsync = await AsyncStorage.getItem('org');
+      const userAsync = await AsyncStorage.getItem('user');
+      console.log('asyn name', userAsync);
+      setUser(userAsync);
+      setSite(siteAsync);
+      setOrg(orgAsync);
+    } catch (error) {
+      console.error('Error fetching data from AsyncStorage:', error);
+    }
+  };
+
+  // On mount
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // When user changes, fetch user data
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchData();
+    await fetchUserData();
+    setRefreshing(false);
+  }, [fetchData, fetchUserData]);
 
   useEffect(() => {
     // This is where you can add any setup code, like fetching user data
@@ -30,28 +72,14 @@ const HomeWMSScreen = () => {
     });
   }, [user]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const siteAsync = await AsyncStorage.getItem('site');
-        const orgAsync = await AsyncStorage.getItem('org');
-        const userAsync = await AsyncStorage.getItem('user');
-        console.log('asyn name', userAsync);
-        setUser(userAsync);
-        setSite(siteAsync);
-        setOrg(orgAsync);
-      } catch (error) {
-        console.error('Error fetching data from AsyncStorage:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <PreventBackNavigate />
-      <ScrollView contentContainerStyle={{paddingBottom: 24}}>
+      <ScrollView
+        contentContainerStyle={{paddingBottom: 24}}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         {/* Header Section */}
         <View className="px-2 pt-6 pb-4 bg-white">
           {userData ? (
@@ -131,10 +159,10 @@ const HomeWMSScreen = () => {
         <View className="px-2 mt-4 space-y-3 ">
           <View className="flex-row space-x-3" style={styles.shadowCard}>
             <TouchableOpacity
-              className="flex-row w-1/2 space-x-3 bg-blue-400"
+              className="flex-row w-1/2 space-x-3 bg-blue-700"
               onPress={() => navigation.navigate('Material Receive')}
               style={styles.roundedCard}>
-              <View className="py-3">
+              <View className="py-3 ml-3">
                 <View className="flex-row justify-between px-4 mb-3">
                   <Icon
                     library="Feather"
@@ -193,7 +221,7 @@ const HomeWMSScreen = () => {
                 title="Material Issue"
                 // count={0}
                 icon="upload"
-                color="bg-red-400"
+                color="bg-red-600"
                 textColor="text-white"
               />
             </View>
@@ -209,7 +237,7 @@ const HomeWMSScreen = () => {
               title="Material Movement"
               // count={0}
               icon="move"
-              color="bg-green-400"
+              color="bg-green-500"
               textColor="text-white"
               onPress={() => navigation.navigate('Material Movement')}
             />
@@ -221,10 +249,10 @@ const HomeWMSScreen = () => {
           <View className="px-2 mt-4 space-y-3">
             <View className="flex-row space-x-3" style={styles.shadowCard}>
               <TouchableOpacity
-                className="w-1/2 bg-blue-400 shadow"
+                className="w-1/2 bg-purple-700 shadow"
                 style={styles.roundedCard}
                 onPress={() => navigation.navigate('Material Return Scan')}>
-                <View className="py-3">
+                <View className="py-3 ml-3">
                   <View className="flex-row justify-between px-4 mb-3">
                     <Icon
                       library="Feather"
@@ -269,7 +297,7 @@ const HomeWMSScreen = () => {
               title="Stock Opname"
               // count={0}
               icon="archive"
-              color="bg-orange-400"
+              color="bg-orange-600"
               textColor="text-white"
               disabled={true}
             />
@@ -280,10 +308,10 @@ const HomeWMSScreen = () => {
         <View className="px-2 mt-4 space-y-3">
           <View className="flex-row space-x-3" style={styles.shadowCard}>
             <TouchableOpacity
-              className="w-1/2 shadow bg-gray-950"
+              className="w-1/2 bg-gray-800 shadow"
               onPress={() => navigation.navigate('RegisterRFID')}
               style={styles.roundedCard}>
-              <View className="py-3">
+              <View className="py-3 ml-3">
                 <View className="flex-row justify-between px-4 mb-3">
                   <Icon library="Feather" name="cast" color="white" size={24} />
                   {/* <Text className={'text-lg font-bold mr-4 text-white'}>0</Text> */}
@@ -316,9 +344,9 @@ const HomeWMSScreen = () => {
           <View className="flex-row space-x-3" style={styles.shadowCard}>
             <TouchableOpacity
               onPress={() => navigation.navigate('RetagingItem')}
-              className={'w-1/2 shadow bg-pink-400'}
+              className={'w-1/2 shadow bg-red-400'}
               style={styles.roundedCard}>
-              <View className="py-3">
+              <View className="py-3 ml-3">
                 <View className="flex-row justify-between px-4 mb-3">
                   <Icon library="Feather" name="cast" color="white" size={24} />
                   {/* <Text className={'text-lg font-bold mr-4 text-white'}>0</Text> */}
@@ -355,7 +383,7 @@ const HomeWMSScreen = () => {
               title="Tag Info"
               // count={0}
               icon="cast"
-              color="bg-cyan-400"
+              color="bg-cyan-500"
               textColor="text-white"
               onPress={() => navigation.navigate('TagInfo')}
             />

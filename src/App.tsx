@@ -10,10 +10,12 @@ import React from 'react';
 import AppNavigator from './navigation/AppNavigator';
 import {AppProvider} from './context/AppContext';
 import '../global.css'; // Ensure global styles are imported
+import ConnectionAlert from './compnents/ConnectionAlert';
 
 function App(): React.JSX.Element {
   return (
     <AppProvider>
+      <ConnectionAlert />
       <NavigationContainer>
         <AppNavigator />
       </NavigationContainer>

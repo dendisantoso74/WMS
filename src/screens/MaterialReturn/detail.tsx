@@ -9,6 +9,7 @@ import {
   TextInput,
   Alert,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
@@ -27,6 +28,7 @@ import {
   ZebraEventEmitter,
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
+import {set} from 'lodash';
 
 const MaterialReturnDetailScreen = () => {
   const navigation = useNavigation<any>();
@@ -45,6 +47,7 @@ const MaterialReturnDetailScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [returnInvuseId, setReturnInvuseId] = useState('');
   const [filteredMatusetrans, setFilteredMatusetrans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const handleReceive = () => {
     setModalVisible(true);
@@ -110,6 +113,7 @@ const MaterialReturnDetailScreen = () => {
 
   useEffect(() => {
     //this will create invuse header for return and then get the list
+    setLoading(true);
     createInvUseReturnHeader(woNum)
       .then(x => {
         scanWoForReturn(woNum).then((res: any) => {
@@ -169,7 +173,8 @@ const MaterialReturnDetailScreen = () => {
           // [{text: 'OK', onPress: () => navigation.goBack()}],
           // {cancelable: false},
         );
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const handleComplete = async (returnInvuseId: string) => {
@@ -284,18 +289,22 @@ const MaterialReturnDetailScreen = () => {
           style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
-      <FlatList
-        data={filteredMatusetrans}
-        renderItem={renderItem}
-        keyExtractor={(item, i) => i.toString()}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-        ListEmptyComponent={
-          <View style={{alignItems: 'center', marginTop: 32}}>
-            <Text style={{color: '#888'}}>No data found</Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
+      ) : (
+        <FlatList
+          data={filteredMatusetrans}
+          renderItem={renderItem}
+          keyExtractor={(item, i) => i.toString()}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+          ListEmptyComponent={
+            <View style={{alignItems: 'center', marginTop: 32}}>
+              <Text style={{color: '#888'}}>No data found</Text>
+            </View>
+          }
+        />
+      )}
       {
         <View style={styles.buttonContainer}>
           <ButtonApp

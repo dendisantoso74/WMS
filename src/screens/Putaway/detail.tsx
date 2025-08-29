@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {
   useFocusEffect,
@@ -34,7 +35,7 @@ import {
   ZebraEventEmitter,
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
-import rfid from '../../assets/images/rfid.png'; // Adjust the path as necessary
+import {Alert} from 'react-native';
 
 const PutawayMaterialScreen = () => {
   const navigation = useNavigation<any>();
@@ -56,6 +57,21 @@ const PutawayMaterialScreen = () => {
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
   const [filteredInvUse, setFilteredInvUse] = useState([]);
+  // REPLACED previous const allInvUseTagged = ... with state + setter + getter
+  const [allInvUseTagged, setAllInvUseTagged] = useState(false);
+  const [binScan, setBinScan] = useState('');
+
+  useEffect(() => {
+    const allTagged =
+      invUse &&
+      Array.isArray(invUse.invuseline) &&
+      invUse.invuseline.length > 0 &&
+      invUse.invuseline.every((line: any) => !!line?.serialnumber);
+
+    console.log('cek status', allTagged);
+
+    setAllInvUseTagged(allTagged);
+  }, [invUse]);
 
   // rfid scanner
   const handleRfidEvent = useCallback(
@@ -91,12 +107,15 @@ const PutawayMaterialScreen = () => {
   const getdataPutawayMixed = async () => {
     setLoading(true);
     fetchPutawayMixedSingle(item.wonum).then(res => {
-      console.log('tes fetch singgle', res.member[0]);
+      console.log('tes fetch singgle WO', res);
       //set invuse that have status retur entered
       const filteredInvUse = res.member[0].invuse.filter(
         (inv: any) => inv.status === 'ENTERED' && inv.usetype === 'MIXED',
       );
-      setInvUse(filteredInvUse);
+
+      console.log('tes fetch singgle WO Filtered', filteredInvUse);
+
+      setInvUse(filteredInvUse[0]);
       setLoading(false);
     });
   };
@@ -104,17 +123,21 @@ const PutawayMaterialScreen = () => {
   useEffect(() => {
     if (!search) {
       setFilteredInvUse(invUse);
-    } else {
-      const filtered = invUse.filter((item: any) => {
-        const invuseline = Array.isArray(item.invuseline)
-          ? item.invuseline[item.invuseline.length - 1]
-          : undefined;
+    } else if (invUse && Array.isArray(invUse.invuseline)) {
+      const filteredLines = invUse.invuseline.filter((line: any) => {
+        const itemnum = line?.itemnum?.toLowerCase() || '';
+        const description = line?.description?.toLowerCase() || '';
+        const searchLower = search.toLowerCase();
         return (
-          invuseline?.itemnum?.toLowerCase().includes(search.toLowerCase()) ||
-          invuseline?.description?.toLowerCase().includes(search.toLowerCase())
+          itemnum.includes(searchLower) || description.includes(searchLower)
         );
       });
-      setFilteredInvUse(filtered);
+      setFilteredInvUse({
+        ...invUse,
+        invuseline: filteredLines,
+      });
+    } else {
+      setFilteredInvUse(invUse);
     }
   }, [search, invUse]);
 
@@ -150,22 +173,20 @@ const PutawayMaterialScreen = () => {
     console.log('selectedItem:', selectedItem);
 
     const bin = await findBinByTagCode(modalValueBin);
+    setBinScan(bin?.member[0]?.bin || 'Undefined');
 
     console.log('Selected Bin:', bin?.member[0]?.bin);
 
     const payload = {
       // tag item
-      invuselineid:
-        selectedItem.invuseline[selectedItem.invuseline.length - 1]
-          ?.invuselineid,
+      invuselineid: selectedItem.invuselineid,
       tagcode: modalValueItem,
       serialnumber: serialNumber,
       // tess hardcode serial number for testing
       // serialnumber: '3070B0BFD595D3001446F4F7',
 
       // tag bin
-      frombin:
-        selectedItem.invuseline[selectedItem.invuseline.length - 1]?.frombin,
+      frombin: selectedItem.frombin,
       wms_finalbin: bin?.member[0]?.bin,
       wms_status: 'COMPLETE',
     };
@@ -180,11 +201,15 @@ const PutawayMaterialScreen = () => {
       .then(res => {
         console.log('Tagging Response:', res);
         ToastAndroid.show('Item tagged successfully', ToastAndroid.SHORT);
+        setModalValueBin('');
+        setModalValueItem('');
+        setBinScan('');
+        setSuggestedBin('');
         // navigation.goBack();
       })
       .catch(err => {
         console.error('Error tagging item:', err);
-        ToastAndroid.show('Error tagging item', ToastAndroid.SHORT);
+        ToastAndroid.show('Failed tagging item', ToastAndroid.SHORT);
       });
 
     await completePutaway(
@@ -199,27 +224,48 @@ const PutawayMaterialScreen = () => {
   };
 
   const handleCompletereturn = async () => {
-    console.log('Complete button pressed', invUse[invUse.length - 1]?.invuseid);
-    changeInvUseStatusComplete(invUse[invUse.length - 1]?.invuseid)
-      .then(res => {
-        console.log('Complete return response:', res);
-        ToastAndroid.show('Return completed successfully', ToastAndroid.SHORT);
-        // getdataPutawayMixed();
-        // navigation.goBack();
-        // reload the list
-        navigation.navigate('Scan WO Number');
-      })
-      .catch(err => {
-        console.error('Error completing return:', err);
-        ToastAndroid.show('Error completing return', ToastAndroid.SHORT);
-      });
+    console.log('Complete button pressed', invUse.invuseid);
+    console.log('status all assign to bin', allInvUseTagged);
+
+    if (allInvUseTagged) {
+      changeInvUseStatusComplete(invUse.invuseid)
+        .then(res => {
+          console.log('Complete return response:', res);
+          ToastAndroid.show(
+            'Return completed successfully',
+            ToastAndroid.SHORT,
+          );
+          // getdataPutawayMixed();
+          // navigation.goBack();
+          // reload the list
+          navigation.navigate('Scan WO Number');
+        })
+        .catch(err => {
+          console.error('Error completing return:', err);
+          ToastAndroid.show('Error completing return', ToastAndroid.SHORT);
+        });
+    } else {
+      Alert.alert(
+        'Warning',
+        'Please assign all items to a bin before completing the return.',
+      );
+    }
   };
+
+  const debouncedCompleteReturn = useCallback(
+    debounce(
+      () => {
+        handleCompletereturn();
+      },
+      1000, // 1 second
+      {leading: true, trailing: false},
+    ),
+    [handleCompletereturn],
+  );
 
   const renderItem = ({item}: {item: string}) => {
     console.log('Render item xxx:', item);
-    const invuseline = Array.isArray(item.invuseline)
-      ? item.invuseline[item.invuseline.length - 1]
-      : undefined;
+    const invuseline = item;
     const sideBarColor = invuseline?.serialnumber ? '#A4DD00' : 'blue';
 
     return (
@@ -234,39 +280,27 @@ const PutawayMaterialScreen = () => {
         <View className="flex-col w-10/12 my-1">
           <View className="flex-row justify-between">
             <Text className="font-bold">
-              {item.invuseline
-                ? item.invuseline[item.invuseline.length - 1]?.itemnum
-                : '-'}
+              {invuseline ? invuseline.itemnum : '-'}
             </Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="font-bold">
-              {item.invuseline
-                ? item.invuseline[item.invuseline.length - 1]?.description
-                : '-'}
+              {invuseline ? invuseline.description : '-'}
             </Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="font-bold text-left ">
-              {item.invuseline
-                ? item.invuseline[item.invuseline.length - 1]?.frombin
-                : '-'}
+              {invuseline ? invuseline.frombin : '-'}
             </Text>
             <Text className="text-right ">Return</Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="font-bold text-left ">
-              {item.invuseline
-                ? item.invuseline[item.invuseline.length - 1]?.fromconditioncode
-                : '-'}
+              {invuseline ? invuseline.fromconditioncode : '-'}
             </Text>
             <Text className="text-right ">
-              {item.invuseline
-                ? item.invuseline[item.invuseline.length - 1]?.quantity
-                : '-'}{' '}
-              {item.invuseline
-                ? item.invuseline[item.invuseline.length - 1]?.wms_unit
-                : '-'}
+              {invuseline ? invuseline.quantity : '-'}{' '}
+              {invuseline ? invuseline.wms_unit : '-'}
             </Text>
           </View>
         </View>
@@ -304,24 +338,28 @@ const PutawayMaterialScreen = () => {
           style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
-      <FlatList
-        data={filteredInvUse}
-        renderItem={renderItem}
-        keyExtractor={(item, i) => i.toString()}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-        ListEmptyComponent={
-          <View style={{alignItems: 'center', marginTop: 32}}>
-            <Text style={{color: '#888'}}>No data found</Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
+      ) : (
+        <FlatList
+          data={filteredInvUse?.invuseline}
+          renderItem={renderItem}
+          keyExtractor={(item, i) => i.toString()}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+          ListEmptyComponent={
+            <View style={{alignItems: 'center', marginTop: 32}}>
+              <Text style={{color: '#888'}}>No data found</Text>
+            </View>
+          }
+        />
+      )}
       <View style={styles.buttonContainer}>
         <ButtonApp
           label="COMPLETE"
           size="large"
           color="primary"
-          onPress={() => handleCompletereturn()}
+          onPress={debouncedCompleteReturn}
         />
       </View>
 
@@ -348,7 +386,7 @@ const PutawayMaterialScreen = () => {
         visible={modalBinVisible}
         value={modalValueBin}
         onChangeText={setModalValueBin}
-        title="Scan BIN"
+        title="Scan BIN destination"
         onSubmit={() => {
           handleSubmitBin();
         }}
@@ -356,6 +394,7 @@ const PutawayMaterialScreen = () => {
         serialNumber={serialNumber}
         placeholder="Scan or enter BIN Tag"
         suggestBin={suggestedBin} // Example suggested bin
+        // bin={binScan}
       />
     </SafeAreaView>
   );

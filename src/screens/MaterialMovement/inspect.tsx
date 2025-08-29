@@ -41,7 +41,7 @@ const MovementSmartScanScreen = () => {
   const {binInfo} = route.params;
   console.log('Bin Info from params:', binInfo);
 
-  const [tagItems, setTagItems] = useState('');
+  const [tagItems, setTagItems] = useState('4C5071020190000000087994');
   const [itemInfo, setItemInfo] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState<any>(null);

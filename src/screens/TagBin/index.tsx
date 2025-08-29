@@ -53,7 +53,7 @@ const TagBinScreen = () => {
   };
 
   useEffect(() => {
-    fetchBins(1);
+    fetchBins(1, '*');
   }, []);
 
   const handleLoadMore = () => {

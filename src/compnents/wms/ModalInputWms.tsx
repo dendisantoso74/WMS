@@ -104,9 +104,11 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
             {canSplit && (
               <View style={styles.row}>
                 <Text style={styles.label}>Split Receive</Text>
-                <Text style={styles.value}>
+                <View className="flex flex-row" style={styles.value}>
+                  <Text className="mr-1 text-white align-middle">No</Text>
                   <Switch value={split} onValueChange={onSplitChange} />
-                </Text>
+                  <Text className="text-white align-middle">Yes</Text>
+                </View>
               </View>
             )}
           </View>

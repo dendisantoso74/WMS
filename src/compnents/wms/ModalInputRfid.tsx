@@ -21,6 +21,7 @@ interface ModalInputRfidProps {
   suggestBin?: string;
   serialNumber?: string;
   mode?: 'bin' | 'item';
+  bin?: string;
 }
 
 const ModalInputRfid: React.FC<ModalInputRfidProps> = ({
@@ -34,6 +35,7 @@ const ModalInputRfid: React.FC<ModalInputRfidProps> = ({
   suggestBin = '',
   serialNumber = '',
   mode = 'item',
+  bin = '',
 }) => (
   <Modal
     visible={visible}
@@ -57,6 +59,12 @@ const ModalInputRfid: React.FC<ModalInputRfidProps> = ({
           value={value}
           onChangeText={onChangeText}
         />
+        {bin ? (
+          <Text style={{color: '#6c757d', marginTop: 8}}>
+            Bin:{'\n'}
+            {bin}
+          </Text>
+        ) : null}
         {serialNumber ? (
           <Text style={{color: '#6c757d', marginTop: 8}}>
             Serial Number:{'\n'}
@@ -69,6 +77,7 @@ const ModalInputRfid: React.FC<ModalInputRfidProps> = ({
             {suggestBin}
           </Text>
         ) : null}
+
         <View
           style={{
             flexDirection: 'row',

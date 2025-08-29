@@ -56,7 +56,7 @@ const PickItemScreen = () => {
   const [maxUser, setMaxUser] = useState(0);
   const [bin, setBin] = useState('');
   const [storeqty, setStoreqty] = useState('');
-  const [pickqty, setPickqty] = useState('');
+  const [pickqty, setPickqty] = useState(0);
   const [serialNumberItem, setSerialNumberItem] = useState('');
   const [findItem, setFindItem] = useState([]);
 
@@ -103,6 +103,7 @@ const PickItemScreen = () => {
       // console.log('MAXuser:', maxUser);
       setMaxUser(res);
     });
+    setPickqty((item?.reservedqty - item?.pendingqty).toString());
 
     //find sugestion bin
     const findbin = async () => {
@@ -274,6 +275,7 @@ const PickItemScreen = () => {
                 placeholderTextColor="#b0b0b0"
                 value={pickqty}
                 onChangeText={setPickqty}
+                keyboardType="numeric"
               />
               <Text>{item?.wms_unit}</Text>
             </View>

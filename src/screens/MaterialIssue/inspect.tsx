@@ -9,6 +9,7 @@ import {
   TextInput,
   ToastAndroid,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
@@ -47,6 +48,7 @@ const MaterialIssueInspectScreen = () => {
   const [invreserveid, setInvreserveid] = useState([]);
   const [invreserveIndex, setInvreserveIndex] = useState(0);
   const [filteredInvreserve, setFilteredInvreserve] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const handleReceive = () => {
     setModalVisible(true);
@@ -55,6 +57,7 @@ const MaterialIssueInspectScreen = () => {
   const fetchWo = async () => {
     getWorkOrderDetails(woNumber)
       .then(res => {
+        setLoading(true);
         if (res.error) {
           console.error('Error fetching work order details:', res.error);
         } else {
@@ -96,6 +99,9 @@ const MaterialIssueInspectScreen = () => {
       })
       .catch(err => {
         console.error('Error in getWorkOrderDetails:', err);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -192,16 +198,16 @@ const MaterialIssueInspectScreen = () => {
           <View className="flex-row justify-between">
             <Text className="w-1/3 font-bold">
               {/* {item?.conditioncode} */}
-              {item?.invreserveid}
+              {/* {item?.invreserveid} */}
             </Text>
             <Text className="w-1/2 text-right">
               {invUse[invreserveIndex]?.status === 'STAGED'
                 ? item?.reservedqty - item?.stagedqty
-                : item?.reservedqty - item?.pendingqty}
-              {item?.wms_unit} / {''}
+                : item?.reservedqty - item?.pendingqty}{' '}
+              {item?.wms_unit} /{' '}
               {invUse[invreserveIndex]?.status === 'STAGED'
                 ? item?.stagedqty
-                : item?.pendingqty}
+                : item?.pendingqty}{' '}
               {item?.wms_unit}
             </Text>
           </View>
@@ -241,18 +247,22 @@ const MaterialIssueInspectScreen = () => {
           style={{position: 'absolute', right: 20, top: 12}}
         />
       </View>
-      <FlatList
-        data={filteredInvreserve}
-        renderItem={renderItem}
-        keyExtractor={item => item.invreserveid}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-        ListEmptyComponent={
-          <View style={{alignItems: 'center', marginTop: 32}}>
-            <Text style={{color: '#888'}}>No data found</Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
+      ) : (
+        <FlatList
+          data={filteredInvreserve}
+          renderItem={renderItem}
+          keyExtractor={item => item.invreserveid}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+          ListEmptyComponent={
+            <View style={{alignItems: 'center', marginTop: 32}}>
+              <Text style={{color: '#888'}}>No data found</Text>
+            </View>
+          }
+        />
+      )}
       {invreserve && (
         <View style={styles.buttonContainer}>
           <ButtonApp

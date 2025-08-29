@@ -210,7 +210,11 @@ const AppNavigator = () => {
           />
 
           {/* Retaging Item Menu */}
-          <Stack.Screen name="RetagingItem" component={RetagingItemScreen} />
+          <Stack.Screen
+            name="RetagingItem"
+            component={RetagingItemScreen}
+            options={{title: 'Retaging Item'}}
+          />
           <Stack.Screen
             name="Bin Detail"
             component={BinDetailScreen}

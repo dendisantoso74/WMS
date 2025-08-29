@@ -128,7 +128,7 @@ const MaterialMovementScreen = () => {
               />
             </View>
             <TextInput
-              editable={false}
+              // editable={false}
               style={styles.input}
               placeholder="Scan Bin"
               value={tagBin || search[0]}
