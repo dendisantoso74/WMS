@@ -25,7 +25,7 @@ import {
   getWorkOrderDetails,
   putToStage,
 } from '../../services/materialIssue';
-import {set} from 'lodash';
+import {random, set} from 'lodash';
 import {formatDateTime} from '../../utils/helpers';
 import {WoDetail} from '../../utils/types';
 import PreventBackNavigate from '../../utils/preventBack';
@@ -165,14 +165,21 @@ const MaterialIssueInspectScreen = () => {
   const renderItem = ({item, index}: {item: string; index: number}) => {
     const sideBarColor =
       item?.reservedqty === item?.pendingqty + item?.stagedqty
-        ? '#A4DD00'
-        : 'gray';
+        ? '#A4DD00' // green
+        : item?.reservedqty > item?.pendingqty + item?.stagedqty &&
+            item?.pendingqty + item?.stagedqty > 0
+          ? '#FFD600' // yellow
+          : 'gray';
+
+    const randomnumber = random(0, 999);
+    console.log('Random number:', randomnumber);
+
     return (
       <TouchableOpacity
         onPress={() =>
           navigation.navigate('Detail Material Issue', {
             item: item,
-            invuselinenum: index + 1,
+            invuselinenum: randomnumber + index + 1,
             invinvUseId: invreserveid,
             indexInvEntered: invreserveIndex,
           })

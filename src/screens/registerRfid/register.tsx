@@ -22,6 +22,7 @@ import {
 import {debounce} from 'lodash';
 import {registerRfid} from '../../services/registerRfid';
 import {getData} from '../../utils/store';
+import ModalApp from '../../compnents/ModalApp';
 
 const AddRfidScreen = () => {
   const navigation = useNavigation<any>();
@@ -30,6 +31,7 @@ const AddRfidScreen = () => {
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([]);
+  const [modalConfirmVisible, setModalConfirmVisible] = useState(false);
 
   useEffect(() => {
     getListRfidDevices();
@@ -86,7 +88,9 @@ const AddRfidScreen = () => {
   };
 
   const handleRegisterNew = async () => {
-    const siteid = await getData('site');
+    // const siteid = await getData('site');
+    // const orgid = siteid === 'TJB56' ? 'BJS' : 'BJP';
+    const siteid = 'TJB56';
     const orgid = siteid === 'TJB56' ? 'BJS' : 'BJP';
     const receivedate = new Date().toISOString();
     const status = 'Blank'; // Default status for new RFID
@@ -110,8 +114,8 @@ const AddRfidScreen = () => {
         };
         try {
           await registerRfid(payload);
-          ToastAndroid.show(`RFID ${tagcode} registered`, ToastAndroid.SHORT);
-          console.log(`RFID ${tagcode} registered`);
+          // ToastAndroid.show(`RFID ${tagcode} registered`, ToastAndroid.SHORT);
+          // console.log(`RFID ${tagcode} registered`);
         } catch (error) {
           ToastAndroid.show(
             `Failed to register ${tagcode}`,
@@ -119,6 +123,8 @@ const AddRfidScreen = () => {
           );
         }
       }
+      ToastAndroid.show(`RFID registered`, ToastAndroid.SHORT);
+      navigation.navigate('RegisterRFID');
     }
   };
 
@@ -161,12 +167,22 @@ const AddRfidScreen = () => {
       />
       <View style={styles.buttonContainer}>
         <ButtonApp
+          disabled={listRfid.length === 0}
           label="ADD RFID"
-          onPress={handleRegisterNew}
+          onPress={() => setModalConfirmVisible(true)}
           size="large"
           color="primary"
         />
       </View>
+
+      <ModalApp
+        content="Are you sure want to add this RFID?"
+        title="Confirmation"
+        type="confirmation"
+        visible={modalConfirmVisible}
+        onClose={() => setModalConfirmVisible(false)}
+        onConfirm={() => handleRegisterNew()}
+      />
     </SafeAreaView>
   );
 };

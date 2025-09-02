@@ -18,11 +18,14 @@ import {
   type ZebraResultPayload,
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
+import Loading from '../compnents/Loading';
+import {set} from 'lodash';
 
 const ConnectRFIDReader = () => {
   const navigation = useNavigation<any>();
   const [connectedDevice, setConnectedDevice] = useState<string | null>(null);
   const [listDevices, setListDevices] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const deviceConnectEvent = ZebraEventEmitter.addListener(
@@ -48,6 +51,7 @@ const ConnectRFIDReader = () => {
         (e: ZebraResultPayload) => {
           ToastAndroid.show(e.data, ToastAndroid.SHORT);
           setConnectedDevice(e.data);
+          setLoading(false);
         },
       );
 
@@ -60,7 +64,9 @@ const ConnectRFIDReader = () => {
 
   const renderItem = ({item}: {item: (typeof DATA)[0]}) => (
     <TouchableOpacity
-      onPress={() => connectToDevice(item)}
+      onPress={() => {
+        connectToDevice(item), setLoading(true);
+      }}
       style={[
         styles.deviceCard,
         connectedDevice === item && {
@@ -88,6 +94,7 @@ const ConnectRFIDReader = () => {
 
   return (
     <View style={styles.container}>
+      <Loading visible={loading} text="Connecting..." />
       <Text
         style={{
           fontSize: 16,

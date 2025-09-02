@@ -36,6 +36,8 @@ import {
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
 import {Alert} from 'react-native';
+import {tagInfo} from '../../services/tagInfo';
+import ModalApp from '../../compnents/ModalApp';
 
 const PutawayMaterialScreen = () => {
   const navigation = useNavigation<any>();
@@ -60,6 +62,7 @@ const PutawayMaterialScreen = () => {
   // REPLACED previous const allInvUseTagged = ... with state + setter + getter
   const [allInvUseTagged, setAllInvUseTagged] = useState(false);
   const [binScan, setBinScan] = useState('');
+  const [modalAppVisible, setModalAppVisible] = useState(false);
 
   useEffect(() => {
     const allTagged =
@@ -173,54 +176,59 @@ const PutawayMaterialScreen = () => {
     console.log('selectedItem:', selectedItem);
 
     const bin = await findBinByTagCode(modalValueBin);
-    setBinScan(bin?.member[0]?.bin || 'Undefined');
 
-    console.log('Selected Bin:', bin?.member[0]?.bin);
+    if (bin?.member.length === 0) {
+      ToastAndroid.show('BIN not found', ToastAndroid.SHORT);
+      setModalValueBin('');
+      return null;
+    } else {
+      setBinScan(bin?.member[0]?.bin || 'Undefined');
 
-    const payload = {
-      // tag item
-      invuselineid: selectedItem.invuselineid,
-      tagcode: modalValueItem,
-      serialnumber: serialNumber,
-      // tess hardcode serial number for testing
-      // serialnumber: '3070B0BFD595D3001446F4F7',
+      console.log('Selected Bin:', bin?.member[0]?.bin);
 
-      // tag bin
-      frombin: selectedItem.frombin,
-      wms_finalbin: bin?.member[0]?.bin,
-      wms_status: 'COMPLETE',
-    };
+      const payload = {
+        // tag item
+        invuselineid: selectedItem.invuselineid,
+        tagcode: modalValueItem,
+        serialnumber: serialNumber,
 
-    console.log('Payload to submit:', payload);
+        // tag bin
+        frombin: selectedItem.frombin,
+        wms_finalbin: bin?.member[0]?.bin,
+        wms_status: 'COMPLETE',
+      };
 
-    await tagItemPutaway(
-      payload.invuselineid,
-      payload.tagcode,
-      payload.serialnumber,
-    )
-      .then(res => {
-        console.log('Tagging Response:', res);
-        ToastAndroid.show('Item tagged successfully', ToastAndroid.SHORT);
-        setModalValueBin('');
-        setModalValueItem('');
-        setBinScan('');
-        setSuggestedBin('');
-        // navigation.goBack();
-      })
-      .catch(err => {
-        console.error('Error tagging item:', err);
-        ToastAndroid.show('Failed tagging item', ToastAndroid.SHORT);
-      });
+      console.log('Payload to submit:', payload);
 
-    await completePutaway(
-      payload.invuselineid,
-      payload.frombin,
-      payload.wms_finalbin,
-    );
+      await tagItemPutaway(
+        payload.invuselineid,
+        payload.tagcode,
+        payload.serialnumber,
+      )
+        .then(res => {
+          console.log('Tagging Response:', res);
+          ToastAndroid.show('Item tagged successfully', ToastAndroid.SHORT);
+          setModalValueBin('');
+          setModalValueItem('');
+          setBinScan('');
+          setSuggestedBin('');
+          // navigation.goBack();
+        })
+        .catch(err => {
+          console.error('Error tagging item:', err);
+          ToastAndroid.show('Failed tagging item', ToastAndroid.SHORT);
+        });
 
-    getdataPutawayMixed();
+      await completePutaway(
+        payload.invuselineid,
+        payload.frombin,
+        payload.wms_finalbin,
+      );
 
-    setModalBinVisible(false);
+      getdataPutawayMixed();
+
+      setModalBinVisible(false);
+    }
   };
 
   const handleCompletereturn = async () => {
@@ -359,7 +367,7 @@ const PutawayMaterialScreen = () => {
           label="COMPLETE"
           size="large"
           color="primary"
-          onPress={debouncedCompleteReturn}
+          onPress={() => setModalAppVisible(true)}
         />
       </View>
 
@@ -367,17 +375,36 @@ const PutawayMaterialScreen = () => {
         visible={modalItemVisible}
         value={modalValueItem}
         onChangeText={setModalValueItem}
-        title="Scan Item Tag"
+        title="Scan New Item Tag"
         placeholder="Scan or enter Item Tag"
         onSubmit={() => {
           if (!modalValueItem) {
-            ToastAndroid.show('Please enter an Item Tag', ToastAndroid.SHORT);
+            ToastAndroid.show('Please Scan New Item Tag', ToastAndroid.SHORT);
             return;
+          } else {
+            tagInfo(modalValueItem).then(res => {
+              console.log(
+                'Tag Info putaway:',
+                res.member[0].status === 'Blank',
+              );
+              if (res.member[0].status !== 'Blank') {
+                setModalItemVisible(false);
+                setModalValueItem('');
+                ToastAndroid.show(
+                  'RFID Used. Try Another Tag',
+                  ToastAndroid.SHORT,
+                );
+              } else {
+                setModalItemVisible(false);
+                handlePressItem(selectedItem);
+              }
+            });
           }
-          setModalItemVisible(false);
-          handlePressItem(selectedItem);
         }}
-        onCancel={() => setModalItemVisible(false)}
+        onCancel={() => {
+          setModalItemVisible(false);
+          setModalValueItem('');
+        }}
         // suggestBin={suggestedBin} // Example suggested bin
       />
 
@@ -390,11 +417,24 @@ const PutawayMaterialScreen = () => {
         onSubmit={() => {
           handleSubmitBin();
         }}
-        onCancel={() => setModalBinVisible(false)}
+        onCancel={() => {
+          setModalBinVisible(false);
+          setModalValueBin('');
+          setModalValueItem('');
+        }}
         serialNumber={serialNumber}
         placeholder="Scan or enter BIN Tag"
         suggestBin={suggestedBin} // Example suggested bin
         // bin={binScan}
+      />
+
+      <ModalApp
+        visible={modalAppVisible}
+        onClose={() => setModalAppVisible(false)}
+        content="Are you sure you want to complete Return?"
+        title="Confirmation"
+        type="confirmation"
+        onConfirm={debouncedCompleteReturn}
       />
     </SafeAreaView>
   );

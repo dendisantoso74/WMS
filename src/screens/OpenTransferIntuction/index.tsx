@@ -55,9 +55,9 @@ const TransferInstructionScreen = () => {
         item.wms_ponum?.toLowerCase().includes(search.toLowerCase()),
       );
       setFilteredInstructions(filtered);
-      if (filtered.length === 0 && search.trim() !== '') {
-        ToastAndroid.show('No items found', ToastAndroid.SHORT);
-      }
+      // if (filtered.length === 0 && search.trim() !== '') {
+      //   ToastAndroid.show('No items found', ToastAndroid.SHORT);
+      // }
     }
   }, [search, transferInstructions]);
 

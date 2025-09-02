@@ -388,25 +388,46 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
               keyboardShouldPersistTaps="handled">
               {/* <Text style={styles.title}>Bottom Sheet Modal</Text> */}
               <View className="flex-col gap-3">
-                <TextInput
-                  placeholder="Type here..."
-                  style={{
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    backgroundColor: '#fafafa',
-                  }}
-                  placeholderTextColor="#aaa"
-                  autoCapitalize="characters"
-                  value={inputId}
-                  onChangeText={text => setInputId(text.toUpperCase())}
-                  returnKeyType="done" // or "go", "next", "search", etc.
-                  onSubmitEditing={() => {
-                    onAutoNavigate && onAutoNavigate([inputId]);
-                  }}
-                />
+                <View style={{position: 'relative'}}>
+                  <TextInput
+                    placeholder="Type here..."
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#ccc',
+                      borderRadius: 8,
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      backgroundColor: '#fafafa',
+                      paddingRight: 36, // add space for the clear button
+                    }}
+                    placeholderTextColor="#aaa"
+                    autoCapitalize="characters"
+                    value={inputId}
+                    onChangeText={text => setInputId(text.toUpperCase())}
+                    returnKeyType="done"
+                    onSubmitEditing={() => {
+                      onAutoNavigate && onAutoNavigate([inputId]);
+                    }}
+                  />
+                  {inputId.length > 0 && (
+                    <TouchableOpacity
+                      onPress={() => setInputId('')}
+                      style={{
+                        position: 'absolute',
+                        right: 10,
+                        top: 0,
+                        bottom: 0,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: 24,
+                        height: '100%',
+                      }}>
+                      <Text className="px-2 text-base font-bold rounded-full color-red-400 bg-slate-200">
+                        ×
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
 
                 <TouchableOpacity
                   style={styles.closeButton}

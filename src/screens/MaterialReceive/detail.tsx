@@ -154,6 +154,7 @@ const MaterialReceiveDetailScreen = () => {
       setModalVisible(false);
       setTempQuantity(quantity);
     }
+    setSplit(false);
   };
 
   const handleConfirmReceiveAll = async () => {
@@ -388,9 +389,9 @@ const MaterialReceiveDetailScreen = () => {
       </View>
       {/* )} */}
       <ModalInputWms
-        // canSplit
-        // split={split}
-        // onSplitChange={setSplit}
+        canSplit
+        split={split}
+        onSplitChange={setSplit}
         visible={modalVisible}
         material={
           poline.find(item => item.polinenum === selectedData)?.description ||

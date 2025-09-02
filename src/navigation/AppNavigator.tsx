@@ -199,11 +199,69 @@ const AppNavigator = () => {
           <Stack.Screen name="ScanCamera" component={ScanScreen} />
           <Stack.Screen name="ChangeSiteScreen" component={ChangeSiteScreen} />
           {/* Register RFID Menu */}
-          <Stack.Screen name="RegisterRFID" component={RegisterRfidScreen} />
-          <Stack.Screen name="AddRFID" component={AddRfidScreen} />
+          <Stack.Screen
+            name="RegisterRFID"
+            component={RegisterRfidScreen}
+            options={({navigation}) => ({
+              title: 'Register RFID',
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
+          <Stack.Screen
+            name="AddRFID"
+            component={AddRfidScreen}
+            options={({navigation}) => ({
+              title: 'Add RFID',
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
           {/* Tag Bin Menu */}
-          <Stack.Screen name="TagBin" component={TagBinScreen} />
-          <Stack.Screen name="TagBin Scan" component={ScanBinScreen} />
+          <Stack.Screen
+            name="TagBin"
+            component={TagBinScreen}
+            options={{title: 'Tag Bin'}}
+          />
+          <Stack.Screen
+            name="TagBin Scan"
+            component={ScanBinScreen}
+            options={({navigation}) => ({
+              title: 'Scan New Tag Bin',
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
           <Stack.Screen
             name="Register RFID Bin"
             component={RegisterBinScreen}
@@ -239,6 +297,7 @@ const AppNavigator = () => {
             name="RetagingBin"
             component={RetagingBinScreen}
             options={({navigation}) => ({
+              title: 'Retaging Bin',
               headerRight: () => (
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Reader Connect')}

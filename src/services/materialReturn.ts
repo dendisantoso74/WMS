@@ -25,6 +25,8 @@ export const scanWoForReturn = async (wonum: string) => {
 
 export const receiveMaterial = async (invuseid: string, payload: any) => {
   const url = `/maximo/oslc/os/MXINVUSE/${invuseid}`;
+  console.log('payload return', payload);
+
   try {
     const response = await api.post(url, payload, {
       headers: {
@@ -37,7 +39,7 @@ export const receiveMaterial = async (invuseid: string, payload: any) => {
 
     return response.data;
   } catch (error) {
-    console.error('Error in receiveMaterial:', error);
+    console.error('Error in Return Material:', error);
     throw error;
   }
 };

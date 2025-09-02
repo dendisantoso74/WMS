@@ -12,6 +12,12 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
+const dummy = [
+  // {binum: '12www', qty: 12, sn: 'SN12345'},
+  // {binum: '34abc', qty: 8, sn: 'SN67890'},
+  // {binum: '56xyz', qty: 5, sn: 'SN54321'},
+];
+
 const DetailMaterialScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
@@ -26,24 +32,41 @@ const DetailMaterialScreen = () => {
     setModalVisible(true);
   };
 
-  // const renderItem = ({item}: {item: string}) => (
-  //   <View className="items-end ">
-  //     <TouchableOpacity
-  //       className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
-  //       onPress={() => navigation.navigate('Pick Item', {item: item})}>
-  //       <Icon library="Feather" name="plus" size={15} color="white"></Icon>
-  //     </TouchableOpacity>
-  //   </View>
-  // );
+  const renderItem = ({item}: {item: any}) => (
+    <View className="flex-row items-center px-4 mb-4 bg-white shadow-sm rounded-xl">
+      {/* <View className="w-4 h-full mr-4 bg-gray-300 rounded-tl-xl rounded-bl-xl" /> */}
+      <View className="flex-1 py-3">
+        <View className="flex-row items-center mb-1">
+          <Text className="font-bold text-gray-700">Serial Number :</Text>
+          <Text className="flex-1 ml-2 text-gray-700" numberOfLines={1}>
+            {item.sn}
+          </Text>
+          <TouchableOpacity
+            className="items-center justify-center ml-2 bg-red-400 rounded-full w-7 h-7"
+            onPress={() => {
+              /* handle remove */
+            }}>
+            <Text className="text-lg font-bold text-white">×</Text>
+          </TouchableOpacity>
+        </View>
+        <View className="flex-row items-center">
+          <Text className="text-gray-500">Bin :</Text>
+          <Text className="flex-1 ml-2 text-gray-700" numberOfLines={1}>
+            {item.binum}
+          </Text>
+          <Text className="mr-1 text-gray-500">Qty :</Text>
+          <Text className="font-bold text-gray-700">{item.qty} PCS</Text>
+        </View>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="p-2 bg-blue-400">
         <View className="flex flex-row justify-start">
           <Text className="w-1/4 font-bold text-white">Material</Text>
-          <Text className="w-4/6 font-bold text-white">
-            {item?.description}
-          </Text>
+          <Text className="w-4/6 text-white">{item?.description}</Text>
         </View>
         <View className="flex flex-row mr-4">
           <Text className="w-1/4 font-bold text-white">Reserve Qty</Text>
@@ -53,7 +76,7 @@ const DetailMaterialScreen = () => {
         </View>
       </View>
 
-      <View className="items-end mt-3 mr-3 ">
+      <View className="items-end my-1 mr-3 ">
         <TouchableOpacity
           className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
           onPress={() =>
@@ -67,13 +90,13 @@ const DetailMaterialScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* <FlatList
-        data={rfids}
+      <FlatList
+        data={dummy}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
-      /> */}
+      />
       <View style={styles.buttonContainer}>
         <ButtonApp
           label="Back"

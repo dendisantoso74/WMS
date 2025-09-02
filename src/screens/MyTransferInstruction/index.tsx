@@ -124,6 +124,7 @@ const MyTransferInstructionScreen = () => {
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}
+          autoCapitalize="characters"
         />
         <Icon
           library="Feather"

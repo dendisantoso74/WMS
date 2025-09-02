@@ -6,9 +6,11 @@ import {
   SafeAreaView,
   ScrollView,
   RefreshControl,
+  Alert,
+  BackHandler,
 } from 'react-native';
 import Icon from '../compnents/Icon';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import MenuCard from '../compnents/MenuCard';
 import {StyleSheet} from 'react-native';
 import {getPersonByLoginId} from '../services/user';
@@ -72,9 +74,32 @@ const HomeWMSScreen = () => {
     });
   }, [user]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert(
+          'NEW WMS',
+          'Are you sure want to exit this app?',
+          [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Exit', onPress: () => BackHandler.exitApp()},
+          ],
+          {cancelable: true},
+        );
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      };
+    }, []),
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <PreventBackNavigate />
+      {/* <PreventBackNavigate /> */}
       <ScrollView
         contentContainerStyle={{paddingBottom: 24}}
         refreshControl={

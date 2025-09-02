@@ -52,6 +52,8 @@ const PickItemScreen = () => {
 
   const [search, setSearch] = useState('');
   const [suggestedBin, setSuggestedBin] = useState([]);
+  const [suggestedBinSelect, setSuggestedBinSelect] = useState('');
+
   const [userType, setUserType] = useState(item?.wms_usetype || 'ISSUE'); // <-- Add state for dropdown
   const [maxUser, setMaxUser] = useState(0);
   const [bin, setBin] = useState('');
@@ -108,8 +110,10 @@ const PickItemScreen = () => {
     //find sugestion bin
     const findbin = async () => {
       const res = await findSugestBin(item.itemnum, item.location);
-      setSuggestedBin(res.member[0]);
-      console.log('Suggested Bin:', res.member[0]);
+      console.log('Suggested Bin Response:', res);
+
+      setSuggestedBin(res.member);
+      setSuggestedBinSelect(res.member[0].binnum);
     };
 
     const getDetailBin = async () => {
@@ -125,7 +129,7 @@ const PickItemScreen = () => {
       serialnumber: serialNumberItem, // need to be make sure this payload is existing because is required
       quantity: Number(pickqty),
       assetnum: item.assetnum,
-      frombin: bin.bin || item.frombin || suggestedBin?.binnum,
+      frombin: bin.bin || item.frombin || suggestedBinSelect,
       fromstoreloc: item.location,
       invuselinenum: invuselinenum,
       issueto: maxUser,
@@ -231,8 +235,9 @@ const PickItemScreen = () => {
               // numberOfLines={2}
               // ellipsizeMode="tail"
               >
-                <Text className="font-bold">{item?.itemnum}</Text>/
-                {item?.description}
+                <Text className="font-bold">{item?.itemnum}</Text>
+
+                {/* {item?.description} */}
               </Text>
             </View>
           </View>
@@ -292,10 +297,25 @@ const PickItemScreen = () => {
 
           <View className="flex-row items-center w-full mt-3">
             <Text className="w-1/2 font-bold">Sugesstion Bin</Text>
-            <View className="w-1/2 py-2 bg-gray-200">
+            {/* <View className="w-1/2 py-2 bg-gray-200">
               <Text className="font-bold text-center ">
                 {suggestedBin?.binnum}
               </Text>
+            </View> */}
+            <View className="w-1/2 py-2 bg-gray-200">
+              <Dropdown
+                data={suggestedBin}
+                labelField="binnum"
+                valueField="binnum"
+                value={suggestedBinSelect}
+                onChange={item => setSuggestedBinSelect(item.binnum)}
+                style={{
+                  backgroundColor: 'transparent',
+                  // width: '100%',
+                  paddingHorizontal: 8,
+                }}
+                // placeholder="Select Suggested Bin"
+              />
             </View>
           </View>
 
