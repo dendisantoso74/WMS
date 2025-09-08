@@ -21,8 +21,8 @@ import {set} from 'lodash';
 const MyTransferInstructionSubmitScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item, invuseid, tobin} = route.params;
-  console.log('INVUSEID:', invuseid);
+  const {item, invuseid, tobin, datas} = route.params;
+  console.log('datas from param:', item, invuseid);
 
   const [search, setSearch] = useState('');
   const [completedIds, setCompletedIds] = useState<string[]>([]);
@@ -127,25 +127,39 @@ const MyTransferInstructionSubmitScreen = () => {
           <Text className="font-bold text-white">{tobin}</Text>
         </View>
       </View>
-      {/* <View className="px-2 py-2 bg-blue-200">
-        <Text className="font-bold text-blue-600">
-          Information : This is smartscan, please scan on material tag
-        </Text>
+      {/* <View className="px-2 py-2 bg-blue-200 ">
+        <View className="flex-row items-center gap-3 mr-3">
+          <Text className="text-blue-600">
+            Information : This is smartscan, please scan on material tag
+          </Text>
+        </View>
       </View> */}
       <View style={styles.filterContainer}></View>
       <FlatList
-        data={item}
+        data={item.filter(i => i.wms_status === 'OPEN')}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
-      <View style={styles.buttonContainer}>
+      {/* <View style={styles.buttonContainer}>
         <ButtonApp
           // onPress={() => handleComplete()}
           // onPress={handleComplete}
           onPress={() => setModalCompleteVisible(true)}
           label="Complete"
+          size="large"
+          color="primary"
+        />
+      </View> */}
+      <View style={styles.buttonContainer}>
+        <ButtonApp
+          // onPress={() => handleComplete()}
+          // onPress={handleComplete}
+          onPress={() =>
+            navigation.navigate('My Transfer Instruction Scan', {datas: datas})
+          }
+          label="SUBMIT"
           size="large"
           color="primary"
         />

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,29 +7,89 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
+  ToastAndroid,
+  Alert,
+  BackHandler,
 } from 'react-native';
 import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
-import {useNavigation, useRoute} from '@react-navigation/native';
-
-const dummy = [
-  // {binum: '12www', qty: 12, sn: 'SN12345'},
-  // {binum: '34abc', qty: 8, sn: 'SN67890'},
-  // {binum: '56xyz', qty: 5, sn: 'SN54321'},
-];
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import {pickItem} from '../../services/materialIssue';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const DetailMaterialScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item, invuselinenum, invinvUseId} = route.params;
-  console.log('RFIDs from params:', item, invuselinenum, invinvUseId);
-
-  const [search, setSearch] = useState('');
-
+  const {item, invuselinenum, invinvUseId, payload} = route.params;
+  console.log(
+    'RFIDs from params d:',
+    item,
+    invuselinenum,
+    invinvUseId,
+    payload,
+  );
+  const [payloads, setPayloads] = useState<any[]>(payload || []);
   const [modalVisible, setModalVisible] = useState(false);
+  const [totalQuantity, setTotalQuantity] = useState(0);
 
-  const handleReceive = () => {
-    setModalVisible(true);
+  // prevent back nav manualy
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = navigation.addListener('beforeRemove', (e: any) => {
+        e.preventDefault();
+        navigation.navigate('Material Issue Inspect', {
+          listrfid: [item.wogroup],
+        });
+      });
+
+      return () => {
+        subscription();
+      };
+    }, [navigation]),
+  );
+
+  useEffect(() => {
+    if (Array.isArray(payload)) {
+      setPayloads(payload);
+    }
+
+    const total = payload.reduce((sum, item) => sum + item.quantity, 0);
+    setTotalQuantity(total);
+    console.log('Total Quantity:', total);
+  }, [payload]);
+
+  useEffect(() => {
+    const total = payloads.reduce((sum, item) => sum + item.quantity, 0);
+    setTotalQuantity(total);
+    console.log('Total Quantity:', total);
+  }, [payloads]);
+
+  const handleRemovePayload = (serialnumber: string) => {
+    const updated = payloads.filter(p => p.serialnumber !== serialnumber);
+    setPayloads(updated);
+  };
+
+  const handlePickItems = async () => {
+    // Implement your pick items logic here
+    await pickItem(invinvUseId, payloads)
+      .then(res => {
+        console.log('Pick item response:', res);
+        ToastAndroid.show('Item picked successfully', ToastAndroid.SHORT);
+        navigation.navigate('Material Issue Inspect', {
+          listrfid: [item.wogroup],
+        });
+      })
+      .catch(err => {
+        console.error('Error picking item:', err);
+        Alert.alert(
+          'Error',
+          err.Error.message || 'An error occurred while picking the item.',
+        );
+      });
   };
 
   const renderItem = ({item}: {item: any}) => (
@@ -37,25 +97,28 @@ const DetailMaterialScreen = () => {
       {/* <View className="w-4 h-full mr-4 bg-gray-300 rounded-tl-xl rounded-bl-xl" /> */}
       <View className="flex-1 py-3">
         <View className="flex-row items-center mb-1">
-          <Text className="font-bold text-gray-700">Serial Number :</Text>
-          <Text className="flex-1 ml-2 text-gray-700" numberOfLines={1}>
-            {item.sn}
+          <Text className="text-sm font-bold text-gray-700">
+            Serial Number :
+          </Text>
+          <Text className="flex-1 ml-2 text-sm text-gray-700" numberOfLines={1}>
+            {item.serialnumber}
           </Text>
           <TouchableOpacity
             className="items-center justify-center ml-2 bg-red-400 rounded-full w-7 h-7"
-            onPress={() => {
-              /* handle remove */
-            }}>
-            <Text className="text-lg font-bold text-white">×</Text>
+            onPress={() => handleRemovePayload(item.serialnumber)}>
+            {/* <Text className="text-lg font-bold text-white">×</Text> */}
+            <Icon library="Feather" name="trash-2" size={12} color="white" />
           </TouchableOpacity>
         </View>
         <View className="flex-row items-center">
-          <Text className="text-gray-500">Bin :</Text>
-          <Text className="flex-1 ml-2 text-gray-700" numberOfLines={1}>
-            {item.binum}
+          <Text className="text-sm text-gray-500">Bin :</Text>
+          <Text className="flex-1 ml-2 text-sm text-gray-700" numberOfLines={1}>
+            {item.frombin}
           </Text>
-          <Text className="mr-1 text-gray-500">Qty :</Text>
-          <Text className="font-bold text-gray-700">{item.qty} PCS</Text>
+          <Text className="mr-1 text-sm text-gray-500">Qty :</Text>
+          <Text className="text-sm font-bold text-gray-700 ">
+            {item.quantity} PCS
+          </Text>
         </View>
       </View>
     </View>
@@ -76,34 +139,44 @@ const DetailMaterialScreen = () => {
         </View>
       </View>
 
-      <View className="items-end my-1 mr-3 ">
-        <TouchableOpacity
-          className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
-          onPress={() =>
-            navigation.navigate('Pick Item', {
-              item: item,
-              invuselinenum: invuselinenum,
-              invinvUseId: invinvUseId,
-            })
-          }>
-          <Icon library="Feather" name="plus" size={15} color="white"></Icon>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={dummy}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+      {totalQuantity < item?.reservedqty && (
+        <View className="items-end my-1 mr-3 ">
+          <TouchableOpacity
+            className="items-center justify-center w-16 h-8 bg-blue-500 border border-blue-500 rounded"
+            onPress={() =>
+              navigation.navigate('Pick Item', {
+                item: item,
+                invuselinenum: invuselinenum,
+                invinvUseId: invinvUseId,
+                payloadPick: payloads,
+              })
+            }>
+            <Icon library="Feather" name="plus" size={15} color="white"></Icon>
+          </TouchableOpacity>
+        </View>
+      )}
+      {payloads && (
+        <FlatList
+          data={payloads}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+        />
+      )}
       <View style={styles.buttonContainer}>
         <ButtonApp
+          label="Pick Items"
+          onPress={() => handlePickItems()}
+          size="large"
+          disabled={payloads.length === 0}
+        />
+        {/* <ButtonApp
           label="Back"
           onPress={() => navigation.goBack()}
           size="large"
           color="primary"
-        />
+        /> */}
       </View>
     </SafeAreaView>
   );

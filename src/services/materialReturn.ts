@@ -2,8 +2,12 @@ import {getData} from '../utils/store';
 import api from './api';
 
 export const generateInvUsageHeader = async (wonum: string) => {
-  const siteid = await getData('site');
+  // const siteid = await getData('site');
+  const siteid = 'TJB56';
+
   const url = `/maxrest/oslc/script/WMS_INVUSERETURN?siteid=${siteid}&wonum=${wonum}`;
+  console.log('Generated URL:', url);
+
   try {
     const response = await api.get(url);
     return response.data;
@@ -13,7 +17,9 @@ export const generateInvUsageHeader = async (wonum: string) => {
 };
 
 export const scanWoForReturn = async (wonum: string) => {
-  const siteid = await getData('site');
+  // const siteid = await getData('site');
+  const siteid = 'TJB56';
+
   const url = `/maximo/oslc/os/WMS_MXRETURN?oslc.select=*&oslc.where=siteid="${siteid}" and wonum="${wonum}"&lean=1`;
   try {
     const response = await api.get(url);
@@ -103,8 +109,12 @@ export const findSuggestedBinReturn = async (
 };
 
 export const createInvUseReturnHeader = async (wonum: string) => {
-  const siteid = await getData('site');
+  // const siteid = await getData('site');
+  const siteid = 'TJB56';
+
   const url = `/maxrest/oslc/script/WMS_INVUSERETURN?siteid=${siteid}&wonum=${wonum}`;
+  console.log('Generated URL:', url);
+
   try {
     const response = await api.get(url, {
       headers: {

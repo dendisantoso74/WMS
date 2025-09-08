@@ -24,7 +24,7 @@ import {
   getItemSNByTagCode,
   pickItem,
 } from '../../services/materialIssue';
-import {debounce, set} from 'lodash';
+import {debounce, random, set} from 'lodash';
 import {Dropdown} from 'react-native-element-dropdown';
 import {getData} from '../../utils/store';
 import {tagInfo} from '../../services/tagInfo';
@@ -46,9 +46,15 @@ const userTypeOptions = [
 const PickItemScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item, invuselinenum, invinvUseId} = route.params;
+  const {item, invuselinenum, invinvUseId, payloadPick} = route.params;
 
-  console.log('RFIDs from params:', item, invuselinenum, invinvUseId);
+  console.log(
+    'RFIDs from params:',
+    item,
+    invuselinenum,
+    invinvUseId,
+    payloadPick,
+  );
 
   const [search, setSearch] = useState('');
   const [suggestedBin, setSuggestedBin] = useState([]);
@@ -105,7 +111,8 @@ const PickItemScreen = () => {
       // console.log('MAXuser:', maxUser);
       setMaxUser(res);
     });
-    setPickqty((item?.reservedqty - item?.pendingqty).toString());
+    // set initail pick qty == qty item
+    // setPickqty((item?.reservedqty - item?.pendingqty).toString());
 
     //find sugestion bin
     const findbin = async () => {
@@ -131,7 +138,7 @@ const PickItemScreen = () => {
       assetnum: item.assetnum,
       frombin: bin.bin || item.frombin || suggestedBinSelect,
       fromstoreloc: item.location,
-      invuselinenum: invuselinenum,
+      invuselinenum: random(0, 999),
       issueto: maxUser,
       itemnum: item.itemnum,
       itemsetid: item.itemsetid,
@@ -149,36 +156,37 @@ const PickItemScreen = () => {
       // fromconditioncode: 'NEW', //tambahan payload karena error condition code
     };
 
-    // Validation activate soon
-    // for (const key in payload) {
-    //   if (
-    //     payload[key] === undefined ||
-    //     payload[key] === null ||
-    //     payload[key] === '' ||
-    //     (key === 'quantity' && (!payload[key] || payload[key] <= 0))
-    //   ) {
-    //     ToastAndroid.show(`Error: ${key} is empty`, ToastAndroid.SHORT);
-    //     return;
-    //   }
-    // }
-
+    const exists = payloadPick.some(
+      p => p?.serialnumber === payload?.serialnumber,
+    );
     // You can now use this payload for your API call
     console.log('invuseid, Payload, item:', invinvUseId, payload, item);
-    await pickItem(invinvUseId, payload)
-      .then(res => {
-        console.log('Pick item response:', res);
-        ToastAndroid.show('Item picked successfully', ToastAndroid.SHORT);
-        navigation.navigate('Material Issue Inspect', {
-          listrfid: [item.wogroup],
-        });
-      })
-      .catch(err => {
-        console.error('Error picking item:', err);
-        Alert.alert(
-          'Error',
-          err.Error.message || 'An error occurred while picking the item.',
-        );
-      });
+    if (exists) {
+      ToastAndroid.show('Item already exists', ToastAndroid.SHORT);
+      return;
+    }
+    navigation.navigate('Detail Material Issue', {
+      item: item,
+      invuselinenum: invuselinenum,
+      invinvUseId: invinvUseId,
+      payload: exists ? payloadPick : [...payloadPick, payload], //merge with existing payload
+    });
+
+    // await pickItem(invinvUseId, payload)
+    //   .then(res => {
+    //     console.log('Pick item response:', res);
+    //     ToastAndroid.show('Item picked successfully', ToastAndroid.SHORT);
+    //     navigation.navigate('Material Issue Inspect', {
+    //       listrfid: [item.wogroup],
+    //     });
+    //   })
+    //   .catch(err => {
+    //     console.error('Error picking item:', err);
+    //     Alert.alert(
+    //       'Error',
+    //       err.Error.message || 'An error occurred while picking the item.',
+    //     );
+    //   });
   };
   const searchSerialNumber = async (tagcode: string) => {
     // console.log('Searching for serial number:', search);
@@ -278,8 +286,14 @@ const PickItemScreen = () => {
                 style={styles.filterInput}
                 placeholder="0"
                 placeholderTextColor="#b0b0b0"
-                value={pickqty}
-                onChangeText={setPickqty}
+                value={pickqty.toString()}
+                onChangeText={val => {
+                  let num = Number(val.replace(/[^0-9]/g, ''));
+                  if (num > item.reservedqty) num = item.reservedqty;
+                  if (findItem?.qtystored && num > findItem.qtystored)
+                    num = findItem.qtystored;
+                  setPickqty(num);
+                }}
                 keyboardType="numeric"
               />
               <Text>{item?.wms_unit}</Text>
@@ -348,6 +362,7 @@ const PickItemScreen = () => {
       </ScrollView>
       <View style={styles.buttonContainer}>
         <ButtonApp
+          disabled={!serialNumberItem}
           label="ADD"
           size="large"
           color="primary"

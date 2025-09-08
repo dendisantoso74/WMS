@@ -19,8 +19,10 @@ export const getWorkOrderDetails = async (workOrderId: string) => {
 export const pickItem = async (invuseId: string, itemDetails: any) => {
   const url = `/maximo/oslc/os/MXINVUSE/${invuseId}`;
   const payload = {
-    invuseline: [itemDetails],
+    invuseline: itemDetails,
   };
+  console.log('service pick item, payload ', payload);
+
   try {
     const response = await api.post(url, payload, {
       headers: {
@@ -98,7 +100,9 @@ export const findBinByTagCode = async (tagcode: string) => {
 };
 
 export const generateIssueHeader = async (wonum: string) => {
-  const siteid = await getData('site');
+  // const siteid = await getData('site');
+  const siteid = 'TJB56';
+
   const url = `/maxrest/oslc/script/WMS_INVUSEISSUE?siteid=${siteid}&wonum=${wonum}`;
   try {
     const response = await api.get(url, {

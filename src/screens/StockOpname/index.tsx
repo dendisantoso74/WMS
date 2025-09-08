@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -11,27 +11,41 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
-
-const dummyRfids = ['00000000000000000000'];
+import {getListStockOpname} from '../../services/stockOpname';
+import {formatDateTime} from '../../utils/helpers';
 
 const StockOpnameListScreen = () => {
   const navigation = useNavigation<any>();
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
+  const [listOpname, setListOpname] = useState([]);
+
+  useEffect(() => {
+    getListStockOpname().then(res => {
+      setListOpname(res.member);
+    });
+  }, []);
+
+  const filteredList = listOpname.filter(item =>
+    item.description?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() => navigation.navigate('Detail Stock Opname')}>
+      onPress={() =>
+        navigation.navigate('Detail Stock Opname', {
+          wms_opinid: item.wms_opinid,
+        })
+      }>
       <View>
         <View className="my-2">
-          <Text className="px-4 font-bold">
-            PHYSICAL STOCK TAKING DECEMBER 2020
+          <Text className="px-4 font-bold">{item.description}</Text>
+          <Text className="px-4 font-semibold">
+            {formatDateTime(item.scanneddate)}
           </Text>
-          <Text className="px-4 font-semibold">15-Des-2020 15:12</Text>
-          <Text className="px-4">BUDIMAN</Text>
-          <Text className="px-4 font-bold">ENTERED</Text>
+          <Text className="px-4">{item.wms_user}</Text>
+          <Text className="px-4 font-bold">{item.status}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -56,11 +70,16 @@ const StockOpnameListScreen = () => {
         />
       </View>
       <FlatList
-        data={rfids}
+        data={filteredList}
         renderItem={renderItem}
-        keyExtractor={item => item}
+        keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.listContent}
         style={styles.list}
+        ListEmptyComponent={
+          <View style={{alignItems: 'center', marginTop: 32}}>
+            <Text style={{color: '#888'}}>No data found</Text>
+          </View>
+        }
       />
     </SafeAreaView>
   );

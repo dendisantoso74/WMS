@@ -22,7 +22,10 @@ import rfid from '../../assets/images/rfid.png'; // Adjust the path as necessary
 import Icon from '../../compnents/Icon';
 import {formatDateTime} from '../../utils/helpers';
 import ButtonApp from '../../compnents/ButtonApp';
-import {getTransferInstructionByPoNum} from '../../services/myTransferInstruction';
+import {
+  completeTransferInstruction,
+  getTransferInstructionByPoNum,
+} from '../../services/myTransferInstruction';
 import {debounce, set} from 'lodash';
 import {
   ZebraEvent,
@@ -30,6 +33,8 @@ import {
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
 import {getBinByTagCode} from '../../services/materialMovement';
+import PreventBackNavigate from '../../utils/preventBack';
+import ModalApp from '../../compnents/ModalApp';
 
 const MyTransferInstructionScanScreen = () => {
   const navigation = useNavigation<any>();
@@ -47,6 +52,9 @@ const MyTransferInstructionScanScreen = () => {
 
   const [tagBin, setTagBin] = useState('');
   const [binInfo, setBinInfo] = useState<any>(null);
+  const [modalCompleteVisible, setModalCompleteVisible] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+
   // const status = datas.status;
 
   useEffect(() => {
@@ -59,9 +67,19 @@ const MyTransferInstructionScanScreen = () => {
           res.error,
         );
       } else {
-        // console.log('Fetched transfer instruction:', res.member[0].invuseid);
+        // console.log('Fetched transfer instruction:', res.member[0].invuseline);
+        const invuseline = res.member[0].invuseline || [];
         setInvuseid(res.member[0].invuseid);
-        setInvuse(res.member[0].invuseline);
+        setInvuse(invuseline);
+
+        // Check status logic
+        if (invuseline.some(line => line.wms_status === 'OPEN')) {
+          setIsComplete(false);
+        } else if (invuseline.every(line => line.wms_status === 'COMPLETE')) {
+          setIsComplete(true);
+        } else {
+          setIsComplete(false);
+        }
       }
       setLoading(false);
     });
@@ -70,6 +88,23 @@ const MyTransferInstructionScanScreen = () => {
   const handleScanRfid = () => {
     console.log('cek');
     setModalVisible(true);
+  };
+
+  const handleComplete = () => {
+    console.log('Complete pressed', invuseid);
+    completeTransferInstruction(invuseid).then(res => {
+      if (res.error) {
+        console.error('Error completing transfer instruction:', res.error);
+        ToastAndroid.show(
+          'Error completing transfer instruction',
+          ToastAndroid.SHORT,
+        );
+      } else {
+        ToastAndroid.show('Transfer instruction completed', ToastAndroid.SHORT);
+        // navigation.goBack();
+        navigation.navigate('My Transfer Instruction');
+      }
+    });
   };
 
   const handleModalSubmit = async () => {
@@ -91,6 +126,7 @@ const MyTransferInstructionScanScreen = () => {
       item: invuse,
       invuseid: invuseid,
       tobin: inputValue,
+      datas: datas,
     });
     console.log('Input value:', datas.invuseline[0].invuselineid, inputValue);
   };
@@ -141,6 +177,7 @@ const MyTransferInstructionScanScreen = () => {
 
   const renderItem = ({item}) => (
     <TouchableOpacity
+      disabled
       style={styles.rfidCard}
       // onPress={() =>
       //   navigation.navigate('My Transfer Instruction Submit', {
@@ -167,7 +204,7 @@ const MyTransferInstructionScanScreen = () => {
           <Text className="font-bold">
             TI Qty : {item.quantity} {item.wms_unit}
           </Text>
-          <Text className="font-bold">Putaway Qty : 0 {item.wms_unit}</Text>
+          {/* <Text className="font-bold">Putaway Qty : 0 {item.wms_unit}</Text> */}
           <Text className="font-bold">{item?.toconditioncode}</Text>
         </View>
       </View>
@@ -176,6 +213,7 @@ const MyTransferInstructionScanScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate toScreen="My Transfer Instruction" />
       <View className="flex-row p-2 bg-blue-400">
         <View className="flex-col justify-start">
           <Text className="font-bold text-white">PO Number</Text>
@@ -227,7 +265,18 @@ const MyTransferInstructionScanScreen = () => {
         />
       )}
       <View className="m-4">
-        <ButtonApp onPress={() => handleScanRfid()} label="SCAN RFID" />
+        {isComplete ? (
+          <ButtonApp
+            // onPress={() => handleComplete()}
+            // onPress={handleComplete}
+            onPress={() => setModalCompleteVisible(true)}
+            label="COMPLETE"
+            size="large"
+            color="primary"
+          />
+        ) : (
+          <ButtonApp onPress={() => handleScanRfid()} label="SCAN RFID BIN" />
+        )}
       </View>
 
       {/* <Modal
@@ -307,6 +356,7 @@ const MyTransferInstructionScanScreen = () => {
                       item: invuse,
                       invuseid: invuseid,
                       tobin: binInfo.bin,
+                      datas: datas,
                     });
                   }}
                 />
@@ -315,6 +365,15 @@ const MyTransferInstructionScanScreen = () => {
           </View>
         </View>
       </Modal>
+
+      <ModalApp
+        title="Confirmation"
+        content="Are you sure you want to complete Transfer?"
+        onClose={() => setModalCompleteVisible(false)}
+        type="confirmation"
+        visible={modalCompleteVisible}
+        onConfirm={() => handleComplete()}
+      />
     </SafeAreaView>
   );
 };

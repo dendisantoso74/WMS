@@ -46,6 +46,8 @@ const MaterialReturnDetailScreen = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [returnInvuseId, setReturnInvuseId] = useState('');
+  const [returnInvuseGlobal, setReturnInvuseGlobal] = useState([]);
+
   const [filteredMatusetrans, setFilteredMatusetrans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -86,7 +88,8 @@ const MaterialReturnDetailScreen = () => {
     const found = datas.invuse.find(
       (inv: any) =>
         typeof inv.description === 'string' &&
-        inv.description.toUpperCase().includes('RETURN'),
+        inv.description.toUpperCase().includes('RETURN') &&
+        inv.status === 'ENTERED',
     );
 
     return found || 'not found';
@@ -131,6 +134,7 @@ const MaterialReturnDetailScreen = () => {
           // setreturnn invuse id
           const returnInvuse = getReturnInvuse(res.member[0]);
           setReturnInvuseId(returnInvuse.invuseid);
+          setReturnInvuseGlobal(returnInvuse);
           console.log('Return invuse:', returnInvuse);
 
           // Filter only items that have invuseline and it's not empty
@@ -307,12 +311,14 @@ const MaterialReturnDetailScreen = () => {
       )}
       {
         <View style={styles.buttonContainer}>
-          <ButtonApp
-            label="RETURN"
-            onPress={() => handleComplete(returnInvuseId)}
-            size="large"
-            color="primary"
-          />
+          {returnInvuseGlobal?.invuseline && (
+            <ButtonApp
+              label="RETURN"
+              onPress={() => handleComplete(returnInvuseId)}
+              size="large"
+              color="primary"
+            />
+          )}
         </View>
       }
     </SafeAreaView>

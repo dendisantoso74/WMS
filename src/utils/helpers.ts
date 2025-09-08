@@ -182,7 +182,10 @@ export const getReceiptQuantityByPoline = (
   // Sum receiptquantity for all entries with the same polinenum
   return wmsMatrectrans
     .filter(trans => trans.polinenum === polinenum)
-    .reduce((sum, trans) => sum + (trans.receiptquantity ?? 0), 0);
+    .reduce(
+      (sum, trans) => sum + (trans.receiptquantity - trans.rejectqty ?? 0),
+      0,
+    );
 };
 
 export const getQuantityByPolineInspect = (

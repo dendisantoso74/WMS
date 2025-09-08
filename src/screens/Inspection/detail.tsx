@@ -46,6 +46,7 @@ const InspectionReceivingScreen = () => {
   const [totalItem, setTotalItem] = useState(0);
   const [totalDoneItem, setTotalDoneItem] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [porevisionnum, setPorevisionnum] = useState(0);
 
   // Helper: check if item is fully inspected (accept + reject = quantity)
   const isDone = (item: any) =>
@@ -118,15 +119,15 @@ const InspectionReceivingScreen = () => {
     const fetchDataPoWINSP = async () => {
       setIsLoading(true);
       const res = await getPoWaitingInspect(ponum);
-      console.log('fetchDataPoWINSP response:', res.member.length);
+      console.log('fetchDataPoWINSP response:', res.member);
 
       if (res.member.length === 0) {
-        Alert.alert(
-          'Information',
-          `${ponum} Not Found`,
-          // [{text: 'OK', onPress: () => navigation.goBack()}],
-          // {cancelable: false},
-        );
+        // Alert.alert(
+        //   'Information',
+        //   `${ponum} Not Found`,
+        //   // [{text: 'OK', onPress: () => navigation.goBack()}],
+        //   // {cancelable: false},
+        // );
         navigation.goBack();
         return;
       }
@@ -137,6 +138,7 @@ const InspectionReceivingScreen = () => {
       }
       // console.log('compareee get, param:', res.member[0]);
       setPoline(res.member[0].wms_matrectrans);
+      setPorevisionnum(res.member[0].revisionnum);
       setWmsMatrectrans(res.member[0].wms_matrectrans);
       setIsLoading(false);
     };
@@ -201,6 +203,7 @@ const InspectionReceivingScreen = () => {
             ponum: ponum,
             item: item.item,
             wms_matrectrans: wmsMatrectrans,
+            porevisionnum: porevisionnum,
           });
         }}
         style={styles.rfidCard}>

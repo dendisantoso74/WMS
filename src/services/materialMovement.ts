@@ -3,7 +3,7 @@ import api from './api';
 
 export const getBinByTagCode = async (tagcode: string) => {
   const siteId = await getData('site');
-  const url = `/maximo/oslc/os/WMS_MXBIN?lean=1&oslc.where=siteid="${siteId}" and tagcode="${tagcode}"&oslc.select=*`;
+  const url = `/maximo/oslc/os/WMS_MXBIN?lean=1&oslc.where=siteid="TJB56" and tagcode="${tagcode}"&oslc.select=*`;
   try {
     const response = await api.get(url, {
       headers: {
@@ -21,7 +21,7 @@ export const getSerializedItemByTagCodes = async (tagcodes: string[]) => {
   const siteId = await getData('site');
 
   const tagcodeList = tagcodes.map(tc => `"${tc}"`).join(',');
-  const url = `/maximo/oslc/os/WMS_MXSERIALIZEDITEM?lean=1&oslc.where=siteid="${siteId}" and tagcode in [${tagcodeList}]&oslc.select=*`;
+  const url = `/maximo/oslc/os/WMS_MXSERIALIZEDITEM?lean=1&oslc.where=siteid="TJB56" and tagcode in [${tagcodeList}]&oslc.select=*`;
   try {
     const response = await api.get(url, {
       headers: {

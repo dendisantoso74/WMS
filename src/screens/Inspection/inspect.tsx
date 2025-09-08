@@ -28,8 +28,9 @@ const InspectionReceivingApproveScreen = () => {
   const {ponum} = route.params || {};
   const {item} = route.params || {};
   const {wms_matrectrans} = route.params || {};
+  const {porevisionnum} = route.params || {};
 
-  console.log('Received ponum inspect next:', ponum, item);
+  console.log('Received ponum inspect next:', ponum, item, porevisionnum);
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
@@ -52,7 +53,7 @@ const InspectionReceivingApproveScreen = () => {
     sourcesysid: 'WMS',
     ponum: ponum,
     polinenum: datas.polinenum,
-    porevisionnum: datas.porevisionnum ?? 0,
+    porevisionnum: porevisionnum ?? 0, // need change
     siteid: 'TJB56',
     positeid: 'TJB56',
     orgid: 'BJS',
@@ -135,6 +136,7 @@ const InspectionReceivingApproveScreen = () => {
     const fetchData2 = async () => {
       const userAsync = await AsyncStorage.getItem('MAXuser');
       const siteid = await getData('site');
+      console.log('datassss', item);
 
       setTempPayload(prev => ({
         ...prev,
@@ -148,6 +150,7 @@ const InspectionReceivingApproveScreen = () => {
         acceptedqty: inputAceptedQty ? parseInt(inputAceptedQty, 10) : 0,
         inspected: 1, // 1 is code for inspection approved and complete waiting to inspect status
         rejectqty: inputRejectedQty ? parseInt(inputRejectedQty, 10) : 0,
+        porevisionnum: porevisionnum ?? 0,
         // rejectedcode: inputRejectedCode || '',
       }));
     };

@@ -54,7 +54,8 @@ const TransferInstructionAssignScreen = () => {
         );
       } else {
         ToastAndroid.show('Assigned successfully', ToastAndroid.SHORT);
-        navigation.goBack();
+        // navigation.goBack();
+        navigation.navigate('Transfer Instruction');
       }
     });
   };

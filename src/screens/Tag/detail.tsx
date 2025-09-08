@@ -77,8 +77,8 @@ const TagDetailScreen = () => {
           }
           const items = res.member[0].wms_serializeditem;
           setDatas(items);
-          setTotalItem(items.length);
-          setTotalUnTagged(items.filter((item: any) => !item.tagcode).length);
+          setTotalItem(items?.length);
+          setTotalUnTagged(items?.filter((item: any) => !item.tagcode).length);
         })
         .finally(() => {
           setLoading(false);

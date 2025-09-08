@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,18 +8,35 @@ import {
   SafeAreaView,
   TextInput,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
+import {getDetailStockOpname} from '../../services/stockOpname';
+import {formatDateTime} from '../../utils/helpers';
 
 const dummyRfids = ['00000000000000000000'];
 
 const DetailStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+  const {wms_opinid} = route.params;
 
   const [rfids, setRfids] = useState(dummyRfids);
-  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [stockOpname, setStockOpname] = useState();
+  const [stockOpnameBin, setStockOpnameBin] = useState();
+
+  useEffect(() => {
+    getDetailStockOpname(wms_opinid).then(res => {
+      setStockOpname(res.member[0]);
+      setStockOpnameBin(res.member[0].wms_opinline_bin);
+      console.log('stock opname detail', res.member[0]);
+
+      setLoading(false);
+    });
+  }, []);
 
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
@@ -38,20 +55,30 @@ const DetailStockOpnameScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className=" p-2 bg-blue-400 flex-col">
-        <Text className="text-white">PHYSICAL STOCK TAKING DECEMBER 2020</Text>
-        <Text className="text-white">12-Nov-2020 13:16</Text>
+      <View className="flex-col p-2 bg-blue-400 ">
+        <Text className="text-white">{stockOpname?.description}</Text>
+        <Text className="text-white">
+          {formatDateTime(stockOpname?.scanneddate)}
+        </Text>
       </View>
-
-      <FlatList
-        data={rfids}
-        renderItem={renderItem}
-        keyExtractor={item => item}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
-      />
+      {loading ? (
+        <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
+      ) : (
+        <FlatList
+          data={stockOpnameBin}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.listContent}
+          style={styles.list}
+        />
+      )}
       <View style={styles.buttonContainer}>
-        <ButtonApp label="Done" size="large" color="primary" />
+        <ButtonApp
+          onPress={() => navigation.goBack()}
+          label="Done"
+          size="large"
+          color="primary"
+        />
       </View>
     </SafeAreaView>
   );

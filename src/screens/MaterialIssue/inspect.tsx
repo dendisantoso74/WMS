@@ -150,6 +150,7 @@ const MaterialIssueInspectScreen = () => {
         console.log('Complete issue response:', res);
         ToastAndroid.show('Issue completed successfully', ToastAndroid.SHORT);
         fetchWo();
+        navigation.navigate('Material Issue Scan');
       });
     } else {
       console.log('Not staged');
@@ -181,7 +182,7 @@ const MaterialIssueInspectScreen = () => {
             item: item,
             invuselinenum: randomnumber + index + 1,
             invinvUseId: invreserveid,
-            indexInvEntered: invreserveIndex,
+            payload: [],
           })
         }
         style={styles.rfidCard}

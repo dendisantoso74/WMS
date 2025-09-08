@@ -41,7 +41,7 @@ const MovementSmartScanScreen = () => {
   const {binInfo} = route.params;
   console.log('Bin Info from params:', binInfo);
 
-  const [tagItems, setTagItems] = useState('4C5071020190000000087994');
+  const [tagItems, setTagItems] = useState('4C5071020190000000085238');
   const [itemInfo, setItemInfo] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState<any>(null);
@@ -102,7 +102,7 @@ const MovementSmartScanScreen = () => {
       frombin: item.wms_bin,
       validated: false,
       fromstoreloc: item.storeroom,
-      quantity: item.qtyserialized,
+      quantity: item.qtystored,
       serialnumber: item.serialnumber,
       toorgid: binInfo.orgid || '-',
       tostoreloc: binInfo.storeloc || '-',
@@ -198,7 +198,7 @@ const MovementSmartScanScreen = () => {
                     {item.itemnum} / {item.description}
                   </Text>
                   <Text className="">
-                    Qty : {item.qtyserialized} {item.unitserialized}
+                    Qty : {item.qtystored} {item.unitserialized}
                   </Text>
                   <Text>Bin : {item.wms_bin}</Text>
                   {/* <Text className="">Putaway Qty : 0 METER</Text> */}
