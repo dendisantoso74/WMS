@@ -16,17 +16,15 @@ import ButtonApp from '../../compnents/ButtonApp';
 import {getDetailStockOpname} from '../../services/stockOpname';
 import {formatDateTime} from '../../utils/helpers';
 
-const dummyRfids = ['00000000000000000000'];
-
 const DetailStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {wms_opinid} = route.params;
 
-  const [rfids, setRfids] = useState(dummyRfids);
   const [loading, setLoading] = useState(true);
   const [stockOpname, setStockOpname] = useState();
-  const [stockOpnameBin, setStockOpnameBin] = useState();
+  const [stockOpnameBin, setStockOpnameBin] = useState([]);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     getDetailStockOpname(wms_opinid).then(res => {
@@ -38,16 +36,32 @@ const DetailStockOpnameScreen = () => {
     });
   }, []);
 
+  const filteredBins = Array.isArray(stockOpnameBin)
+    ? stockOpnameBin?.filter(
+        bin =>
+          bin?.binnum?.toLowerCase().includes(search.toLowerCase()) ||
+          bin?.wms_zone?.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
+
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
       style={styles.rfidCard}
-      onPress={() => navigation.navigate('Detail Bin Stock Opname')}>
+      onPress={() =>
+        navigation.navigate('Detail Bin Stock Opname', {
+          itemBin: item,
+          wms_opinid: wms_opinid,
+        })
+      }>
       <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
       <View className="my-2">
         <View className="flex-col justify-start">
-          <Text className="font-bold">MS-A1L-4-3-2-1</Text>
-          <Text className="font-bold">MS-A1</Text>
-          <Text className="font-bold">MS-AREA</Text>
+          <Text className="font-bold">{item.binnum}</Text>
+          <Text className="font-bold">Zone: {item.wms_zone}</Text>
+          <Text className="font-bold">Area: {item.wms_area}</Text>
+          <Text>
+            {item.scannedcount} items scaned from {item.itemcount} items
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -55,31 +69,54 @@ const DetailStockOpnameScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View className="flex-col p-2 bg-blue-400 ">
-        <Text className="text-white">{stockOpname?.description}</Text>
-        <Text className="text-white">
-          {formatDateTime(stockOpname?.scanneddate)}
-        </Text>
-      </View>
       {loading ? (
         <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
       ) : (
-        <FlatList
-          data={stockOpnameBin}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={styles.listContent}
-          style={styles.list}
-        />
+        <>
+          <View className="flex-col p-2 bg-blue-400 ">
+            <Text className="text-xl text-white">
+              {stockOpname?.description}
+            </Text>
+            <Text className="text-white">
+              {formatDateTime(stockOpname?.scanneddate)}
+            </Text>
+          </View>
+
+          <View>
+            <TextInput
+              style={styles.filterInput}
+              placeholder="Search Bin or Zone"
+              placeholderTextColor="#b0b0b0"
+              value={search}
+              onChangeText={e => setSearch(e)}
+              autoCapitalize="characters"
+            />
+            <Icon
+              library="Feather"
+              name="search"
+              size={20}
+              color="#b0b0b0"
+              style={{position: 'absolute', right: 20, top: 12}}
+            />
+          </View>
+
+          <FlatList
+            data={filteredBins}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.listContent}
+            style={styles.list}
+          />
+          <View style={styles.buttonContainer}>
+            <ButtonApp
+              onPress={() => navigation.goBack()}
+              label="Done"
+              size="large"
+              color="primary"
+            />
+          </View>
+        </>
       )}
-      <View style={styles.buttonContainer}>
-        <ButtonApp
-          onPress={() => navigation.goBack()}
-          label="Done"
-          size="large"
-          color="primary"
-        />
-      </View>
     </SafeAreaView>
   );
 };

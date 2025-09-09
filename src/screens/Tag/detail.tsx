@@ -38,7 +38,7 @@ const TagDetailScreen = () => {
 
     // Filter by tag status
     if (activeFilter === 'TAGGED') {
-      filtered = filtered.filter((item: any) => !!item.tagcode);
+      filtered = filtered?.filter((item: any) => !!item.tagcode);
     } else if (activeFilter === 'UNTAGGED') {
       filtered = filtered?.filter((item: any) => !item.tagcode);
     }
@@ -155,7 +155,7 @@ const TagDetailScreen = () => {
                   ? 'border-blue-600 bg-blue-200 text-blue-800 font-bold'
                   : 'border-blue-200 bg-blue-50'
               }`}>
-              Tagged ({totalItem - totalUnTagged})
+              Tagged ({totalItem && totalItem - totalUnTagged})
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setActiveFilter('UNTAGGED')}>

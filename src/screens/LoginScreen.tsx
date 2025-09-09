@@ -147,6 +147,10 @@ const LoginScreen = () => {
           isloading={loading}
         />
       </View>
+
+      <View style={{position: 'absolute', bottom: 24, alignSelf: 'center'}}>
+        <Text style={{color: '#888'}}>Version {Config.VERSION}</Text>
+      </View>
     </View>
   );
 };
