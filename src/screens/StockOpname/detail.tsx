@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,22 @@ import {
   ToastAndroid,
   ActivityIndicator,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
-import {getDetailStockOpname} from '../../services/stockOpname';
+import {getDetailBin, getDetailStockOpname} from '../../services/stockOpname';
 import {formatDateTime} from '../../utils/helpers';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  ZebraResultPayload,
+  ZebraRfidResultPayload,
+} from 'react-native-zebra-rfid-barcode';
+import {debounce, uniq} from 'lodash';
 
 const DetailStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
@@ -25,7 +36,45 @@ const DetailStockOpnameScreen = () => {
   const [stockOpname, setStockOpname] = useState();
   const [stockOpnameBin, setStockOpnameBin] = useState([]);
   const [search, setSearch] = useState('');
+  const [rfidItems, setRfidItems] = useState([]);
 
+  // rfisd reader setup
+  useFocusEffect(
+    useCallback(() => {
+      const rfidEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_RFID,
+        (e: ZebraRfidResultPayload) => {
+          console.log('scan on stock opname', uniq(e.data));
+          handleRfidEvent(uniq(e.data));
+        },
+      );
+      // Clean up listeners when screen is unfocused
+      return () => {
+        rfidEvent.remove();
+      };
+    }, []),
+  );
+
+  const handleRfidEvent = useCallback(
+    debounce((newData: string[]) => {
+      setRfidItems(newData[0]);
+      getDetailBin(newData[0])
+        .then(res => {
+          setRfidItems(res.member);
+          const binnum = res.member[0].wms_bin[0].bin;
+          console.log('detail bin', binnum);
+          setSearch(binnum);
+        })
+        .catch(err => {
+          ToastAndroid.show('Bin not found', ToastAndroid.SHORT);
+        });
+    }, 200),
+    [],
+  );
+
+  const handleSearch = (text: string) => {
+    setSearch(text);
+  };
   useEffect(() => {
     getDetailStockOpname(wms_opinid).then(res => {
       setStockOpname(res.member[0]);
@@ -44,28 +93,37 @@ const DetailStockOpnameScreen = () => {
       )
     : [];
 
-  const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      onPress={() =>
-        navigation.navigate('Detail Bin Stock Opname', {
-          itemBin: item,
-          wms_opinid: wms_opinid,
-        })
-      }>
-      <View style={[styles.sideBar, {backgroundColor: 'gray'}]} />
-      <View className="my-2">
-        <View className="flex-col justify-start">
-          <Text className="font-bold">{item.binnum}</Text>
-          <Text className="font-bold">Zone: {item.wms_zone}</Text>
-          <Text className="font-bold">Area: {item.wms_area}</Text>
-          <Text>
-            {item.scannedcount} items scaned from {item.itemcount} items
-          </Text>
+  const renderItem = ({item}: {item: string}) => {
+    const sideBarColor =
+      item.scannedcount === item.itemcount
+        ? '#A4DD00' // green
+        : item.scannedcount > 0 && item.scannedcount < item.itemcount
+          ? '#FFD600' // yellow
+          : 'gray';
+
+    return (
+      <TouchableOpacity
+        style={styles.rfidCard}
+        onPress={() =>
+          navigation.navigate('Detail Bin Stock Opname', {
+            itemBin: item,
+            wms_opinid: wms_opinid,
+          })
+        }>
+        <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
+        <View className="my-2">
+          <View className="flex-col justify-start">
+            <Text className="font-bold">{item.binnum}</Text>
+            <Text className="font-bold">Zone: {item.wms_zone}</Text>
+            <Text className="font-bold">Area: {item.wms_area}</Text>
+            <Text>
+              {item.scannedcount} items scaned from {item.itemcount} items
+            </Text>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>

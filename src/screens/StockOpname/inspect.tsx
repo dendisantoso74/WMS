@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,16 +10,26 @@ import {
   ToastAndroid,
   Modal,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
 import {
   getDetailBin,
+  getDetailItem,
   getDetailStockOpname,
   saveStockOpname,
 } from '../../services/stockOpname';
-import {set} from 'lodash';
-
+import {debounce, set, uniq} from 'lodash';
+import {
+  ZebraEvent,
+  ZebraEventEmitter,
+  ZebraResultPayload,
+  ZebraRfidResultPayload,
+} from 'react-native-zebra-rfid-barcode';
 const dummyRfids = [
   {
     wms_bin: 'MS-A1L-1-2-1-1',
@@ -84,6 +94,62 @@ const DetaliBinStockOpnameScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [physicalCount, setPhysicalCount] = useState(0);
+  const [rfidItems, setRfidItems] = useState([]);
+  const [itemsDetail, setItemsDetail] = useState([]);
+
+  // rfisd reader setup
+  useFocusEffect(
+    useCallback(() => {
+      const rfidEvent = ZebraEventEmitter.addListener(
+        ZebraEvent.ON_RFID,
+        (e: ZebraRfidResultPayload) => {
+          console.log('scan on stock opname', uniq(e.data));
+          handleRfidEvent(uniq(e.data));
+        },
+      );
+      // Clean up listeners when screen is unfocused
+      return () => {
+        rfidEvent.remove();
+      };
+    }, []),
+  );
+
+  const handleRfidEvent = useCallback(
+    debounce((newData: string[]) => {
+      setRfidItems(pre => uniq([...pre, ...newData]));
+    }, 200),
+    [],
+  );
+
+  useEffect(() => {
+    // Loop through rfidItems and fetch detail for each tagcode/serialnumber
+    const fetchDetails = async () => {
+      const details = [];
+      for (const tagcode of rfidItems) {
+        try {
+          const res = await getDetailItem(tagcode);
+          // Only include if wms_bin matches itemBin.binnum
+          if (
+            res &&
+            res.member &&
+            res.member.length > 0 &&
+            res.member[0].wms_bin === itemBin.binnum
+          ) {
+            details.push(res.member[0]);
+          }
+        } catch (err) {
+          console.error('Error fetching detail for', tagcode, err);
+        }
+      }
+      setItemsDetail(details);
+    };
+
+    if (rfidItems.length > 0) {
+      fetchDetails();
+    } else {
+      setItemsDetail([]);
+    }
+  }, [rfidItems]);
 
   const openAdjustModal = (item: any) => {
     setSelectedItem(item);
@@ -228,7 +294,7 @@ const DetaliBinStockOpnameScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       {console.log('item detail bin', opinline)}
       {console.log('payload temp', tempPayload)}
-
+      {console.log('rfid items', rfidItems)}
       <View className="p-2 bg-blue-400">
         <View className="flex-row gap-16">
           <View className="flex-col justify-start">
@@ -256,7 +322,7 @@ const DetaliBinStockOpnameScreen = () => {
         </View>
       </View>
       <FlatList
-        data={rfids}
+        data={itemsDetail}
         renderItem={renderItem}
         keyExtractor={(item, index) => item.serialnumber}
         contentContainerStyle={styles.listContent}
@@ -287,7 +353,7 @@ const DetaliBinStockOpnameScreen = () => {
               </Text>
             </View>
             <View style={modalStyles.row}>
-              <Text style={modalStyles.label}>Serial Number</Text>
+              <Text style={modalStyles.label}>S/N</Text>
               <Text style={modalStyles.value}>
                 {selectedItem?.serialnumber}
               </Text>
@@ -304,6 +370,9 @@ const DetaliBinStockOpnameScreen = () => {
               <Text style={modalStyles.label}>Current Balance</Text>
               <Text style={modalStyles.value}>{selectedItem?.qtystored}</Text>
             </View>
+            <Text className="mt-2 text-xl font-bold text-center text-black ">
+              Physical Count
+            </Text>
             <View style={modalStyles.counterRow}>
               <TouchableOpacity
                 style={modalStyles.circleBtn}

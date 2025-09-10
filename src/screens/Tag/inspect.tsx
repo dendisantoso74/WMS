@@ -39,13 +39,9 @@ const TagInspectScreen = () => {
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
   const [listRfid, setListRfid] = useState<string[]>([
-    '4C5071020190000000091950',
-    '4C5071020190000000085001',
-    '4C5071020190000000085499',
-    '4C5071020190000000085257',
-    '4C5071020190000000085357',
-    '4C5071020190000000085218',
-    '4C5071020190000000085322',
+    '4C5071020190000000085517',
+    '4C5071020190000000085242',
+    '4C5071020190000000085353',
   ]);
 
   useEffect(() => {

@@ -69,7 +69,7 @@ export const getDetailItem = async (tagcode: string) => {
       },
       maxBodyLength: Infinity,
     });
-    console.log('Detail item:', response.data);
+    console.log('Detail item api:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching detail item:', error);
