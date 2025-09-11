@@ -128,7 +128,7 @@ const RetagingBinScreen = () => {
 
   const handleModalSubmit = async () => {
     console.log('slectedItem:', selectedItem?.wms_binid, tag);
-    await retagBIN(selectedItem?.wms_binid, tag)
+    await retagBIN(selectedItem?.wms_binid, tag ? tag : inputValue)
       .then(res => {
         console.log('Retagging response:', res);
 
