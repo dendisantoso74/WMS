@@ -166,9 +166,7 @@ const DetaliBinStockOpnameScreen = () => {
   };
 
   const handleIncrease = () => {
-    setPhysicalCount(prev =>
-      prev < (selectedItem?.qtystored ?? 0) ? prev + 1 : prev,
-    );
+    setPhysicalCount(prev => prev + 1);
   };
 
   const handleInputChange = (text: string) => {
@@ -392,7 +390,8 @@ const DetaliBinStockOpnameScreen = () => {
               <TouchableOpacity
                 style={modalStyles.circleBtn}
                 onPress={handleIncrease}
-                disabled={physicalCount >= (selectedItem?.qtystored ?? 0)}>
+                // disabled={physicalCount >= (selectedItem?.qtystored ?? 0)}
+              >
                 <Text style={modalStyles.circleBtnText}>+</Text>
               </TouchableOpacity>
             </View>

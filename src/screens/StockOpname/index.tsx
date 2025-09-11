@@ -13,6 +13,7 @@ import {useNavigation} from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import {getListStockOpname} from '../../services/stockOpname';
 import {formatDateTime} from '../../utils/helpers';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const StockOpnameListScreen = () => {
   const navigation = useNavigation<any>();
@@ -26,10 +27,11 @@ const StockOpnameListScreen = () => {
     });
   }, []);
 
-  const filteredList = listOpname.filter(item =>
-    item.description?.toLowerCase().includes(search.toLowerCase()),
+  const filteredList = listOpname.filter(
+    item =>
+      item?.description?.toLowerCase().includes(search.toLowerCase()) ||
+      String(item?.wms_opinid).toLowerCase().includes(search.toLowerCase()),
   );
-
   const renderItem = ({item}: {item: string}) => (
     <TouchableOpacity
       style={styles.rfidCard}
@@ -37,10 +39,15 @@ const StockOpnameListScreen = () => {
         navigation.navigate('Detail Stock Opname', {
           wms_opinid: item.wms_opinid,
         })
-      }>
+      }
+      disabled={item.status === 'WAPPR'}>
       <View>
         <View className="my-2">
-          <Text className="px-4 font-bold">{item.description}</Text>
+          <Text className="px-4 font-bold">ID : {item.wms_opinid}</Text>
+
+          <Text className="px-4 font-bold">
+            {item.description ? item.description : '-'}
+          </Text>
           <Text className="px-4 font-semibold">
             {formatDateTime(item.scanneddate)}
           </Text>
@@ -53,10 +60,11 @@ const StockOpnameListScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate />
       <View style={styles.filterContainer}>
         <TextInput
           style={styles.filterInput}
-          placeholder="Enter Description Opname"
+          placeholder="Enter Description Stock Opname or ID"
           placeholderTextColor="#b0b0b0"
           value={search}
           onChangeText={setSearch}

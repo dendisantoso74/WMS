@@ -17,7 +17,11 @@ import {
 } from '@react-navigation/native';
 import Icon from '../../compnents/Icon';
 import ButtonApp from '../../compnents/ButtonApp';
-import {getDetailBin, getDetailStockOpname} from '../../services/stockOpname';
+import {
+  changeStatusOpname,
+  getDetailBin,
+  getDetailStockOpname,
+} from '../../services/stockOpname';
 import {formatDateTime} from '../../utils/helpers';
 import {
   ZebraEvent,
@@ -26,6 +30,7 @@ import {
   ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
 import {debounce, uniq} from 'lodash';
+import ModalApp from '../../compnents/ModalApp';
 
 const DetailStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
@@ -37,6 +42,7 @@ const DetailStockOpnameScreen = () => {
   const [stockOpnameBin, setStockOpnameBin] = useState([]);
   const [search, setSearch] = useState('');
   const [rfidItems, setRfidItems] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // rfisd reader setup
   useFocusEffect(
@@ -71,6 +77,17 @@ const DetailStockOpnameScreen = () => {
     }, 200),
     [],
   );
+
+  const handleDone = () => {
+    changeStatusOpname(wms_opinid, 'WAPPR')
+      .then(res => {
+        ToastAndroid.show('Stock Opname Completed', ToastAndroid.SHORT);
+        navigation.navigate('Stock Opname List');
+      })
+      .catch(err => {
+        ToastAndroid.show('Failed to complete', ToastAndroid.SHORT);
+      });
+  };
 
   const handleSearch = (text: string) => {
     setSearch(text);
@@ -167,7 +184,7 @@ const DetailStockOpnameScreen = () => {
           />
           <View style={styles.buttonContainer}>
             <ButtonApp
-              onPress={() => navigation.goBack()}
+              onPress={() => setModalVisible(true)}
               label="Done"
               size="large"
               color="primary"
@@ -175,6 +192,18 @@ const DetailStockOpnameScreen = () => {
           </View>
         </>
       )}
+
+      <ModalApp
+        content="Are you sure want to complete this stock opname?"
+        title="Confirmation"
+        type="confirmation"
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onConfirm={() => {
+          handleDone();
+          setModalVisible(false);
+        }}
+      />
     </SafeAreaView>
   );
 };

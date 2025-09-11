@@ -79,7 +79,7 @@ const DetailMaterialStockOpnameScreen = () => {
           </View>
           <View className="flex-col justify-start ">
             <Text className="h-20 text-white ">
-              {item.itemnum} / {item.description}
+              {item.itemnum} / {item?.description}
             </Text>
             <Text className="text-white ">{item.serialnumber}</Text>
             <Text className="text-white ">{item.wms_bin}</Text>
