@@ -7,7 +7,7 @@ interface ModalAppProps {
   onClose: () => void;
   title: string;
   content: string;
-  type: 'confirmation' | 'alert';
+  type: 'confirmation' | 'alert' | 'restricted'; // Add redistick type
   size?: 'small' | 'medium' | 'large'; // Add size prop
   onConfirm?: () => void; // Add onConfirm prop
 }

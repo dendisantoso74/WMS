@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, Animated} from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import ModalApp from './ModalApp';
 
 const ConnectionAlert = () => {
   const [wifiOn, setWifiOn] = useState(true);
@@ -43,9 +44,18 @@ const ConnectionAlert = () => {
   if (wifiOn) return null;
 
   return (
-    <Animated.View style={[styles.container, {opacity: fadeAnim}]}>
-      <Text style={styles.text}>WiFi is turned off</Text>
-    </Animated.View>
+    // <Animated.View style={[styles.container, {opacity: fadeAnim}]}>
+    // <Text>WiFi is turned off</Text>
+    // </Animated.View>
+    <>
+      <ModalApp
+        visible={!wifiOn}
+        content="WiFi is turned off"
+        onClose={() => {}}
+        title="Alert"
+        type="restricted"
+      />
+    </>
   );
 };
 
