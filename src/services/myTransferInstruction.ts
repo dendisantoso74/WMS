@@ -5,8 +5,10 @@ import {getData} from '../utils/store';
 export const fetchAssignedTransferInstructions = async (invowner: string) => {
   console.log('Fetching assigned transfer instructions for:', invowner);
 
-  const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=wms_ponum,invusenum,fromstoreloc,statusdate&oslc.where=status="ENTERED" and usetype="TRANSFER" and wms_status="Assigned" and wms_isgenerated=1 and invowner="${invowner}"`;
-  // const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=invuseid%2Cwms_ponum%2Cinvusenum%2Cinvowner%2Cstatus%2Cfromstoreloc%2Cstatusdate%2Cinvuseline&oslc.where=siteid%3D%22TJB56%22%20and%20status%3D%22ENTERED%22%20and%20wms_status%3D%22Assigned%22%20and%20invowner%3D%22TAUFIQ%20MA%22`;
+  // to show list with assugned to user login
+  // const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=wms_ponum,invusenum,fromstoreloc,statusdate&oslc.where=status="ENTERED" and usetype="TRANSFER" and wms_status="Assigned" and wms_isgenerated=1 and invowner="${invowner}"`;
+  const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=wms_ponum,invusenum,fromstoreloc,statusdate&oslc.where=status="ENTERED" and usetype="TRANSFER"`;
+
   try {
     const response = await api.get(url, {
       headers: {

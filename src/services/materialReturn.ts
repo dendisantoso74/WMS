@@ -91,7 +91,7 @@ export const findSuggestedBinReturn = async (
 ) => {
   const siteid = await getData('site');
 
-  const url = `/maximo/oslc/os/MXINVBAL?lean=1&oslc.select=*&oslc.orderBy=%20%2Bcurbal&oslc.where=siteid="${siteid}" and itemnum="${itemnum}" and location="${location}" and binnum="*"`;
+  const url = `/maximo/oslc/os/MXINVBAL?lean=1&oslc.select=*&oslc.orderBy=%20%2Bcurbal&oslc.where=siteid="${siteid}" and itemnum="${itemnum}" and location="*" and binnum="*"`;
   try {
     const response = await api.get(url, {
       headers: {

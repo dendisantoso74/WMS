@@ -206,6 +206,7 @@ const RetagingBinScreen = () => {
               />
             </View>
             <TextInput
+              editable={false}
               style={styles.input}
               placeholder="Tag"
               value={inputValue || tag}
