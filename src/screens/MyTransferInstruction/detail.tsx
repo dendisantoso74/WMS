@@ -67,9 +67,11 @@ const MyTransferInstructionScanScreen = () => {
           res.error,
         );
       } else {
-        // console.log('Fetched transfer instruction:', res.member[0].invuseline);
-        const invuseline = res.member[0].invuseline || [];
-        setInvuseid(res.member[0].invuseid);
+        const member = res.member.filter(item => item.status === 'ENTERED');
+
+        const invuseline = member[0].invuseline || [];
+        console.log('cekkkk Filtered member:', invuseline);
+        setInvuseid(member[0].invuseid);
         setInvuse(invuseline);
 
         // Check status logic
@@ -130,6 +132,19 @@ const MyTransferInstructionScanScreen = () => {
     });
     console.log('Input value:', datas.invuseline[0].invuselineid, inputValue);
   };
+
+  useEffect(() => {
+    if (binInfo) {
+      setModalVisible(false);
+
+      navigation.navigate('My Transfer Instruction Submit', {
+        item: invuse,
+        invuseid: invuseid,
+        tobin: binInfo.bin,
+        datas: datas,
+      });
+    }
+  }, [binInfo, navigation]);
 
   const filteredInvuse = invuse?.filter(item => {
     const code = (item.itemnum || '').toLowerCase();
@@ -346,7 +361,7 @@ const MyTransferInstructionScanScreen = () => {
               }}>
               {/* <Button title="Cancel" onPress={() => setIsShowScan(false)} /> */}
               {/* <View style={{width: 12}} /> */}
-              {binInfo && (
+              {/* {binInfo && (
                 <Button
                   title="Next"
                   onPress={() => {
@@ -360,7 +375,7 @@ const MyTransferInstructionScanScreen = () => {
                     });
                   }}
                 />
-              )}
+              )} */}
             </View>
           </View>
         </View>

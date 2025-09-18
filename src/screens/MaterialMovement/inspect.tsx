@@ -41,7 +41,7 @@ const MovementSmartScanScreen = () => {
   const {binInfo} = route.params;
   console.log('Bin Info from params:', binInfo);
 
-  const [tagItems, setTagItems] = useState('4C5071020190000000085238');
+  const [tagItems, setTagItems] = useState([]);
   const [itemInfo, setItemInfo] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState<any>(null);
@@ -54,7 +54,7 @@ const MovementSmartScanScreen = () => {
     });
 
     tagItems &&
-      getSerializedItemByTagCodes([tagItems]).then(res => {
+      getSerializedItemByTagCodes(tagItems).then(res => {
         console.log('RFID Data Response:', res.member);
         setItemInfo(res.member);
         setLoading(false); // Stop loading
@@ -160,6 +160,11 @@ const MovementSmartScanScreen = () => {
       });
   };
 
+  const handleRemovePayload = (serialnumber: string) => {
+    const updated = itemInfo.filter(item => item.serialnumber !== serialnumber);
+    setItemInfo(updated);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <PreventBackNavigate toScreen="Material Movement" />
@@ -191,9 +196,20 @@ const MovementSmartScanScreen = () => {
               <View style={[styles.sideBar, {backgroundColor: 'blue'}]} />
               <View className="flex-row my-2">
                 <View className="mr-3">
-                  <Text className="font-bold">
-                    Serial Number : {item.serialnumber}
-                  </Text>
+                  <View className="flex-row justify-between w-full">
+                    <Text className="font-bold">S/N : {item.serialnumber}</Text>
+                    <TouchableOpacity
+                      className="items-center justify-center mr-2 bg-red-400 rounded-full w-7 h-7"
+                      onPress={() => handleRemovePayload(item.serialnumber)}>
+                      {/* <Text className="text-lg font-bold text-white">×</Text> */}
+                      <Icon
+                        library="Feather"
+                        name="trash-2"
+                        size={12}
+                        color="white"
+                      />
+                    </TouchableOpacity>
+                  </View>
                   <Text className="">
                     {item.itemnum} / {item.description}
                   </Text>

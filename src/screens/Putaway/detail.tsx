@@ -9,6 +9,8 @@ import {
   TextInput,
   ToastAndroid,
   ActivityIndicator,
+  Image,
+  Button,
 } from 'react-native';
 import {
   useFocusEffect,
@@ -38,6 +40,47 @@ import {
 import {Alert} from 'react-native';
 import {tagInfo} from '../../services/tagInfo';
 import ModalApp from '../../compnents/ModalApp';
+import {Modal} from 'react-native';
+import rfid from '../../assets/images/rfid.png'; // Adjust the path as necessary
+
+const debouncedHandleRfid = debounce(
+  (
+    newData,
+    getModalValueItem,
+    setModalValueItem,
+    setModalValueBin,
+    setBinScan,
+  ) => {
+    const modalValueItem = getModalValueItem();
+    console.log('RFID Data:', newData);
+    console.log('Modal Value Item :', modalValueItem);
+
+    if (modalValueItem) {
+      findBinByTagCode(newData[0])
+        .then(res => {
+          setBinScan(res?.member[0]?.bin || 'Undefined');
+          setModalValueBin(newData[0]);
+        })
+        .catch(err => {
+          ToastAndroid.show('BIN not found', ToastAndroid.SHORT);
+          setModalValueBin('');
+          setBinScan('');
+        });
+    } else {
+      setModalValueItem(newData[0]);
+      tagInfo(newData[0]).then(res => {
+        console.log('Tag Info putaway:', res.member[0]);
+        if (res.member[0].status !== 'Blank') {
+          ToastAndroid.show('RFID Used. Try Another Tag', ToastAndroid.SHORT);
+          setModalValueItem(false);
+        } else {
+          setModalValueItem(newData[0]);
+        }
+      });
+    }
+  },
+  200,
+);
 
 const PutawayMaterialScreen = () => {
   const navigation = useNavigation<any>();
@@ -65,6 +108,13 @@ const PutawayMaterialScreen = () => {
   const [modalAppVisible, setModalAppVisible] = useState(false);
 
   useEffect(() => {
+    if (binScan && binScan !== 'Undefined') {
+      handleSubmitBin();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [binScan]);
+
+  useEffect(() => {
     const allTagged =
       invUse &&
       Array.isArray(invUse.invuseline) &&
@@ -77,18 +127,23 @@ const PutawayMaterialScreen = () => {
   }, [invUse]);
 
   // rfid scanner
+  // Use a ref to always get the latest modalValueItem
+  const modalValueItemRef = React.useRef(modalValueItem);
+  useEffect(() => {
+    modalValueItemRef.current = modalValueItem;
+  }, [modalValueItem]);
+
   const handleRfidEvent = useCallback(
-    debounce((newData: string) => {
-      console.log('RFID Data:', newData);
-      // if newdata is array make popup to select item for set to search
-
-      if (modalValueItem) {
-        setModalValueBin(newData[0]);
-      }
-
-      setModalValueItem(newData[0]);
-    }, 200),
-    [],
+    (newData: string) => {
+      debouncedHandleRfid(
+        newData,
+        () => modalValueItemRef.current,
+        setModalValueItem,
+        setModalValueBin,
+        setBinScan,
+      );
+    },
+    [], // no dependencies needed
   );
 
   useFocusEffect(
@@ -149,21 +204,29 @@ const PutawayMaterialScreen = () => {
   }, [item.invuse]);
 
   const handlePressItem = async (item: any) => {
+    selectedItem !== item && setSelectedItem(item);
     setModalBinVisible(true);
+    console.log('suggest bin 000');
 
     const SN = await generateSerialNumber();
     setSerialNumber(SN);
+    console.log('suggest bin 111', item);
 
-    const bin = await findSuggestedBinPutaway(
-      item.invuseline[item.invuseline.length - 1]?.itemnum,
-      item.fromstoreloc,
-    );
-    setSuggestedBin(bin.member[0]?.binnum || '');
-    console.log('Selected InvUse:', bin.member[0].binnum);
+    const bin = await findSuggestedBinPutaway(item.itemnum, item.fromstoreloc);
+
+    // Join all binnum values as a comma-separated string
+    const suggestedBins =
+      Array.isArray(bin.member) && bin.member.length > 0
+        ? bin.member.map((b: any) => b.binnum).join(', ')
+        : '';
+
+    setSuggestedBin(suggestedBins);
+    console.log('suggest bin :', bin.member);
   };
 
   const handleSubmitBin = async () => {
-    if (!modalValueBin) {
+    console.log('Submitting BIN:', binScan);
+    if (!binScan) {
       ToastAndroid.show('Please enter a BIN', ToastAndroid.SHORT);
       return;
     }
@@ -175,16 +238,16 @@ const PutawayMaterialScreen = () => {
     }
     console.log('selectedItem:', selectedItem);
 
-    const bin = await findBinByTagCode(modalValueBin);
+    const bin = binScan;
 
-    if (bin?.member.length === 0) {
+    if (!binScan) {
       ToastAndroid.show('BIN not found', ToastAndroid.SHORT);
       setModalValueBin('');
       return null;
     } else {
-      setBinScan(bin?.member[0]?.bin || 'Undefined');
+      // setBinScan(bin?.member[0]?.bin || 'Undefined');
 
-      console.log('Selected Bin:', bin?.member[0]?.bin);
+      // console.log('Selected Bin:', bin?.member[0]?.bin);
 
       const payload = {
         // tag item
@@ -194,7 +257,7 @@ const PutawayMaterialScreen = () => {
 
         // tag bin
         frombin: selectedItem.frombin,
-        wms_finalbin: bin?.member[0]?.bin,
+        wms_finalbin: binScan,
         wms_status: 'COMPLETE',
       };
 
@@ -212,6 +275,8 @@ const PutawayMaterialScreen = () => {
           setModalValueItem('');
           setBinScan('');
           setSuggestedBin('');
+          // setModalBinVisible(false);
+          setModalItemVisible(false);
           // navigation.goBack();
         })
         .catch(err => {
@@ -272,7 +337,6 @@ const PutawayMaterialScreen = () => {
   );
 
   const renderItem = ({item}: {item: string}) => {
-    console.log('Render item xxx:', item);
     const invuseline = item;
     const sideBarColor = invuseline?.serialnumber ? '#A4DD00' : 'blue';
 
@@ -282,7 +346,10 @@ const PutawayMaterialScreen = () => {
         style={styles.rfidCard}
         onPress={() => {
           setModalItemVisible(true);
-          setSelectedItem(item);
+          handlePressItem(item);
+          setModalValueItem('');
+          setModalValueBin('');
+          setBinScan('');
         }}>
         <View style={[styles.sideBar, {backgroundColor: sideBarColor}]} />
         <View className="flex-col w-10/12 my-1">
@@ -298,7 +365,9 @@ const PutawayMaterialScreen = () => {
           </View>
           <View className="flex-row justify-between">
             <Text className="font-bold text-left ">
-              {invuseline ? invuseline.frombin : '-'}
+              {invuseline?.wms_finalbin
+                ? invuseline?.wms_finalbin
+                : invuseline.frombin}
             </Text>
             <Text className="text-right ">Return</Text>
           </View>
@@ -371,7 +440,7 @@ const PutawayMaterialScreen = () => {
         />
       </View>
 
-      <ModalInputRfid
+      {/* <ModalInputRfid
         visible={modalItemVisible}
         value={modalValueItem}
         onChangeText={setModalValueItem}
@@ -406,9 +475,9 @@ const PutawayMaterialScreen = () => {
           setModalValueItem('');
         }}
         // suggestBin={suggestedBin} // Example suggested bin
-      />
+      /> */}
 
-      <ModalInputRfid
+      {/* <ModalInputRfid
         mode="bin"
         visible={modalBinVisible}
         value={modalValueBin}
@@ -425,8 +494,70 @@ const PutawayMaterialScreen = () => {
         serialNumber={serialNumber}
         placeholder="Scan or enter BIN Tag"
         suggestBin={suggestedBin} // Example suggested bin
-        // bin={binScan}
-      />
+        bin={binScan}
+      /> */}
+
+      <Modal
+        visible={modalItemVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalItemVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {!modalValueItem ? (
+              <>
+                <Text
+                  style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
+                  Scan New Item Tag
+                </Text>
+                <View className="flex-row justify-center py-3 align-items-center">
+                  <Image
+                    source={rfid}
+                    style={{width: 100, height: 100, resizeMode: 'contain'}}
+                  />
+                </View>
+                <TextInput
+                  editable={false}
+                  style={styles.input}
+                  placeholder="Please Scan New Item Tag"
+                  value={modalValueItem}
+                  // onChangeText={setModalValueItem}
+                  // onSubmitEditing={e => findBin(e.nativeEvent.text)}
+                />
+              </>
+            ) : (
+              <>
+                <Text
+                  style={{fontWeight: 'bold', fontSize: 16, marginBottom: 8}}>
+                  Scan BIN destination
+                </Text>
+                <View className="flex-row justify-center py-3 align-items-center">
+                  <Image
+                    source={rfid}
+                    style={{width: 100, height: 100, resizeMode: 'contain'}}
+                  />
+                </View>
+                <Text>TAG : {modalValueItem}</Text>
+                <Text>SN : {serialNumber}</Text>
+                <Text>
+                  Suggestion BIN {'\n'}
+                  {suggestedBin}
+                </Text>
+
+                <TextInput
+                  editable={false}
+                  style={styles.input}
+                  placeholder="Please Scan BIN Tag"
+                  value={modalValueBin}
+                  // onChangeText={setModalValueItem}
+                  // onSubmitEditing={e => findBin(e.nativeEvent.text)}
+                />
+                <Text> BIN : {binScan}</Text>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
 
       <ModalApp
         visible={modalAppVisible}
@@ -526,6 +657,28 @@ const styles = StyleSheet.create({
     // marginBottom: 4,
     marginTop: 6,
     marginHorizontal: 8,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: '80%',
+    elevation: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#f8f9fa',
   },
 });
 

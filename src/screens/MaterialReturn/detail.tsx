@@ -232,6 +232,7 @@ const MaterialReturnDetailScreen = () => {
           navigation.navigate('Detail Material', {
             item: item,
             invuseid: returnInvuseId,
+            maxqty: returnItem ? returnItem.quantity : 0,
           })
         }
         style={styles.rfidCard}>

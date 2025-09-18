@@ -22,6 +22,8 @@ import {
 } from 'react-native-zebra-rfid-barcode';
 import {getData} from '../../utils/store';
 import PreventBackNavigate from '../../utils/preventBack';
+import {sortBy} from 'lodash';
+import InstructionItem from '../../compnents/wms/CardTransferInstruction';
 
 const MyTransferInstructionScreen = () => {
   const navigation = useNavigation<any>();
@@ -65,21 +67,16 @@ const MyTransferInstructionScreen = () => {
     }
   }, [search, assignedInstructions]);
 
-  const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      onPress={() =>
-        navigation.navigate('My Transfer Instruction Scan', {datas: item})
-      }>
-      <View>
-        <View className="my-2">
-          <Text className="px-4 font-bold">{item.wms_ponum}</Text>
-          <Text className="px-4">{item.invusenum}</Text>
-          <Text className="px-4">{item.fromstoreloc}</Text>
-          <Text className="px-4">{formatDateTime(item.statusdate)}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+  const renderItem = React.useCallback(
+    ({item}: {item: any}) => (
+      <InstructionItem
+        item={item}
+        onPress={() =>
+          navigation.navigate('My Transfer Instruction Scan', {datas: item})
+        }
+      />
+    ),
+    [navigation],
   );
 
   useFocusEffect(
@@ -140,11 +137,18 @@ const MyTransferInstructionScreen = () => {
         <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
       ) : (
         <FlatList
-          data={filteredInstructions}
+          data={sortBy(filteredInstructions, ['invusenum'])}
           renderItem={renderItem}
           keyExtractor={item => item.invusenum}
           contentContainerStyle={styles.listContent}
           style={styles.list}
+          initialNumToRender={10}
+          windowSize={10}
+          getItemLayout={(_, index) => ({
+            length: 80, // approximate or exact item height
+            offset: 80 * index,
+            index,
+          })}
           ListEmptyComponent={
             <View style={{flex: 1, alignItems: 'center', marginTop: 20}}>
               <Text>No items found</Text>

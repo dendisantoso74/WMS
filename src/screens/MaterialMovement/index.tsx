@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Text,
   StyleSheet,
@@ -69,12 +69,13 @@ const MaterialMovementScreen = () => {
     console.log('Found bin:', bin.member[0]);
   }, []);
 
-  const handleScanComplete = (rfids: string[]) => {
-    // setListRfid(rfids);
-    setIsShowScan(false);
-    // You can navigate or process rfids here
-    // navigation.navigate('NextScreen', {listrfid: rfids});
-  };
+  useEffect(() => {
+    if (binInfo) {
+      navigation.navigate('Movement Smart Scan', {
+        binInfo: binInfo,
+      });
+    }
+  }, [binInfo, navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -128,7 +129,7 @@ const MaterialMovementScreen = () => {
               />
             </View>
             <TextInput
-              // editable={false}
+              editable={false}
               style={styles.input}
               placeholder="Scan Bin"
               value={tagBin || search[0]}
@@ -148,7 +149,7 @@ const MaterialMovementScreen = () => {
               }}>
               {/* <Button title="Cancel" onPress={() => setIsShowScan(false)} /> */}
               {/* <View style={{width: 12}} /> */}
-              {binInfo && (
+              {/* {binInfo && (
                 <Button
                   title="Next"
                   onPress={() =>
@@ -157,7 +158,7 @@ const MaterialMovementScreen = () => {
                     })
                   }
                 />
-              )}
+              )} */}
             </View>
           </View>
         </View>

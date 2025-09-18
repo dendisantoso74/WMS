@@ -401,12 +401,27 @@ const AppNavigator = () => {
                   />
                 </TouchableOpacity>
               ),
+              title: 'Transfer Instruction',
             })}
           />
           <Stack.Screen
             name="My Transfer Instruction Scan"
             component={MyTransferInstructionScanScreen}
-            options={{title: 'My Transfer Instruction'}}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+              title: 'My Transfer Instruction',
+            })}
           />
 
           <Stack.Screen

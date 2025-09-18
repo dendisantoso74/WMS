@@ -19,18 +19,20 @@ import {
 } from '../../services/materialReturn';
 import PreventBackNavigate from '../../utils/preventBack';
 import {getData} from '../../utils/store';
+import {Dropdown} from 'react-native-element-dropdown';
 
 const DetailMaterialReturnScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item, invuseid} = route.params;
+  const {item, invuseid, maxqty} = route.params;
   console.log('item from params:', item, invuseid);
   const [search, setSearch] = useState('');
   const [count, setCount] = useState(0);
-  const [suggestBin, setSuggestBin] = useState('');
+  const [suggestBin, setSuggestBin] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [userMX, setUserMX] = useState('');
   const [remark, setRemark] = useState('');
+  const [suggestedBinSelect, setSuggestedBinSelect] = useState('');
 
   const handleDecrease = () => {
     if (count > 1) setCount(count - 1);
@@ -48,7 +50,7 @@ const DetailMaterialReturnScreen = () => {
     // Only allow numbers, fallback to 0 if empty or invalid
     const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
     // Max is item.receiptquantity - inputAceptedQty
-    const max = item.qtyrequested;
+    const max = item.qtyrequested - maxqty;
     if (isNaN(num)) {
       setCount(0);
     } else if (num > max) {
@@ -59,10 +61,12 @@ const DetailMaterialReturnScreen = () => {
   };
 
   useEffect(() => {
-    setCount(item.qtyrequested);
+    setCount(item.qtyrequested - maxqty);
     getData('MAXuser').then(res => {
       setUserMX(res);
     });
+
+    suggestedBin();
   }, [item]);
 
   const buildReturnPayload = (
@@ -127,8 +131,9 @@ const DetailMaterialReturnScreen = () => {
 
   const suggestedBin = async () => {
     const res = await findSuggestedBinReturn(item.itemnum, item.fromstoreloc);
-    setSuggestBin(res.member[0].binnum);
-    console.log('Suggested Bin:', res.member[0].binnum);
+    setSuggestBin(res.member);
+    setSuggestedBinSelect(res.member[0]?.binnum);
+    console.log('Suggested Bin:', res.member);
   };
 
   return (
@@ -171,18 +176,33 @@ const DetailMaterialReturnScreen = () => {
             />
           </View>
           <TouchableOpacity
-            disabled={count == item.qtyrequested}
+            disabled={count == item.qtyrequested - maxqty}
             style={styles.circleBtn}
             onPress={handleIncrease}>
             <Text style={styles.circleBtnText}>+</Text>
           </TouchableOpacity>
         </View>
-        {/* <View className="flex-row items-center mt-5">
+        <View className="flex-row items-center mt-5">
           <Text className="w-1/3 font-bold">Suggestion Bin</Text>
-          <View className="w-2/3 py-2 ml-5 bg-gray-200">
+          {/* <View className="w-2/3 py-2 ml-5 bg-gray-200">
             <Text className="ml-2 font-bold text-left ">{suggestBin}</Text>
+          </View> */}
+          <View className="w-2/3 py-2 ml-5 bg-gray-200">
+            <Dropdown
+              data={suggestBin}
+              labelField="binnum"
+              valueField="binnum"
+              value={suggestedBinSelect}
+              onChange={item => setSuggestedBinSelect(item.binnum)}
+              style={{
+                backgroundColor: 'transparent',
+                // width: '100%',
+                paddingHorizontal: 8,
+              }}
+              // placeholder="Select Suggested Bin"
+            />
           </View>
-        </View> */}
+        </View>
         <View className="flex-row items-center mt-5">
           <Text className="w-1/3 font-bold">Condition Code</Text>
           <View className="w-2/3 py-2 ml-5 bg-gray-200">

@@ -158,26 +158,38 @@ const HomeWMSScreen = () => {
         {/* Menu Options */}
         {site === 'TJB56' && (
           <View className="px-2 mt-4 space-y-3">
-            {/* Top Row */}
             <View className="flex-row gap-2 space-x-3">
               <MenuCard
-                onPress={() => navigation.navigate('Transfer Instruction')}
-                title="Open Transfer Instruction"
-                // count={0}
-                icon="arrow-up-right"
-                color="bg-yellow-400"
-                textColor="text-white"
-              />
-              <MenuCard
                 onPress={() => navigation.navigate('My Transfer Instruction')}
-                title="My Transfer Instruction"
+                className="px-3"
+                title="Transfer Instruction"
                 // count={0}
                 icon="file-text"
-                color="bg-green-600"
+                color="bg-yellow-400"
                 textColor="text-white"
               />
             </View>
           </View>
+          // <View className="px-2 mt-4 space-y-3">
+          //   <View className="flex-row gap-2 space-x-3">
+          //     <MenuCard
+          //       onPress={() => navigation.navigate('Transfer Instruction')}
+          //       title="Open Transfer Instruction"
+          //       // count={0}
+          //       icon="arrow-up-right"
+          //       color="bg-yellow-400"
+          //       textColor="text-white"
+          //     />
+          //     <MenuCard
+          //       onPress={() => navigation.navigate('My Transfer Instruction')}
+          //       title="My Transfer Instruction"
+          //       // count={0}
+          //       icon="file-text"
+          //       color="bg-green-600"
+          //       textColor="text-white"
+          //     />
+          //   </View>
+          // </View>
         )}
 
         {/* Menu Options have 3 menu in 1 line */}

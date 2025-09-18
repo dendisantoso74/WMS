@@ -132,11 +132,14 @@ const PickItemScreen = () => {
   }, [item]);
 
   const handleAdd = async () => {
+    console.log('cek bin cuyyy', bin);
+    console.log('cek bin itemm cuyyy', item, findItem?.wms_bin);
+
     const payload = {
       serialnumber: serialNumberItem, // need to be make sure this payload is existing because is required
       quantity: Number(pickqty),
       assetnum: item.assetnum,
-      frombin: bin.bin || item.frombin || suggestedBinSelect,
+      frombin: findItem?.wms_bin,
       fromstoreloc: item.location,
       invuselinenum: random(0, 999),
       issueto: maxUser,
