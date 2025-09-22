@@ -25,7 +25,6 @@ const DetailMaterialReturnScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item, invuseid, maxqty} = route.params;
-  console.log('item from params:', item, invuseid);
   const [search, setSearch] = useState('');
   const [count, setCount] = useState(0);
   const [suggestBin, setSuggestBin] = useState([]);
@@ -115,7 +114,6 @@ const DetailMaterialReturnScreen = () => {
         'Please enter a valid return quantity',
         ToastAndroid.SHORT,
       );
-      console.log('payload:', payload);
 
       return;
     } else {
@@ -133,7 +131,6 @@ const DetailMaterialReturnScreen = () => {
     const res = await findSuggestedBinReturn(item.itemnum, item.fromstoreloc);
     setSuggestBin(res.member);
     setSuggestedBinSelect(res.member[0]?.binnum);
-    console.log('Suggested Bin:', res.member);
   };
 
   return (

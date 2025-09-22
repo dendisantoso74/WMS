@@ -12,7 +12,7 @@ interface LoadingProps {
 
 const Loading: React.FC<LoadingProps> = ({
   visible,
-  text,
+  text = 'Loading...',
   size = 'small',
   type = 'loading',
   progress = 0, // Default progress to 0

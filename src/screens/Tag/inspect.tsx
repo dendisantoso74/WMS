@@ -29,7 +29,6 @@ const TagInspectScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item, poNumber} = route.params;
-  console.log('RFIDs from params:', item, poNumber);
 
   const [modalTag, setModalTag] = useState(false);
   const [selectTag, setSelectTag] = useState('');
@@ -104,9 +103,7 @@ const TagInspectScreen = () => {
 
   const checkSN = async () => {
     const serialNumber = await generateSerialNumber();
-    console.log('Generated Serial Number:', serialNumber);
     checkSerialNumber(serialNumber).then((res: any) => {
-      console.log('Check Serial Number Response:', res.status);
       if (res.status === 'AVAILABLE') {
         console.log('Serial Number is available:', serialNumber);
       }
@@ -122,7 +119,6 @@ const TagInspectScreen = () => {
       //   item: item,
       //   tag: tag,
       // });
-      console.log('Selected Tag:', tag, 'Serial Number:', sn, 'Item:', id);
 
       await taggingPo(id, sn, tag)
         .then((res: any) => {

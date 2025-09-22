@@ -34,7 +34,6 @@ const PutawayScanWoScreen = () => {
     fetchPutawayMixed()
       .then(res => {
         setRfids(res.member || []);
-        console.log('RFIDs fetched successfully:', res.member);
       })
       .catch(() => {
         ToastAndroid.show('Failed to fetch data', ToastAndroid.SHORT);

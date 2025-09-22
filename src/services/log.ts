@@ -12,7 +12,6 @@ export const getWmsErrorLog = async () => {
       },
     });
 
-    console.log('updateWmsErrorLog Response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error in updateWmsErrorLog:', error);

@@ -20,21 +20,17 @@ import {
 } from '@react-navigation/native';
 import {pickItem} from '../../services/materialIssue';
 import PreventBackNavigate from '../../utils/preventBack';
+import Loading from '../../compnents/Loading';
 
 const DetailMaterialScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item, invuselinenum, invinvUseId, payload} = route.params;
-  console.log(
-    'RFIDs from params d:',
-    item,
-    invuselinenum,
-    invinvUseId,
-    payload,
-  );
+
   const [payloads, setPayloads] = useState<any[]>(payload || []);
   const [modalVisible, setModalVisible] = useState(false);
   const [totalQuantity, setTotalQuantity] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   // prevent back nav manualy
   useFocusEffect(
@@ -59,13 +55,11 @@ const DetailMaterialScreen = () => {
 
     const total = payload.reduce((sum, item) => sum + item.quantity, 0);
     setTotalQuantity(total);
-    console.log('Total Quantity:', total);
   }, [payload]);
 
   useEffect(() => {
     const total = payloads.reduce((sum, item) => sum + item.quantity, 0);
     setTotalQuantity(total);
-    console.log('Total Quantity:', total);
   }, [payloads]);
 
   const handleRemovePayload = (serialnumber: string) => {
@@ -75,9 +69,9 @@ const DetailMaterialScreen = () => {
 
   const handlePickItems = async () => {
     // Implement your pick items logic here
+    setLoading(true);
     await pickItem(invinvUseId, payloads)
       .then(res => {
-        console.log('Pick item response:', res);
         ToastAndroid.show('Item picked successfully', ToastAndroid.SHORT);
         navigation.navigate('Material Issue Inspect', {
           listrfid: [item.wogroup],
@@ -89,6 +83,9 @@ const DetailMaterialScreen = () => {
           'Error',
           err.Error.message || 'An error occurred while picking the item.',
         );
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -126,6 +123,7 @@ const DetailMaterialScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Loading visible={loading} text="Loading..." />
       <View className="p-2 bg-blue-400">
         <View className="flex flex-row justify-start">
           <Text className="w-1/4 font-bold text-white">Material</Text>

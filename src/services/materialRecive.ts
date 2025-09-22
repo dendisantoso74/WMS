@@ -16,8 +16,6 @@ export const getPersonByLoginId = async (loginId: string) => {
 
 export const ScanPo = async (id: string) => {
   const site = await getData('site');
-  console.log('ScanPo id', id);
-  console.log('get data async site ', site);
 
   const url = `/maximo/oslc/os/WMS_MXRECEIPT?savedQuery=PO:POREV&oslc.select=ponum,status,poid,orderdate,vendor,siteid,orgid,revisionnum,poline{itemnum,description,orderqty,orderunit,wmsissueunit,conversion,polinenum,conditioncode},wms_matrectrans{itemnum,description,receiptquantity,rejectqty,wmsmatrectransid,orderunit,polinenum,positeid,orgid}&oslc.where=siteid="${site}" and poline.linetype="ITEM" and ponum="${id}"&lean=1`;
   try {
@@ -75,8 +73,6 @@ export const ListPoWINSP = async () => {
 // };
 
 export const ReceivePo = async (payload: any[]) => {
-  console.log('Receive Po payload:', payload);
-
   const url = '/maximo/oslc/os/WMS_MXMATRECTRANS?lean=1';
   try {
     const response = await api.post(url, payload, {
@@ -85,7 +81,7 @@ export const ReceivePo = async (payload: any[]) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log('Receive Po response:', response.data);
+    // console.log('Receive Po response:', response.data);
 
     return response.data;
   } catch (error) {
@@ -118,7 +114,7 @@ export const assignInspectPo = async (poid: string, assignedTo: string) => {
 export const inspectPo = async (payload: any) => {
   const url = '/maximo/oslc/os/MXRECEIPT?lean=1';
   try {
-    console.log('Inspect Po response:', url);
+    // console.log('Inspect Po response:', url);
 
     const response = await api.post(url, payload, {
       headers: {
@@ -167,7 +163,6 @@ export const taggingPo = async (
     serialnumber: serialNumber,
     tagcode: tagCode,
   };
-  console.log('Tagging Po payload, item id:', payload, itemId);
 
   try {
     const response = await api.post(url, payload, {
@@ -177,7 +172,7 @@ export const taggingPo = async (
         'Content-Type': 'application/json',
       },
     });
-    console.log('Tagging Response:', response.data);
+    // console.log('Tagging Response:', response.data);
 
     return response.data;
   } catch (error) {
@@ -247,7 +242,7 @@ export const assignTransferInstruction = async (
         'Content-Type': 'application/json',
       },
     });
-    console.log('Assign Transfer Instruction Response:', response?.data);
+    // console.log('Assign Transfer Instruction Response:', response?.data);
 
     return response.data;
   } catch (error) {
@@ -270,7 +265,7 @@ export const putAway = async (invuselineId: string, toBin: string) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log('Put Away Response:', response?.data);
+    // console.log('Put Away Response:', response?.data);
 
     return response.data;
   } catch (error) {

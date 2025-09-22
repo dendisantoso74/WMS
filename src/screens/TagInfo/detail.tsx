@@ -71,7 +71,6 @@ const TagInfoDetailScreen = () => {
           setWmsBin(res.member[0]?.wms_bin[0]);
         }
         setLoading(false);
-        console.log('infooooo', res.member[0]);
       })
       .catch(() => setLoading(false));
   };
@@ -88,7 +87,6 @@ const TagInfoDetailScreen = () => {
     })
       .then(res => {
         ToastAndroid.show('Update successful', ToastAndroid.SHORT);
-        console.log('Update response:', res);
         getInfo(); // Refresh data after update
       })
       .catch(err => {

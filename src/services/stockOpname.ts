@@ -12,7 +12,7 @@ export const getListStockOpname = async () => {
         // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
-    console.log('Response data:', response.data);
+    // console.log('Response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching stock opname list:', error);
@@ -31,7 +31,7 @@ export const getDetailStockOpname = async (wms_opinid: string | number) => {
         // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
-    console.log('Response data:', response.data);
+    // console.log('Response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching stock opname detail:', error);
@@ -49,7 +49,7 @@ export const getDetailBin = async (tagcode: string) => {
         // 'Cookie': 'JSESSIONID=...' // Uncomment and set if needed
       },
     });
-    console.log('Bin detail:', response.data);
+    // console.log('Bin detail:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching bin detail:', error);
@@ -69,7 +69,7 @@ export const getDetailItem = async (tagcode: string) => {
       },
       maxBodyLength: Infinity,
     });
-    console.log('Detail item api:', response.data);
+    // console.log('Detail item api:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching detail item:', error);
@@ -100,7 +100,7 @@ export const saveStockOpname = async (payload: {
       }),
       maxBodyLength: Infinity,
     });
-    console.log('Save stock opname response:', response.data);
+    // console.log('Save stock opname response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error saving stock opname:', error);
@@ -126,7 +126,7 @@ export const changeStatusOpname = async (
       },
       maxBodyLength: Infinity,
     });
-    console.log('Set status WAPPR response:', response.data);
+    // console.log('Set status WAPPR response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error setting status to WAPPR:', error);

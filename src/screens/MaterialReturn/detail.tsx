@@ -130,12 +130,10 @@ const MaterialReturnDetailScreen = () => {
             );
           }
           setDatas(res.member[0]);
-          console.log('Work order details:', res);
           // setreturnn invuse id
           const returnInvuse = getReturnInvuse(res.member[0]);
           setReturnInvuseId(returnInvuse.invuseid);
           setReturnInvuseGlobal(returnInvuse);
-          console.log('Return invuse:', returnInvuse);
 
           // Filter only items that have invuseline and it's not empty
           const filteredInvUse = res.member[0].invuse.filter(
@@ -158,7 +156,6 @@ const MaterialReturnDetailScreen = () => {
             (inv: any) => inv.usetype === 'MIXED' && inv.status !== 'COMPLETE',
           );
           setHeaderReturn(mixedInvuse);
-          console.log('Mixed Invuse:', mixedInvuse);
 
           // Enrich matusetrans with invuseid
           const enrichedMatusetrans = enrichMatusetransWithInvuseid(
@@ -213,8 +210,6 @@ const MaterialReturnDetailScreen = () => {
   };
 
   const renderItem = ({item}: {item: string}) => {
-    console.log('Rendering item:', item);
-
     const returnItem = findInvuselineByIdReturn(
       woListReturn,
       item.matusetransid,

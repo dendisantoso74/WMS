@@ -42,7 +42,6 @@ const MyTransferInstructionScreen = () => {
         // Replace 'TAUFIQ MA' with the actual invowner if needed
         const res = await fetchAssignedTransferInstructions(userMX);
         const instructions = Array.isArray(res.member) ? res.member : [];
-        console.log('Fetched instructions:', instructions);
 
         setAssignedInstructions(instructions);
         setFilteredInstructions(instructions);

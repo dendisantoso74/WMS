@@ -38,7 +38,7 @@ const HomeWMSScreen = () => {
       const siteAsync = await AsyncStorage.getItem('site');
       const orgAsync = await AsyncStorage.getItem('org');
       const userAsync = await AsyncStorage.getItem('user');
-      console.log('asyn name', userAsync);
+      // console.log('asyn name', userAsync);
       setUser(userAsync);
       setSite(siteAsync);
       setOrg(orgAsync);

@@ -28,7 +28,7 @@ const RetagingItemScreen = () => {
     setLoading(true);
     try {
       const res = await fetchRetaggingItems('*', '*', page);
-      console.log('Fetched bins:', res);
+      // console.log('Fetched bins:', res);
 
       const newBins = Array.isArray(res.member) ? res.member : [];
       setBins(prev =>

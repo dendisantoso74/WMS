@@ -7,7 +7,7 @@ export const getWorkOrderDetails = async (workOrderId: string) => {
   const url = `/maximo/oslc/os/WMS_MXWOISSUE?lean=1&oslc.select=*&oslc.where=siteid="${site}" and wonum="${workOrderId}"`;
   try {
     const response = await api.get(url);
-    console.log('Work Order Details Response:', response.data);
+    // console.log('Work Order Details Response:', response.data);
 
     return response.data;
   } catch (error) {
@@ -21,7 +21,7 @@ export const pickItem = async (invuseId: string, itemDetails: any) => {
   const payload = {
     invuseline: itemDetails,
   };
-  console.log('service pick item, payload ', payload);
+  // console.log('service pick item, payload ', payload);
 
   try {
     const response = await api.post(url, payload, {
@@ -31,7 +31,7 @@ export const pickItem = async (invuseId: string, itemDetails: any) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log('Pick Item Response:', response?.data);
+    // console.log('Pick Item Response:', response?.data);
 
     return response.data;
   } catch (error) {
@@ -61,16 +61,6 @@ export const findSugestBin = async (
   binnum: string = '*',
 ) => {
   const siteid = await getData('site');
-  console.log(
-    'siteid',
-    siteid,
-    'itemnum',
-    itemnum,
-    'location',
-    location,
-    'binnum',
-    binnum,
-  );
 
   const url = `/maximo/oslc/os/MXINVBAL?lean=1&oslc.select=*&oslc.orderBy=%20%2Bcurbal&oslc.where=siteid="${siteid}" and itemnum="${itemnum}" and location="${location}" and curbal>0 and binnum="*"`;
   try {
@@ -111,7 +101,7 @@ export const generateIssueHeader = async (wonum: string) => {
         // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
-    console.log('generateIssueHeader Response:', response.data);
+    // console.log('generateIssueHeader Response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error in generateIssueHeader:', error);

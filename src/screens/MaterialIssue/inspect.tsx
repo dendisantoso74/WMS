@@ -62,7 +62,7 @@ const MaterialIssueInspectScreen = () => {
           console.error('Error fetching work order details:', res.error);
         } else {
           // Check if the work order exists
-          console.log('chec exist:', res.member[0]);
+          console.log('scan wo issue', res);
 
           setDatas(res.member);
 
@@ -72,8 +72,6 @@ const MaterialIssueInspectScreen = () => {
               Array.isArray(item.invuseline) && item.invuseline.length > 0,
           );
           setInvUse(res.member[0].invuse);
-
-          console.log('Work order details:', res);
 
           // search entered index of array
           let enteredIndex = res.member[0].invuse.findIndex(
@@ -91,7 +89,6 @@ const MaterialIssueInspectScreen = () => {
             (item: any) =>
               item.status === 'ENTERED' && item.usetype === 'ISSUE',
           );
-          console.log('Entered inventory:', enteredInv, enteredIndex);
           setInvreserveIndex(enteredIndex);
           setInvreserveid(enteredInv[0]?.invuseid);
           // Process the work order details as needed
@@ -122,7 +119,6 @@ const MaterialIssueInspectScreen = () => {
   }, [search, invreserve]);
 
   useEffect(() => {
-    console.log('RFIDs from params:', woNumber);
     //fetchwo
     generateIssueHeader(woNumber)
       .then(x => {
@@ -141,22 +137,14 @@ const MaterialIssueInspectScreen = () => {
   }, [woNumber]);
 
   const handlePutToStage = async () => {
-    // console.log('Put to stage pressed', invUse[0]?.status);
-
     if (invUse[invreserveIndex]?.status === 'STAGED') {
-      console.log('Already staged', invUse[invreserveIndex]?.invuseid);
-
       completeIssue(invUse[invreserveIndex]?.invuseid).then(res => {
-        console.log('Complete issue response:', res);
         ToastAndroid.show('Issue completed successfully', ToastAndroid.SHORT);
         fetchWo();
         navigation.navigate('Material Issue Scan');
       });
     } else {
-      console.log('Not staged');
-
       putToStage(invUse[invreserveIndex]?.invuseid).then(res => {
-        console.log('Put to stage response:', res);
         ToastAndroid.show('Put to stage successfully', ToastAndroid.SHORT);
         fetchWo();
       });
@@ -173,7 +161,6 @@ const MaterialIssueInspectScreen = () => {
           : 'gray';
 
     const randomnumber = random(0, 999);
-    console.log('Random number:', randomnumber);
 
     return (
       <TouchableOpacity

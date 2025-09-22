@@ -22,7 +22,6 @@ const MyTransferInstructionSubmitScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item, invuseid, tobin, datas} = route.params;
-  console.log('datas from param:', item, invuseid);
 
   const [search, setSearch] = useState('');
   const [completedIds, setCompletedIds] = useState<string[]>([]);
@@ -32,7 +31,6 @@ const MyTransferInstructionSubmitScreen = () => {
   const [itemnum, setItemnum] = useState('');
 
   const handleComplete = () => {
-    console.log('Complete pressed', item);
     completeTransferInstruction(invuseid).then(res => {
       if (res.error) {
         console.error('Error completing transfer instruction:', res.error);

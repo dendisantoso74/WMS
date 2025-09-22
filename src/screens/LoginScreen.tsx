@@ -73,7 +73,7 @@ const LoginScreen = () => {
       const formData = new URLSearchParams();
       formData.append('username', username);
       formData.append('password', password);
-      console.log('formData', btoa(`${username}:${password}`));
+      // console.log('formData', btoa(`${username}:${password}`));
 
       authService
         .login(username, password)
@@ -87,7 +87,7 @@ const LoginScreen = () => {
           //     setUser(JSON.stringify(decodeRes.payload));
           //   }) // already an object. read below, exp key note
           //   .catch(err => console.log('error', err));
-          console.log('berhasil login', res);
+          // console.log('berhasil login', res);
           storeData('user', username);
           storeData('MAXuser', res.member[0]?.maxuser[0]?.userid);
 
@@ -100,7 +100,7 @@ const LoginScreen = () => {
           setIsAuthenticated(false);
 
           Alert.alert('Failed', err?.Error.message || err?.detail || err);
-          console.log('error login', err);
+          // console.log('error login', err);
 
           setLoading(false);
         });

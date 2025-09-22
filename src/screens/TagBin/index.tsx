@@ -29,7 +29,6 @@ const TagBinScreen = () => {
     setLoading(true);
     try {
       const res = await getTagBinList('*', pageSize, page, searchValue);
-      console.log('BIN fetched successfully:', res, searchValue);
 
       const newBins = Array.isArray(res.member) ? res.member : [];
       setBins(prev =>

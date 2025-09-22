@@ -22,7 +22,6 @@ const TransferInstructionAssignScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item} = route.params;
-  console.log('item from params:', item);
 
   const [search, setSearch] = useState('');
   const [invuse, setInvuse] = useState([]);
@@ -38,13 +37,11 @@ const TransferInstructionAssignScreen = () => {
         console.error('Error fetching transfer instruction:', res.error);
       } else {
         setInvuse(res.member[0].invuseline);
-        console.log('Fetched po num:', res.member);
       }
     });
   }, []);
 
   const handleAssignToMe = () => {
-    console.log('Assign to me pressed', item.invuseid, maxUser);
     assignTransferInstruction(item.invuseid, maxUser).then(res => {
       if (res.error) {
         console.error('Error assigning transfer instruction:', res.error);

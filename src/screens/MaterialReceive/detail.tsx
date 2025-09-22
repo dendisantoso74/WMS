@@ -20,6 +20,7 @@ import {set} from 'lodash';
 import ModalApp from '../../compnents/ModalApp';
 import {getData} from '../../utils/store';
 import {getReceiptQuantityByPoline} from '../../utils/helpers';
+import Loading from '../../compnents/Loading';
 
 const MaterialReceiveDetailScreen = () => {
   const navigation = useNavigation<any>();
@@ -43,6 +44,7 @@ const MaterialReceiveDetailScreen = () => {
   const [totalDoneItem, setTotalDoneItem] = useState(0);
   // Add a state for split option (checkbox, switch, etc.)
   const [split, setSplit] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // const handleReceive = async (quantity: number, item: any) => {
   //   const site = await getData('site');
@@ -86,11 +88,8 @@ const MaterialReceiveDetailScreen = () => {
   // Update handleReceive to support split logic:
   const handleReceive = async (quantity: number, item: any) => {
     const site = await getData('site');
-    console.log('value split', split);
 
     if (split) {
-      console.log('masuk split');
-
       // Split: send multiple requests, each with receiptquantity = 1
       for (let i = 0; i < quantity; i++) {
         try {
@@ -121,7 +120,6 @@ const MaterialReceiveDetailScreen = () => {
       setTempQuantity(quantity);
     } else {
       // Not split: existing logic
-      console.log('NO split');
 
       ReceivePo([
         {
@@ -174,31 +172,35 @@ const MaterialReceiveDetailScreen = () => {
     //   Alert.alert('Error', res.error);
     //   return;
     // }
-    console.log('ReceivePo response:');
     // after submit successfully
     Alert.alert('Success', 'Material received');
     setModalConfirmVisible(false);
     // navigation.goBack();
   };
 
+  useEffect(() => {
+    setLoading(true);
+  }, []);
+
   const fetchData = async () => {
     const site = await getData('site');
 
-    ScanPo(listrfid[listrfid.length - 1]).then((res: any) => {
-      console.log('RFIDs fetched successfully:', res.member);
-      if (res.member.length === 0) {
-        navigation.goBack();
-        Alert.alert(
-          'Information',
-          `${listrfid[listrfid.length - 1]} Not Found at site: ${site} `,
-          // [{text: 'OK', onPress: () => navigation.goBack()}],
-          // {cancelable: false},
-        );
-      }
-      setDatas(res.member[0]);
-      setPoline(res.member[0].poline);
-      setWmsMatrectrans(res.member[0].wms_matrectrans);
-    });
+    ScanPo(listrfid[listrfid.length - 1])
+      .then((res: any) => {
+        if (res.member.length === 0) {
+          navigation.goBack();
+          Alert.alert(
+            'Information',
+            `${listrfid[listrfid.length - 1]} Not Found at site: ${site} `,
+            // [{text: 'OK', onPress: () => navigation.goBack()}],
+            // {cancelable: false},
+          );
+        }
+        setDatas(res.member[0]);
+        setPoline(res.member[0].poline);
+        setWmsMatrectrans(res.member[0].wms_matrectrans);
+      })
+      .finally(() => setLoading(false));
   };
   useEffect(() => {
     fetchData();
@@ -353,6 +355,7 @@ const MaterialReceiveDetailScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
+      {loading && <Loading visible={loading} />}
       {filteredPoline.length === 0 ? (
         <View style={{alignItems: 'center', marginTop: 40}}>
           <Text style={{color: '#888', fontSize: 16}}>No data found</Text>
@@ -375,7 +378,7 @@ const MaterialReceiveDetailScreen = () => {
           color="primary"
         />
       </View> */}
-      <View style={styles.buttonContainer}>
+      {/* <View style={styles.buttonContainer}>
         <ButtonApp
           label="GO TO INSPECT"
           onPress={() =>
@@ -386,7 +389,7 @@ const MaterialReceiveDetailScreen = () => {
           size="large"
           color="primary"
         />
-      </View>
+      </View> */}
       {/* )} */}
       <ModalInputWms
         canSplit

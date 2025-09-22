@@ -222,7 +222,7 @@ const ScanRFIDScreen: React.FC<ScanRFIDScreenProps> = ({
 
   useEffect(() => {
     setListRfid([]);
-    console.log('RFID list cleared', listRfid);
+    // console.log('RFID list cleared', listRfid);
   }, []);
 
   // const handleRfidEvent = useCallback(

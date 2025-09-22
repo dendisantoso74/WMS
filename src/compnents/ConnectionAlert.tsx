@@ -10,7 +10,7 @@ const ConnectionAlert = () => {
   useEffect(() => {
     // Subscribe to NetInfo for WiFi state
     const unsubscribe = NetInfo.addEventListener(state => {
-      console.log('Network state:', state);
+      // console.log('Network state:', state);
       const isWifiConnected = state.type === 'wifi' && state.isConnected;
       setWifiOn(isWifiConnected);
     });
@@ -21,16 +21,13 @@ const ConnectionAlert = () => {
   }, []);
 
   useEffect(() => {
-    console.log('WiFi status changed - wifiOn:', wifiOn);
     if (!wifiOn) {
-      console.log('WiFi is off - showing alert');
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
         useNativeDriver: true,
       }).start();
     } else {
-      console.log('WiFi is on - hiding alert');
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 300,
@@ -39,7 +36,7 @@ const ConnectionAlert = () => {
     }
   }, [wifiOn]);
 
-  console.log('Rendering alert - wifiOn:', wifiOn);
+  // console.log('Rendering alert - wifiOn:', wifiOn);
 
   if (wifiOn) return null;
 

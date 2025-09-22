@@ -40,7 +40,6 @@ const MyTransferInstructionScanScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {datas} = route.params;
-  console.log('item from params dertail:', datas);
 
   const [search, setSearch] = useState('');
   const [invuse, setInvuse] = useState([]);
@@ -70,7 +69,6 @@ const MyTransferInstructionScanScreen = () => {
         const member = res.member.filter(item => item.status === 'ENTERED');
 
         const invuseline = member[0].invuseline || [];
-        console.log('cekkkk Filtered member:', invuseline);
         setInvuseid(member[0].invuseid);
         setInvuse(invuseline);
 
@@ -88,12 +86,10 @@ const MyTransferInstructionScanScreen = () => {
   }, [datas]);
 
   const handleScanRfid = () => {
-    console.log('cek');
     setModalVisible(true);
   };
 
   const handleComplete = () => {
-    console.log('Complete pressed', invuseid);
     completeTransferInstruction(invuseid).then(res => {
       if (res.error) {
         console.error('Error completing transfer instruction:', res.error);
@@ -130,7 +126,6 @@ const MyTransferInstructionScanScreen = () => {
       tobin: inputValue,
       datas: datas,
     });
-    console.log('Input value:', datas.invuseline[0].invuselineid, inputValue);
   };
 
   useEffect(() => {
@@ -156,7 +151,6 @@ const MyTransferInstructionScanScreen = () => {
   // rfid scanner
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
-      console.log('RFID Data:', newData);
       // if newdata is array make popup to select item for set to search
 
       // setSearch(newData);
@@ -183,11 +177,8 @@ const MyTransferInstructionScanScreen = () => {
   );
 
   const findBin = useCallback(async (tag: string) => {
-    console.log('Finding bin for tag move:', tag);
-
     const bin = await getBinByTagCode(tag);
     setBinInfo(bin.member[0]);
-    console.log('Found bin:', bin.member[0]);
   }, []);
 
   const renderItem = ({item}) => (

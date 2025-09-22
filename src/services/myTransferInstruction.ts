@@ -3,8 +3,6 @@ import api from './api';
 import {getData} from '../utils/store';
 
 export const fetchAssignedTransferInstructions = async (invowner: string) => {
-  console.log('Fetching assigned transfer instructions for:', invowner);
-
   // to show list with assugned to user login
   // const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=wms_ponum,invusenum,fromstoreloc,statusdate&oslc.where=status="ENTERED" and usetype="TRANSFER" and wms_status="Assigned" and wms_isgenerated=1 and invowner="${invowner}"`;
   const url = `/maximo/oslc/os/MXINVUSE?lean=1&oslc.select=wms_ponum,invusenum,fromstoreloc,statusdate&oslc.where=status="ENTERED" and usetype="TRANSFER"`;
@@ -16,7 +14,7 @@ export const fetchAssignedTransferInstructions = async (invowner: string) => {
         // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
-    console.log('Response data:', response.data);
+    // console.log('Response data:', response.data);
 
     return response.data;
   } catch (error) {
@@ -40,7 +38,7 @@ export const completeTransferInstruction = async (
         },
       },
     );
-    console.log('Complete response data:', response.data);
+    // console.log('Complete response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error completing transfer instruction:', error);
@@ -49,8 +47,6 @@ export const completeTransferInstruction = async (
 };
 
 export const getTransferInstructionByPoNum = async (ponum: string) => {
-  console.log('get detail po num:', ponum);
-
   const siteid = await getData('site'); // Uncomment if you need to fetch siteid dynamically
   // transfer instruction is must be in TJB56 site
   // const siteid = 'TJB56'; // Hardcoded for testing, remove in production
@@ -62,7 +58,7 @@ export const getTransferInstructionByPoNum = async (ponum: string) => {
         // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
-    console.log('Transfer instruction by PO number response:', response.data);
+    // console.log('Transfer instruction by PO number response:', response.data);
 
     return response.data;
   } catch (error) {

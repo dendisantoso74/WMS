@@ -36,7 +36,6 @@ const MaterialMovementScreen = () => {
   // rfid scanner
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
-      console.log('RFID Data:', newData);
       // if newdata is array make popup to select item for set to search
 
       setSearch(newData);
@@ -62,11 +61,8 @@ const MaterialMovementScreen = () => {
   );
 
   const findBin = useCallback(async (tag: string) => {
-    console.log('Finding bin for tag move:', tag);
-
     const bin = await getBinByTagCode(tag);
     setBinInfo(bin.member[0]);
-    console.log('Found bin:', bin.member[0]);
   }, []);
 
   useEffect(() => {

@@ -10,7 +10,6 @@ export const getTagBinList = async (
   bin: string = '*',
 ) => {
   const url = `/maximo/oslc/os/WMS_MXBIN?lean=1&oslc.select=*&oslc.where=siteid="${siteid}" and tagcode="${tagcode}" and bin="${bin}"&oslc.pageSize=${pageSize}&pageno=${pageNo}`;
-  console.log('payload getTagBinList:', tagcode, pageNo, pageSize, bin);
   try {
     const response = await api.get(url, {
       headers: {
@@ -36,7 +35,7 @@ export const getBinUntagList = async (
         // Add Cookie header if needed, e.g. 'Cookie': 'JSESSIONID=...'
       },
     });
-    console.log('res getBinUntagList:', response.data);
+    // console.log('res getBinUntagList:', response.data);
 
     return response.data;
   } catch (error) {
@@ -68,7 +67,7 @@ export const registerTagToBin = async (
         maxBodyLength: Infinity,
       },
     );
-    console.log('Response from registerTagToBin:', response.data);
+    // console.log('Response from registerTagToBin:', response.data);
 
     return response.data;
   } catch (error) {

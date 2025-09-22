@@ -45,7 +45,7 @@ export const createMaterialMovement = async (payload: any) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log('Material movement created:', response.data);
+    // console.log('Material movement created:', response.data);
 
     return response.data;
   } catch (error) {

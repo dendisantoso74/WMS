@@ -82,7 +82,7 @@ export const tagItemPutaway = async (
         // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
-    console.log('Tagging Response:', response.data);
+    // console.log('Tagging Response:', response.data);
 
     return response.data;
   } catch (error) {

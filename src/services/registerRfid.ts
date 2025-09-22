@@ -15,7 +15,7 @@ export const registerRfid = async (payload: {
         // Add Cookie header if needed, e.g. 'Cookie': 'JSESSIONID=...'
       },
     });
-    console.log('RFID registered successfully:', response.data);
+    // console.log('RFID registered successfully:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error registering RFID:', error);

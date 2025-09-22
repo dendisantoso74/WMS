@@ -36,6 +36,7 @@ import {
   type ZebraResultPayload,
   type ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
+import Loading from '../../compnents/Loading';
 
 const userTypeOptions = [
   {label: 'ISSUE', value: 'ISSUE'},
@@ -48,29 +49,20 @@ const PickItemScreen = () => {
   const route = useRoute();
   const {item, invuselinenum, invinvUseId, payloadPick} = route.params;
 
-  console.log(
-    'RFIDs from params:',
-    item,
-    invuselinenum,
-    invinvUseId,
-    payloadPick,
-  );
-
   const [search, setSearch] = useState('');
   const [suggestedBin, setSuggestedBin] = useState([]);
   const [suggestedBinSelect, setSuggestedBinSelect] = useState('');
 
   const [userType, setUserType] = useState(item?.wms_usetype || 'ISSUE'); // <-- Add state for dropdown
   const [maxUser, setMaxUser] = useState(0);
-  const [bin, setBin] = useState('');
   const [storeqty, setStoreqty] = useState('');
   const [pickqty, setPickqty] = useState(0);
   const [serialNumberItem, setSerialNumberItem] = useState('');
   const [findItem, setFindItem] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
-      console.log('RFID Data:', newData);
       // if newdata is array make popup to select item for set to search
 
       setSearch(newData[0]);
@@ -117,7 +109,6 @@ const PickItemScreen = () => {
     //find sugestion bin
     const findbin = async () => {
       const res = await findSugestBin(item.itemnum, item.location);
-      console.log('Suggested Bin Response:', res);
 
       setSuggestedBin(res.member);
       setSuggestedBinSelect(res.member[0].binnum);
@@ -132,9 +123,6 @@ const PickItemScreen = () => {
   }, [item]);
 
   const handleAdd = async () => {
-    console.log('cek bin cuyyy', bin);
-    console.log('cek bin itemm cuyyy', item, findItem?.wms_bin);
-
     const payload = {
       serialnumber: serialNumberItem, // need to be make sure this payload is existing because is required
       quantity: Number(pickqty),
@@ -163,7 +151,7 @@ const PickItemScreen = () => {
       p => p?.serialnumber === payload?.serialnumber,
     );
     // You can now use this payload for your API call
-    console.log('invuseid, Payload, item:', invinvUseId, payload, item);
+
     if (exists) {
       ToastAndroid.show('Item already exists', ToastAndroid.SHORT);
       return;
@@ -193,21 +181,30 @@ const PickItemScreen = () => {
   };
   const searchSerialNumber = async (tagcode: string) => {
     // console.log('Searching for serial number:', search);
-
+    setIsLoading(true);
     // const result = await findBinByTagCode(search);
-    const result = await getItemSNByTagCode(tagcode).then(res => {
-      console.log('Tag Info:', res.member[0]);
-      setSerialNumberItem(res.member[0].serialnumber);
-      setFindItem(res.member[0]);
-      setStoreqty(res.member[0].qtystored);
-    });
-
-    setBin(result.member[0]);
-    console.log('Search BIN result:', result.member[0]);
+    await getItemSNByTagCode(tagcode)
+      .then(res => {
+        console.log('result get sn', res);
+        if (res.member[0].itemnum !== item?.itemnum) {
+          ToastAndroid.show('Item not Match', ToastAndroid.SHORT);
+        } else {
+          setSerialNumberItem(res.member[0].serialnumber);
+          setFindItem(res.member[0]);
+          setStoreqty(res.member[0].qtystored);
+        }
+      })
+      .catch(() => {
+        ToastAndroid.show('Item not Found', ToastAndroid.SHORT);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Loading visible={isLoading} />
       <ScrollView
         contentContainerStyle={{paddingBottom: 100}}
         keyboardShouldPersistTaps="handled"
@@ -365,7 +362,7 @@ const PickItemScreen = () => {
       </ScrollView>
       <View style={styles.buttonContainer}>
         <ButtonApp
-          disabled={!serialNumberItem}
+          disabled={!serialNumberItem || pickqty === 0}
           label="ADD"
           size="large"
           color="primary"

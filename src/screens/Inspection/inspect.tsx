@@ -30,8 +30,6 @@ const InspectionReceivingApproveScreen = () => {
   const {wms_matrectrans} = route.params || {};
   const {porevisionnum} = route.params || {};
 
-  console.log('Received ponum inspect next:', ponum, item, porevisionnum);
-
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
   const [datas, setDatas] = useState([]);
@@ -84,10 +82,8 @@ const InspectionReceivingApproveScreen = () => {
   };
 
   const handleApprove = async () => {
-    console.log('Approve button pressed', tempPayload);
     inspectPo(tempPayload)
       .then(res => {
-        console.log('Inspect Po response:', res);
         if (res.error) {
           ToastAndroid.show('Error approving inspection', ToastAndroid.SHORT);
         } else {
@@ -114,7 +110,6 @@ const InspectionReceivingApproveScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       const resRejectCode = await ListRejectCode();
-      console.log('ListRejectCode data:', resRejectCode);
       setRejectCode(resRejectCode);
 
       const userAsync = await AsyncStorage.getItem('MAXuser');
@@ -123,7 +118,6 @@ const InspectionReceivingApproveScreen = () => {
       setDatas(item);
       setPoline(item.poline);
       setWmsMatrectrans(item.wms_matrectrans);
-      console.log('Poline inspect:', wms_matrectrans);
 
       // tes temp payload
       // To update just one field, for example acceptedqty:
@@ -136,7 +130,6 @@ const InspectionReceivingApproveScreen = () => {
     const fetchData2 = async () => {
       const userAsync = await AsyncStorage.getItem('MAXuser');
       const siteid = await getData('site');
-      console.log('datassss', item);
 
       setTempPayload(prev => ({
         ...prev,
@@ -189,7 +182,6 @@ const InspectionReceivingApproveScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {console.log('tempPayload:', tempPayload)}
       <View className="w-full bg-blue-400 ">
         <View className="flex-row my-1 ml-2">
           <Text className="w-20 font-bold text-white">Material</Text>

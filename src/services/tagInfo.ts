@@ -18,8 +18,6 @@ export const postRemarkAndConditionCode = async (
   wmsId: string | number,
   body: any,
 ) => {
-  console.log('Posting remark and condition code:', body);
-
   try {
     const response = await api.post(
       `/maximo/oslc/os/WMS_MXSERIALIZEDITEM/${wmsId}?lean=1`,
@@ -32,7 +30,7 @@ export const postRemarkAndConditionCode = async (
         },
       },
     );
-    console.log('Response from postRemarkAndConditionCode:', response.data);
+    // console.log('Response from postRemarkAndConditionCode:', response.data);
 
     return response.data;
   } catch (error) {

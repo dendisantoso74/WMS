@@ -55,7 +55,6 @@ const InspectionScreen = () => {
     setIsloading(true);
     // Replace with actual data fetching logic
     const res = await ListPoWINSP();
-    console.log('inspect RFIDs fetched:', res);
     const data = res.member || [];
     setDatas(data);
     setFilteredData(data);

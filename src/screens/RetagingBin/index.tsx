@@ -43,7 +43,6 @@ const RetagingBinScreen = () => {
   // rfid scanner
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
-      console.log('RFID Data:', newData);
       // if newdata is array make popup to select item for set to search
 
       setTag(newData[0]);
@@ -71,7 +70,7 @@ const RetagingBinScreen = () => {
     setLoading(true);
     try {
       const res = await getTagBinList('*', pageSize, page, '*');
-      console.log('Fetched bins:', res);
+      // console.log('Fetched bins:', res);
 
       const newBins = Array.isArray(res.member) ? res.member : [];
       setBins(prev =>

@@ -37,7 +37,7 @@ const ModalInputWms: React.FC<ModalInputWmsProps> = ({
   onSplitChange,
 }) => {
   const [count, setCount] = useState(total);
-  console.log('ModalInputWms count:', remainingQty);
+  // console.log('ModalInputWms count:', remainingQty);
 
   // Reset count when modal is closed or opened with a new total
   useEffect(() => {

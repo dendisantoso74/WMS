@@ -58,7 +58,6 @@ const RegisterBinScreen = () => {
   const handleConfirm = async () => {
     registerTagToBin(selectedBin?.wms_binid, Tag, serialNumbers)
       .then(res => {
-        console.log('Tag registered successfully:', res);
         ToastAndroid.show(
           `Registered ${Tag} to ${selectedBin?.bin}`,
           ToastAndroid.SHORT,

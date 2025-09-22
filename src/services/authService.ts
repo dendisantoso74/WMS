@@ -8,7 +8,6 @@ interface LoginPayload {
 
 export const authService = {
   login: async (username: string, password: string) => {
-    console.log('authService login', username, password);
     storeData('userToken', btoa(`${username}:${password}`));
 
     try {

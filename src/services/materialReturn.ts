@@ -6,7 +6,6 @@ export const generateInvUsageHeader = async (wonum: string) => {
   const siteid = 'TJB56';
 
   const url = `/maxrest/oslc/script/WMS_INVUSERETURN?siteid=${siteid}&wonum=${wonum}`;
-  console.log('Generated URL:', url);
 
   try {
     const response = await api.get(url);
@@ -31,7 +30,6 @@ export const scanWoForReturn = async (wonum: string) => {
 
 export const receiveMaterial = async (invuseid: string, payload: any) => {
   const url = `/maximo/oslc/os/MXINVUSE/${invuseid}`;
-  console.log('payload return', payload);
 
   try {
     const response = await api.post(url, payload, {
@@ -41,7 +39,7 @@ export const receiveMaterial = async (invuseid: string, payload: any) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log('Receive Material Response:', response?.data);
+    // console.log('Receive Material Response:', response?.data);
 
     return response.data;
   } catch (error) {
@@ -99,7 +97,7 @@ export const findSuggestedBinReturn = async (
         // 'Cookie': 'JSESSIONID=...' // Add if needed
       },
     });
-    console.log('Suggested Bin Response:', response.data);
+    // console.log('Suggested Bin Response:', response.data);
 
     return response.data;
   } catch (error) {
@@ -113,7 +111,7 @@ export const createInvUseReturnHeader = async (wonum: string) => {
   const siteid = 'TJB56';
 
   const url = `/maxrest/oslc/script/WMS_INVUSERETURN?siteid=${siteid}&wonum=${wonum}`;
-  console.log('Generated URL:', url);
+  // console.log('Generated URL:', url);
 
   try {
     const response = await api.get(url, {
@@ -122,7 +120,7 @@ export const createInvUseReturnHeader = async (wonum: string) => {
         // 'Cookie': 'JSESSIONID=...' // Uncomment if needed
       },
     });
-    console.log('fetchInvUseReturn Response:', response.data);
+    // console.log('fetchInvUseReturn Response:', response.data);
     return true;
   } catch (error) {
     console.error('Error in fetchInvUseReturn:', error);
@@ -146,7 +144,7 @@ export const changeInvUseStatusComplete = async (
         },
       },
     );
-    console.log('Change InvUse Status Response:', response.data);
+    // console.log('Change InvUse Status Response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error changing InvUse status to COMPLETE:', error);

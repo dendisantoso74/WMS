@@ -52,8 +52,6 @@ const debouncedHandleRfid = debounce(
     setBinScan,
   ) => {
     const modalValueItem = getModalValueItem();
-    console.log('RFID Data:', newData);
-    console.log('Modal Value Item :', modalValueItem);
 
     if (modalValueItem) {
       findBinByTagCode(newData[0])
@@ -69,7 +67,6 @@ const debouncedHandleRfid = debounce(
     } else {
       setModalValueItem(newData[0]);
       tagInfo(newData[0]).then(res => {
-        console.log('Tag Info putaway:', res.member[0]);
         if (res.member[0].status !== 'Blank') {
           ToastAndroid.show('RFID Used. Try Another Tag', ToastAndroid.SHORT);
           setModalValueItem(false);
@@ -86,7 +83,6 @@ const PutawayMaterialScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item} = route.params;
-  console.log('item from params put away:', item);
 
   const [search, setSearch] = useState('');
   const [invUse, setInvUse] = useState([]);
@@ -120,8 +116,6 @@ const PutawayMaterialScreen = () => {
       Array.isArray(invUse.invuseline) &&
       invUse.invuseline.length > 0 &&
       invUse.invuseline.every((line: any) => !!line?.serialnumber);
-
-    console.log('cek status', allTagged);
 
     setAllInvUseTagged(allTagged);
   }, [invUse]);
@@ -165,13 +159,10 @@ const PutawayMaterialScreen = () => {
   const getdataPutawayMixed = async () => {
     setLoading(true);
     fetchPutawayMixedSingle(item.wonum).then(res => {
-      console.log('tes fetch singgle WO', res);
       //set invuse that have status retur entered
       const filteredInvUse = res.member[0].invuse.filter(
         (inv: any) => inv.status === 'ENTERED' && inv.usetype === 'MIXED',
       );
-
-      console.log('tes fetch singgle WO Filtered', filteredInvUse);
 
       setInvUse(filteredInvUse[0]);
       setLoading(false);
@@ -206,11 +197,9 @@ const PutawayMaterialScreen = () => {
   const handlePressItem = async (item: any) => {
     selectedItem !== item && setSelectedItem(item);
     setModalBinVisible(true);
-    console.log('suggest bin 000');
 
     const SN = await generateSerialNumber();
     setSerialNumber(SN);
-    console.log('suggest bin 111', item);
 
     const bin = await findSuggestedBinPutaway(item.itemnum, item.fromstoreloc);
 
@@ -221,11 +210,9 @@ const PutawayMaterialScreen = () => {
         : '';
 
     setSuggestedBin(suggestedBins);
-    console.log('suggest bin :', bin.member);
   };
 
   const handleSubmitBin = async () => {
-    console.log('Submitting BIN:', binScan);
     if (!binScan) {
       ToastAndroid.show('Please enter a BIN', ToastAndroid.SHORT);
       return;
@@ -236,7 +223,6 @@ const PutawayMaterialScreen = () => {
       ToastAndroid.show(checkSN.error, ToastAndroid.SHORT);
       return;
     }
-    console.log('selectedItem:', selectedItem);
 
     const bin = binScan;
 
@@ -261,15 +247,12 @@ const PutawayMaterialScreen = () => {
         wms_status: 'COMPLETE',
       };
 
-      console.log('Payload to submit:', payload);
-
       await tagItemPutaway(
         payload.invuselineid,
         payload.tagcode,
         payload.serialnumber,
       )
         .then(res => {
-          console.log('Tagging Response:', res);
           ToastAndroid.show('Item tagged successfully', ToastAndroid.SHORT);
           setModalValueBin('');
           setModalValueItem('');
@@ -297,13 +280,9 @@ const PutawayMaterialScreen = () => {
   };
 
   const handleCompletereturn = async () => {
-    console.log('Complete button pressed', invUse.invuseid);
-    console.log('status all assign to bin', allInvUseTagged);
-
     if (allInvUseTagged) {
       changeInvUseStatusComplete(invUse.invuseid)
         .then(res => {
-          console.log('Complete return response:', res);
           ToastAndroid.show(
             'Return completed successfully',
             ToastAndroid.SHORT,

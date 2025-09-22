@@ -503,7 +503,24 @@ const AppNavigator = () => {
             component={DetailMaterialScreen}
             options={{title: 'Detail Material'}}
           />
-          <Stack.Screen name="Pick Item" component={PickItemScreen} />
+          <Stack.Screen
+            name="Pick Item"
+            component={PickItemScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Reader Connect')}
+                  style={{marginRight: 16}}>
+                  <Icon
+                    library="Feather"
+                    name="bluetooth"
+                    size={22}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
 
           {/* Material Return */}
           <Stack.Screen

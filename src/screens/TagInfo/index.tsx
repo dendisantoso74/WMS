@@ -18,7 +18,6 @@ const TagInfoScreen = () => {
         mode="rfid"
         onAutoNavigate={rfids => {
           navigation.navigate('Tag Info Detail', {listrfid: rfids});
-          console.log('Navigating with RFIDs:', rfids);
         }}
       />
     </SafeAreaView>

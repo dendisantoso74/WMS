@@ -98,9 +98,8 @@ const InputApp: React.FC<InputAppProps> = ({
                   label={option.label}
                   checked={toggleCheckBox}
                   onChange={checked => {
-                    console.log(checked),
-                      setToggleCheckBox(!toggleCheckBox),
-                      onChange(!checked);
+                    // console.log(checked),
+                    setToggleCheckBox(!toggleCheckBox), onChange(!checked);
                   }}
                 />
                 {/* <Text style={styles.checkboxLabel}>{option.label}</Text> */}

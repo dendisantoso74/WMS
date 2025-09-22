@@ -39,7 +39,6 @@ const MovementSmartScanScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {binInfo} = route.params;
-  console.log('Bin Info from params:', binInfo);
 
   const [tagItems, setTagItems] = useState([]);
   const [itemInfo, setItemInfo] = useState<any>(null);
@@ -55,7 +54,6 @@ const MovementSmartScanScreen = () => {
 
     tagItems &&
       getSerializedItemByTagCodes(tagItems).then(res => {
-        console.log('RFID Data Response:', res.member);
         setItemInfo(res.member);
         setLoading(false); // Stop loading
       });
@@ -64,7 +62,6 @@ const MovementSmartScanScreen = () => {
   // rfid scanner
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
-      console.log('RFID Data:', newData);
       // if newdata is array make popup to select item for set to search
       setLoading(true); // Start loading
       // getSerializedItemByTagCodes([newData]).then(res => {
@@ -129,7 +126,6 @@ const MovementSmartScanScreen = () => {
 
     try {
       // const res = await createMaterialMovement(payload);
-      console.log('Payload:', payload);
       setTempPayload(payload);
 
       // ToastAndroid.show('Material movement updated!', ToastAndroid.SHORT);
@@ -144,7 +140,6 @@ const MovementSmartScanScreen = () => {
   const handleOnConfirm = async () => {
     createMaterialMovement(tempPayload)
       .then(res => {
-        console.log('Material movement created:', res);
         ToastAndroid.show('Material movement successfully', ToastAndroid.SHORT);
         setModalVisible(false);
         navigation.navigate('Material Movement');
@@ -251,7 +246,6 @@ const MovementSmartScanScreen = () => {
         onClose={() => setModalVisible(false)}
         onConfirm={() => {
           handleOnConfirm();
-          console.log('Material movement confirmed', tempPayload);
         }}
       />
     </SafeAreaView>

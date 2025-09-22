@@ -32,7 +32,6 @@ export const retagSerializedItem = async (
     tagcode: tagcode,
   };
   try {
-    console.log('Retagging payload:', payload, wmsId);
     const response = await api.post(url, payload, {
       headers: {
         'Patch-Type': 'MERGE',
@@ -40,7 +39,7 @@ export const retagSerializedItem = async (
         'Content-Type': 'application/json',
       },
     });
-    console.log('Retagging response:', response.data);
+    // console.log('Retagging response:', response.data);
 
     return response.data;
   } catch (error) {
@@ -63,7 +62,7 @@ export const retagBIN = async (wmsId: string | number, tagcode: string) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log('Retagging response:', response.data);
+    // console.log('Retagging response:', response.data);
 
     return response.data;
   } catch (error) {

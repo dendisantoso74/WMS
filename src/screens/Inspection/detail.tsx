@@ -59,7 +59,6 @@ const InspectionReceivingScreen = () => {
   }, [poline]);
 
   const handleReceive = (quantity: number, item: any) => {
-    console.log('Temp Quantity:', quantity, 'Poline:', item);
     ReceivePo([
       {
         // Assuming ReceivePo expects an array of poline changes
@@ -77,7 +76,6 @@ const InspectionReceivingScreen = () => {
         if (res.error) {
           Alert.alert('Error', res.error);
         } else {
-          console.log('ReceivePo response:', res);
           Alert.alert('Material received');
           setModalVisible(false);
           // navigation.goBack();
@@ -108,7 +106,6 @@ const InspectionReceivingScreen = () => {
       Alert.alert('Error', res.error);
       return;
     }
-    console.log('ReceivePo response:', res);
     // after submit successfully
     Alert.alert('Material received');
     setModalConfirmVisible(false);
@@ -119,7 +116,6 @@ const InspectionReceivingScreen = () => {
     const fetchDataPoWINSP = async () => {
       setIsLoading(true);
       const res = await getPoWaitingInspect(ponum);
-      console.log('fetchDataPoWINSP response:', res.member);
 
       if (res.member.length === 0) {
         // Alert.alert(
@@ -136,7 +132,6 @@ const InspectionReceivingScreen = () => {
         Alert.alert('Error', res.error);
         return;
       }
-      // console.log('compareee get, param:', res.member[0]);
       setPoline(res.member[0].wms_matrectrans);
       setPorevisionnum(res.member[0].revisionnum);
       setWmsMatrectrans(res.member[0].wms_matrectrans);
@@ -162,8 +157,6 @@ const InspectionReceivingScreen = () => {
   });
 
   const renderItem = item => {
-    console.log('Render item:', item.item);
-
     // Find the matching wmsMatrectrans entry by itemnum
     const matchedTrans = wmsMatrectrans?.find(
       trans => trans.itemnum === item.item.itemnum,
@@ -185,7 +178,6 @@ const InspectionReceivingScreen = () => {
     );
 
     // Set sidebar color: green if fully received, otherwise gray
-    console.log(receiptQty, acceptQty, rejectQty);
 
     const sideBarColor =
       item.item.rejectqty + item.item.acceptqty === item.item.receiptquantity
@@ -301,14 +293,14 @@ const InspectionReceivingScreen = () => {
           color="primary"
         />
       </View> */}
-      <View style={styles.buttonContainer}>
+      {/* <View style={styles.buttonContainer}>
         <ButtonApp
           label="GO TO TAG"
           onPress={() => navigation.navigate('Po Detail', {listrfid: [ponum]})}
           size="large"
           color="primary"
         />
-      </View>
+      </View> */}
 
       <ModalInputWms
         visible={modalVisible}
