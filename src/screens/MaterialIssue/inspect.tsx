@@ -18,7 +18,6 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import ModalInputWms from '../../compnents/wms/ModalInputWms';
 import {
   completeIssue,
   generateIssueHeader,
@@ -29,6 +28,7 @@ import {random, set} from 'lodash';
 import {formatDateTime} from '../../utils/helpers';
 import {WoDetail} from '../../utils/types';
 import PreventBackNavigate from '../../utils/preventBack';
+import Loading from '../../compnents/Loading';
 
 const dummyRfids = [''];
 
@@ -40,8 +40,6 @@ const MaterialIssueInspectScreen = () => {
 
   const [search, setSearch] = useState('');
 
-  const [rfids, setRfids] = useState(dummyRfids);
-  const [modalVisible, setModalVisible] = useState(false);
   const [datas, setDatas] = useState<WoDetail[]>([]); // <-- Use WoDetail[] type
   const [invUse, setInvUse] = useState([]); // <-- Use WoDetail[] type
   const [invreserve, setInvreserve] = useState([]); // <-- Use WoDetail[] type
@@ -49,10 +47,7 @@ const MaterialIssueInspectScreen = () => {
   const [invreserveIndex, setInvreserveIndex] = useState(0);
   const [filteredInvreserve, setFilteredInvreserve] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const handleReceive = () => {
-    setModalVisible(true);
-  };
+  const [loadingChangeStatus, setLoadingChangeStatus] = useState(false);
 
   const fetchWo = async () => {
     getWorkOrderDetails(woNumber)
@@ -99,6 +94,7 @@ const MaterialIssueInspectScreen = () => {
       })
       .finally(() => {
         setLoading(false);
+        setLoadingChangeStatus(false);
       });
   };
 
@@ -137,6 +133,7 @@ const MaterialIssueInspectScreen = () => {
   }, [woNumber]);
 
   const handlePutToStage = async () => {
+    setLoadingChangeStatus(true);
     if (invUse[invreserveIndex]?.status === 'STAGED') {
       completeIssue(invUse[invreserveIndex]?.invuseid).then(res => {
         ToastAndroid.show('Issue completed successfully', ToastAndroid.SHORT);
@@ -145,7 +142,34 @@ const MaterialIssueInspectScreen = () => {
       });
     } else {
       putToStage(invUse[invreserveIndex]?.invuseid).then(res => {
+        Alert.alert(
+          'Information',
+          'Status change to stage, you want to complete the issue?',
+          [
+            {
+              text: 'No',
+              style: 'cancel',
+              onPress: () => setLoadingChangeStatus(false),
+            },
+            {
+              text: 'Yes',
+              onPress: () => {
+                completeIssue(invUse[invreserveIndex]?.invuseid).then(res => {
+                  ToastAndroid.show(
+                    'Issue completed successfully',
+                    ToastAndroid.SHORT,
+                  );
+                  fetchWo();
+                  navigation.navigate('Material Issue Scan');
+                });
+              },
+            },
+          ],
+          {cancelable: false},
+        );
+
         ToastAndroid.show('Put to stage successfully', ToastAndroid.SHORT);
+
         fetchWo();
       });
     }
@@ -170,6 +194,7 @@ const MaterialIssueInspectScreen = () => {
             invuselinenum: randomnumber + index + 1,
             invinvUseId: invreserveid,
             payload: [],
+            invuse: invUse,
           })
         }
         style={styles.rfidCard}
@@ -213,16 +238,21 @@ const MaterialIssueInspectScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Loading visible={loadingChangeStatus} />
       <PreventBackNavigate toScreen="Material Issue Scan" />
       <View className="flex-row p-2 bg-blue-400">
         <View>
           <Text className="font-bold text-white">WO Number</Text>
           <Text className="font-bold text-white">WO Date</Text>
+          <Text className="font-bold text-white">Status</Text>
         </View>
         <View>
           <Text className="ml-10 font-bold text-white">{datas[0]?.wonum}</Text>
           <Text className="ml-10 font-bold text-white">
             {formatDateTime(datas[0]?.statusdate || '')}
+          </Text>
+          <Text className="ml-10 font-bold text-white">
+            {invUse[invreserveIndex]?.status}
           </Text>
         </View>
       </View>
@@ -267,7 +297,10 @@ const MaterialIssueInspectScreen = () => {
                 : 'PUT TO STAGE'
             }
             onPress={() => handlePutToStage()}
-            disabled={invUse[invreserveIndex]?.status === 'COMPLETE'}
+            disabled={
+              invUse[invreserveIndex]?.status === 'COMPLETE' ||
+              !invUse[invreserveIndex]?.invuseline
+            }
             size="large"
             color="primary"
           />

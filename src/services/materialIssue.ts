@@ -4,7 +4,10 @@ import api from './api';
 
 export const getWorkOrderDetails = async (workOrderId: string) => {
   const site = await getData('site');
-  const url = `/maximo/oslc/os/WMS_MXWOISSUE?lean=1&oslc.select=*&oslc.where=siteid="${site}" and wonum="${workOrderId}"`;
+  //for improvement query soon :  invuse,invreserve,status,status_description,description,wonum,siteid,reportdate,statusdate
+  const select =
+    'invuse,invreserve,status,status_description,description,wonum,siteid,reportdate,statusdate';
+  const url = `/maximo/oslc/os/WMS_MXWOISSUE?lean=1&oslc.select=${select}&oslc.where=siteid="${site}" and wonum="${workOrderId}"`;
   try {
     const response = await api.get(url);
     // console.log('Work Order Details Response:', response.data);

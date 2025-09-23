@@ -12,9 +12,10 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from '../compnents/Icon';
 import ButtonApp from '../compnents/ButtonApp';
-import {storeData} from '../utils/store';
+import {clearAllData, storeData} from '../utils/store';
 import {useNavigation} from '@react-navigation/native';
 import {useAppContext} from '../context/AppContext';
+import Loading from '../compnents/Loading';
 
 const ServerAddressScreen = () => {
   const navigation = useNavigation<any>();
@@ -22,11 +23,21 @@ const ServerAddressScreen = () => {
 
   const [address, setAddress] = useState('http://192.168.77.43:9080');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
       try {
         const value = await AsyncStorage.getItem('user');
+        const logindateAsync = await AsyncStorage.getItem('loginDate');
+
+        // if (logindateAsync !== new Date().toISOString().split('T')[0]) {
+        //   clearAllData();
+        //   setIsAuthenticated(false);
+        // } else {
+        //   setIsAuthenticated(true);
+        // }
+
         if (value !== null) {
           setIsAuthenticated(true);
         }
@@ -77,6 +88,7 @@ const ServerAddressScreen = () => {
           resizeMode="cover"
         /> */}
       </View>
+      <Loading visible={isLoading} />
       <View style={styles.container}>
         {/* <Image
           source={require('../assets/images/icon3.png')}

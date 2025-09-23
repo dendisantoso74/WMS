@@ -93,6 +93,7 @@ const LoginScreen = () => {
 
           storeData('site', 'TJB56');
           storeData('org', 'BJS');
+          storeData('loginDate', new Date().toISOString().split('T')[0]);
 
           setIsAuthenticated(true);
         })

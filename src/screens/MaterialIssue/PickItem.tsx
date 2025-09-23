@@ -47,7 +47,7 @@ const userTypeOptions = [
 const PickItemScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item, invuselinenum, invinvUseId, payloadPick} = route.params;
+  const {item, invuselinenum, invinvUseId, payloadPick, invuse} = route.params;
 
   const [search, setSearch] = useState('');
   const [suggestedBin, setSuggestedBin] = useState([]);
@@ -60,6 +60,26 @@ const PickItemScreen = () => {
   const [serialNumberItem, setSerialNumberItem] = useState('');
   const [findItem, setFindItem] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [invuseLine, setInvuseLine] = useState([]);
+
+  useEffect(() => {
+    // If invuseline is an array, map it; if it's an object, wrap it in an array first
+    let lines = invuse[0]?.invuseline;
+    if (lines) {
+      if (!Array.isArray(lines)) {
+        lines = [lines];
+      }
+      const filteredLines = lines.map((line: any) => ({
+        serialnumber: line.serialnumber,
+        itemnum: line.itemnum,
+        quantity: line.quantity,
+        invuselinenum: line.invuselinenum,
+      }));
+      setInvuseLine(filteredLines);
+      console.log(filteredLines);
+    }
+  }, []);
 
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
@@ -123,13 +143,18 @@ const PickItemScreen = () => {
   }, [item]);
 
   const handleAdd = async () => {
+    // Find invuseLine with matching serialnumber
+    const matchedLine = invuseLine.find(
+      line => line.serialnumber === serialNumberItem,
+    );
+
     const payload = {
       serialnumber: serialNumberItem, // need to be make sure this payload is existing because is required
       quantity: Number(pickqty),
       assetnum: item.assetnum,
       frombin: findItem?.wms_bin,
       fromstoreloc: item.location,
-      invuselinenum: random(0, 999),
+      invuselinenum: matchedLine ? matchedLine.invuselinenum : random(0, 999),
       issueto: maxUser,
       itemnum: item.itemnum,
       itemsetid: item.itemsetid,
@@ -161,6 +186,7 @@ const PickItemScreen = () => {
       invuselinenum: invuselinenum,
       invinvUseId: invinvUseId,
       payload: exists ? payloadPick : [...payloadPick, payload], //merge with existing payload
+      invuse: invuse,
     });
 
     // await pickItem(invinvUseId, payload)

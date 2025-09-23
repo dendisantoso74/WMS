@@ -25,7 +25,16 @@ import Loading from '../../compnents/Loading';
 const DetailMaterialScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const {item, invuselinenum, invinvUseId, payload} = route.params;
+  const {item, invuselinenum, invinvUseId, payload, invuse} = route.params;
+
+  // console.log(
+  //   'param detail material',
+  //   item,
+  //   invuselinenum,
+  //   invinvUseId,
+  //   payload,
+  //   invuse,
+  // );
 
   const [payloads, setPayloads] = useState<any[]>(payload || []);
   const [modalVisible, setModalVisible] = useState(false);
@@ -50,6 +59,8 @@ const DetailMaterialScreen = () => {
 
   useEffect(() => {
     if (Array.isArray(payload)) {
+      // console.log('Payload is an array:', payload);
+
       setPayloads(payload);
     }
 
@@ -147,6 +158,7 @@ const DetailMaterialScreen = () => {
                 invuselinenum: invuselinenum,
                 invinvUseId: invinvUseId,
                 payloadPick: payloads,
+                invuse: invuse,
               })
             }>
             <Icon library="Feather" name="plus" size={15} color="white"></Icon>
