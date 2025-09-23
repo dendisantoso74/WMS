@@ -30,6 +30,7 @@ import {
   ZebraResultPayload,
   ZebraRfidResultPayload,
 } from 'react-native-zebra-rfid-barcode';
+import Loading from '../../compnents/Loading';
 const dummyRfids = [
   {
     wms_bin: 'MS-A1L-1-2-1-1',
@@ -83,7 +84,7 @@ const DetaliBinStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {itemBin, wms_opinid} = route.params;
-  console.log('item from params, temp:', itemBin);
+  // console.log('item from params, temp:', itemBin);
 
   const [rfids, setRfids] = useState(dummyRfids);
   const [search, setSearch] = useState('');
@@ -94,8 +95,16 @@ const DetaliBinStockOpnameScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [physicalCount, setPhysicalCount] = useState(0);
-  const [rfidItems, setRfidItems] = useState([]);
+  const [rfidItems, setRfidItems] = useState([
+    // '4C5090620230000000009769',
+    // '4C5090620230000000009770',
+    // '4C5090620230000000009765',
+    // '4C5090620230000000009766',
+    // '4C5090620230000000009784',
+  ]);
   const [itemsDetail, setItemsDetail] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   // rfisd reader setup
   useFocusEffect(
@@ -103,7 +112,7 @@ const DetaliBinStockOpnameScreen = () => {
       const rfidEvent = ZebraEventEmitter.addListener(
         ZebraEvent.ON_RFID,
         (e: ZebraRfidResultPayload) => {
-          console.log('scan on stock opname', uniq(e.data));
+          // console.log('scan on stock opname', uniq(e.data));
           handleRfidEvent(uniq(e.data));
         },
       );
@@ -124,10 +133,13 @@ const DetaliBinStockOpnameScreen = () => {
   useEffect(() => {
     // Loop through rfidItems and fetch detail for each tagcode/serialnumber
     const fetchDetails = async () => {
+      setIsLoading(true);
       const details = [];
       for (const tagcode of rfidItems) {
         try {
           const res = await getDetailItem(tagcode);
+          // console.log('detail item for', tagcode, res);
+
           // Only include if wms_bin matches itemBin.binnum
           if (
             res &&
@@ -142,6 +154,7 @@ const DetaliBinStockOpnameScreen = () => {
         }
       }
       setItemsDetail(details);
+      setIsLoading(false);
     };
 
     if (rfidItems.length > 0) {
@@ -197,15 +210,23 @@ const DetaliBinStockOpnameScreen = () => {
     ToastAndroid.show('Material adjusted!', ToastAndroid.SHORT);
   };
 
-  const handleSave = (payload: any[]) => {
+  const handleSave = async (payload: any[]) => {
     // make loop base on array payload
-    payload.forEach((item, index) => {
-      console.log('Saving item:', index, item);
-      saveStockOpname(item);
-    });
+    // payload.forEach((item, index) => {
+    //   console.log('Saving item:', index, item);
+    //   saveStockOpname(item);
+    // });
+    setIsLoading(true);
+    for (let index = 0; index < payload.length; index++) {
+      const item = payload[index];
+      // console.log('Saving item:', index, item);
+      await saveStockOpname(item);
+      await sleep(1000); // 1 second delay
+    }
     // console.log('Saving payload send:', payload);
     // You can call your save API here with the payload
     ToastAndroid.show('Data saved successfully!', ToastAndroid.SHORT);
+    setIsLoading(false);
     navigation.navigate('Detail Stock Opname', {
       wms_opinid: wms_opinid,
     });
@@ -232,67 +253,85 @@ const DetaliBinStockOpnameScreen = () => {
     return found ? found.physicalcount : defaultCount;
   };
 
-  const renderItem = ({item}: {item: string}) => (
-    <TouchableOpacity
-      style={styles.rfidCard}
-      // onPress={() =>
-      //   navigation.navigate('Detail Material Stock Opname', {
-      //     item: item,
-      //     wms_opinid: wms_opinid,
-      //     itemBin: itemBin,
-      //     // tempPayload: [payload],
-      //   })
-      // }
+  const renderItem = ({item}: {item: string}) => {
+    // Check if serialnumber is in tempPayload
+    const isAdjusted = tempPayload.some(
+      (p: any) => p.serialnumber === item.serialnumber,
+    );
 
-      onPress={() => openAdjustModal(item)}>
-      <View style={[styles.sideBar, {backgroundColor: 'blue'}]} />
-      <View className="flex-row my-2">
-        <View className="flex-col justify-start">
-          <Text className="font-bold">{item.itemnum}</Text>
-          <Text className="mr-4 ">{item.description}</Text>
-          <Text className="font-bold">SN: {item.serialnumber}</Text>
-          <View className="flex-row gap-5">
-            <View className="flex-col">
-              <Text>Current Balance</Text>
-              <Text>Physical Count</Text>
-              <Text>Condition code</Text>
-            </View>
-            <View className="flex-col">
-              <Text>
-                {item.qtystored} {item.unitstored}
-              </Text>
-              <Text>
-                {item.serialnumber
-                  ? (() => {
-                      // Check tempPayload first for matching serialnumber
-                      const temp = tempPayload.find(
-                        (p: any) => p.serialnumber === item.serialnumber,
-                      );
-                      if (temp) {
-                        return temp.physicalcount;
-                      }
-                      // Fallback to opinline
-                      return getPhysicalCountBySerial(
-                        item.serialnumber,
-                        item.qtystored,
-                      );
-                    })()
-                  : 0}{' '}
-                {item.unitstored}
-              </Text>
-              <Text>{item.conditioncode}</Text>
+    // Check if serialnumber is in opinline
+    const isInOpinline = opinline.some(
+      (line: any) => line.serialnumber === item.serialnumber,
+    );
+
+    return (
+      <TouchableOpacity
+        style={styles.rfidCard}
+        // onPress={() =>
+        //   navigation.navigate('Detail Material Stock Opname', {
+        //     item: item,
+        //     wms_opinid: wms_opinid,
+        //     itemBin: itemBin,
+        //     // tempPayload: [payload],
+        //   })
+        // }
+
+        onPress={() => openAdjustModal(item)}>
+        <View
+          style={[
+            styles.sideBar,
+            {backgroundColor: isAdjusted || isInOpinline ? 'blue' : 'gray'},
+          ]}
+        />
+        <View className="flex-row my-2">
+          <View className="flex-col justify-start">
+            <Text className="font-bold">{item.itemnum}</Text>
+            <Text className="mr-4 ">{item.description}</Text>
+            <Text className="font-bold">SN: {item.serialnumber}</Text>
+            <View className="flex-row gap-5">
+              <View className="flex-col">
+                <Text>Current Balance</Text>
+                <Text>Physical Count</Text>
+                <Text>Condition code</Text>
+              </View>
+              <View className="flex-col">
+                <Text>
+                  {item.qtystored} {item.unitstored}
+                </Text>
+                <Text>
+                  {item.serialnumber
+                    ? (() => {
+                        // Check tempPayload first for matching serialnumber
+                        const temp = tempPayload.find(
+                          (p: any) => p.serialnumber === item.serialnumber,
+                        );
+                        if (temp) {
+                          return temp.physicalcount;
+                        }
+                        // Fallback to opinline
+                        return getPhysicalCountBySerial(
+                          item.serialnumber,
+                          item.qtystored,
+                        );
+                      })()
+                    : 0}{' '}
+                  {item.unitstored}
+                </Text>
+                <Text>{item.conditioncode}</Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {console.log('item detail bin', opinline)}
+      {/* {console.log('item detail bin', opinline)}
       {console.log('payload temp', tempPayload)}
-      {console.log('rfid items', rfidItems)}
+      {console.log('rfid items', rfidItems)} */}
+      <Loading visible={isLoading} text="Loading..." />
       <View className="p-2 bg-blue-400">
         <View className="flex-row gap-16">
           <View className="flex-col justify-start">
@@ -307,7 +346,7 @@ const DetaliBinStockOpnameScreen = () => {
           </View>
         </View>
         <Text className="text-white">
-          {itemBin.scannedcount} Items scanned of {itemBin.itemcount}
+          {itemBin.scannedcount} Items saved of {itemBin.itemcount}
         </Text>
       </View>
 
@@ -319,6 +358,9 @@ const DetaliBinStockOpnameScreen = () => {
           </Text>
         </View>
       </View>
+      <Text className="ml-3">
+        Scan from device : {itemsDetail.length} items
+      </Text>
       <FlatList
         data={itemsDetail}
         renderItem={renderItem}

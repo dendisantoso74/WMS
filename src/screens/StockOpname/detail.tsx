@@ -31,6 +31,7 @@ import {
 } from 'react-native-zebra-rfid-barcode';
 import {debounce, uniq} from 'lodash';
 import ModalApp from '../../compnents/ModalApp';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const DetailStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
@@ -43,6 +44,7 @@ const DetailStockOpnameScreen = () => {
   const [search, setSearch] = useState('');
   const [rfidItems, setRfidItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // rfisd reader setup
   useFocusEffect(
@@ -50,7 +52,7 @@ const DetailStockOpnameScreen = () => {
       const rfidEvent = ZebraEventEmitter.addListener(
         ZebraEvent.ON_RFID,
         (e: ZebraRfidResultPayload) => {
-          console.log('scan on stock opname', uniq(e.data));
+          // console.log('scan on stock opname', uniq(e.data));
           handleRfidEvent(uniq(e.data));
         },
       );
@@ -68,7 +70,7 @@ const DetailStockOpnameScreen = () => {
         .then(res => {
           setRfidItems(res.member);
           const binnum = res.member[0].wms_bin[0].bin;
-          console.log('detail bin', binnum);
+          // console.log('detail bin', binnum);
           setSearch(binnum);
         })
         .catch(err => {
@@ -89,18 +91,27 @@ const DetailStockOpnameScreen = () => {
       });
   };
 
-  const handleSearch = (text: string) => {
-    setSearch(text);
-  };
-  useEffect(() => {
-    getDetailStockOpname(wms_opinid).then(res => {
+  const fetchStockOpname = async () => {
+    setLoading(true);
+    try {
+      const res = await getDetailStockOpname(wms_opinid);
       setStockOpname(res.member[0]);
       setStockOpnameBin(res.member[0].wms_opinline_bin);
-      console.log('stock opname detail', res.member[0]);
-
       setLoading(false);
-    });
+    } catch (e) {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStockOpname();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchStockOpname();
+    setRefreshing(false);
+  };
 
   const filteredBins = Array.isArray(stockOpnameBin)
     ? stockOpnameBin?.filter(
@@ -134,7 +145,7 @@ const DetailStockOpnameScreen = () => {
             <Text className="font-bold">Zone: {item.wms_zone}</Text>
             <Text className="font-bold">Area: {item.wms_area}</Text>
             <Text>
-              {item.scannedcount} items scaned from {item.itemcount} items
+              {item.scannedcount} items scanned from {item.itemcount} items
             </Text>
           </View>
         </View>
@@ -144,19 +155,17 @@ const DetailStockOpnameScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate toScreen="Stock Opname List" />
+      <View className="flex-col p-2 bg-blue-400 ">
+        <Text className="text-xl text-white">{stockOpname?.description}</Text>
+        <Text className="text-white">
+          {stockOpname?.scanneddate && formatDateTime(stockOpname?.scanneddate)}
+        </Text>
+      </View>
       {loading ? (
         <ActivityIndicator className="mt-6" size="large" color="#3674B5" />
       ) : (
         <>
-          <View className="flex-col p-2 bg-blue-400 ">
-            <Text className="text-xl text-white">
-              {stockOpname?.description}
-            </Text>
-            <Text className="text-white">
-              {formatDateTime(stockOpname?.scanneddate)}
-            </Text>
-          </View>
-
           <View>
             <TextInput
               style={styles.filterInput}
@@ -181,6 +190,8 @@ const DetailStockOpnameScreen = () => {
             keyExtractor={(item, index) => index.toString()}
             contentContainerStyle={styles.listContent}
             style={styles.list}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
           />
           <View style={styles.buttonContainer}>
             <ButtonApp

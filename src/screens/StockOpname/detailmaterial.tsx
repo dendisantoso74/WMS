@@ -19,7 +19,7 @@ const DetailMaterialStockOpnameScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {item, wms_opinid, itemBin} = route.params;
-  console.log('item from params detail material:', item);
+  // console.log('item from params detail material:', item);
   const [count, setCount] = useState(0);
   const [tempPayload, setTempPayload] = useState([]);
 
@@ -58,7 +58,7 @@ const DetailMaterialStockOpnameScreen = () => {
       serialnumber: item.serialnumber,
     };
     setTempPayload([payload]); // Save to state (array for possible multiple entries)
-    console.log('Adjusting material:', payload);
+    // console.log('Adjusting material:', payload);
     navigation.navigate('Detail Bin Stock Opname', {
       item: item,
       wms_opinid: wms_opinid,
