@@ -37,16 +37,7 @@ export const clearDataByKeys = async (keys: StorageKeyTypes[]) => {
 };
 
 export const clearDataLogout = async () => {
-  const keys = [
-    'userToken',
-    'user',
-    'MAXuser',
-    'my-key',
-    'unitLevel',
-    'totalUnitArea',
-    'totalUnitAreaProgres',
-    // 'shift',
-  ];
+  const keys = ['MAXuser', 'userToken', 'site', 'org', 'user', 'loginDate'];
   try {
     await AsyncStorage.multiRemove(keys);
     console.log(`Data for keys "${keys.join(', ')}" cleared`);

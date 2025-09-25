@@ -16,14 +16,29 @@ import {clearAllData, storeData} from '../utils/store';
 import {useNavigation} from '@react-navigation/native';
 import {useAppContext} from '../context/AppContext';
 import Loading from '../compnents/Loading';
+import Config from 'react-native-config';
 
 const ServerAddressScreen = () => {
   const navigation = useNavigation<any>();
   const {setUser, setIsAuthenticated} = useAppContext();
 
-  const [address, setAddress] = useState('http://192.168.77.43:9080');
+  const [address, setAddress] = useState(Config.API_URL);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const savedAddress = await AsyncStorage.getItem('apiUrl');
+        if (savedAddress) {
+          setAddress(savedAddress);
+        }
+      } catch (e) {
+        console.error('Failed to load address from storage', e);
+      }
+    };
+    fetchAddress();
+  }, []);
 
   useEffect(() => {
     const getData = async () => {
@@ -114,7 +129,7 @@ const ServerAddressScreen = () => {
                 style={styles.input}
                 value={address}
                 onChangeText={setAddress}
-                placeholder="http://192.168.77.43:9080"
+                placeholder="http://xxx.xxx.xx.xx:xxxx"
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="url"

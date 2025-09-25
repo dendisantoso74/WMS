@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import ButtonApp from '../compnents/ButtonApp';
 import ModalApp from '../compnents/ModalApp';
-import {clearAllData, getData} from '../utils/store';
+import {clearAllData, clearDataLogout, getData} from '../utils/store';
 import {useAppContext} from '../context/AppContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
@@ -23,6 +23,7 @@ const OptionsScreen = () => {
 
   const [user, setUser] = useState<string | null>(null);
   const [site, setSite] = useState<string | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -30,6 +31,8 @@ const OptionsScreen = () => {
       setUser(userAsync);
       const siteAsync = await getData('site');
       setSite(siteAsync);
+      const addressAsync = await getData('apiUrl');
+      setAddress(addressAsync);
     };
     fetchUser();
   }, []);
@@ -40,7 +43,8 @@ const OptionsScreen = () => {
 
   const confirmLogout = () => {
     setIsModalVisible(false);
-    clearAllData();
+    // clearAllData();
+    clearDataLogout();
     setIsAuthenticated(false);
   };
 
@@ -69,10 +73,10 @@ const OptionsScreen = () => {
 
       {/* Change Site */}
       <Text style={styles.sectionTitle}>User</Text>
-      <TouchableOpacity style={styles.menuRow} onPress={() => {}}>
+      <View style={styles.menuRow}>
         <Text style={styles.menuText}>{user}</Text>
         {/* <Icon name="chevron-right" size={24} color="#888" /> */}
-      </TouchableOpacity>
+      </View>
 
       {/* Change Site */}
       <Text style={styles.sectionTitle}>Change Site</Text>
@@ -89,6 +93,13 @@ const OptionsScreen = () => {
         <Text style={styles.menuText}>Connect to RFID Reader</Text>
         <Icon name="chevron-right" size={24} color="#888" />
       </TouchableOpacity>
+
+      {/* Server Address */}
+      <Text style={styles.sectionTitle}>Server Address</Text>
+      <View style={styles.menuRow}>
+        <Text style={styles.menuText}>{address}</Text>
+        {/* <Icon name="chevron-right" size={24} color="#888" /> */}
+      </View>
 
       {/* Language */}
       {/* <Text style={styles.sectionTitle}>Language</Text>

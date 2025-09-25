@@ -13,7 +13,6 @@ import {authService} from '../services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {clearAllData, storeData} from '../utils/store';
 import {getCurrentShift, isExpired, isTablet} from '../utils/helpers';
-import {decode} from 'react-native-pure-jwt';
 import Config from 'react-native-config';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 const LoginScreen = () => {

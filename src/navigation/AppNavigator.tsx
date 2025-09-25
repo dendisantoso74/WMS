@@ -2,11 +2,9 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import ListScreen from '../screens/ListScreen';
 import ScanScreen from '../screens/ScanScreen';
 import LoginScreen from '../screens/LoginScreen';
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import ProfileScreen from '../screens/ProfileScreen';
 import Icon from '../compnents/Icon';
 import {useAppContext} from '../context/AppContext';
 import {isMobile} from '../utils/helpers';
@@ -84,33 +82,6 @@ const BottomTabNavigator = (props: any) => {
           paddingTop: 5,
         },
       })}>
-      <Tab.Screen
-        name="List View"
-        component={ListScreen}
-        options={({navigation}) => ({
-          headerTitleAlign: 'center',
-          headerTitleStyle: {
-            fontSize: isMobile() ? 18 : 20,
-          },
-          tabBarActiveTintColor: '#3674B5',
-          tabBarLabel: 'Home',
-          tabBarIcon: ({color, size}) => (
-            <Icon library="Feather" name="home" color={color} size={size} />
-          ),
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Home')}
-              style={{marginLeft: 20, marginRight: 32}}>
-              <Icon
-                library="Feather"
-                name="arrow-left"
-                size={24}
-                color="black"
-              />
-            </TouchableOpacity>
-          ),
-        })}
-      />
       <Stack.Screen
         name="scan"
         options={{
@@ -723,7 +694,6 @@ const AppNavigator = () => {
             component={BottomTabNavigator}
             options={{headerShown: false}}
           />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Options" component={OptionsScreen} />
           <Stack.Screen name="Reader Connect" component={ConnectRFIDReader} />
         </>
