@@ -43,7 +43,7 @@ const BinDetailScreen = () => {
   // rfid scanner
   const handleRfidEvent = useCallback(
     debounce((newData: string) => {
-      console.log('RFID Data:', newData);
+      // console.log('RFID Data:', newData);
       // if newdata is array make popup to select item for set to search
 
       setTag(newData[0]);
@@ -68,10 +68,10 @@ const BinDetailScreen = () => {
   );
 
   const fetchDatas = async () => {
-    console.log('Bin detailsxxx:', item);
+    // console.log('Bin detailsxxx:', item);
 
     fetchRetaggingItems(item.bin).then(res => {
-      console.log('Bin details:', res);
+      // console.log('Bin details:', res);
       setItemDetails(res.member[0].wms_serializeditem);
     });
   };
@@ -86,18 +86,18 @@ const BinDetailScreen = () => {
   };
 
   const handleModalSubmit = async () => {
-    console.log('Input value:', selectedItem);
+    // console.log('Input value:', selectedItem);
     await retagSerializedItem(
       selectedItem.item.wms_serializeditemid,
       tag || inputValue,
     )
       .then(res => {
-        console.log('Retagging response:', res);
+        // console.log('Retagging response:', res);
         if (res.error) {
           console.error('Error retagging item:', res.error);
         } else {
           Alert.alert('Success', 'Item retagged successfully!');
-          console.log('Item retagged successfully:', res);
+          // console.log('Item retagged successfully:', res);
           fetchDatas(); // Refresh the data after retagging
           setModalVisible(false);
           setInputValue('');

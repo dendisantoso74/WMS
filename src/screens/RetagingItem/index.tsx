@@ -65,7 +65,7 @@ const RetagingItemScreen = () => {
 
   const handleSearch = async (bin: string) => {
     const res = await fetchRetaggingItems(bin);
-    console.log('Search text:', res.member);
+    // console.log('Search text:', res.member);
     setBins(res.member || []);
   };
 

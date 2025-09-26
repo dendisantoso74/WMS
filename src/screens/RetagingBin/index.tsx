@@ -99,7 +99,7 @@ const RetagingBinScreen = () => {
 
   const handleSearch = async (bin: string) => {
     const res = await getTagBinList('*', pageSize, 1, bin);
-    console.log('Search text:', res.member);
+    // console.log('Search text:', res.member);
     setBins(res.member || []);
   };
 
@@ -126,13 +126,13 @@ const RetagingBinScreen = () => {
   };
 
   const handleModalSubmit = async () => {
-    console.log('slectedItem:', selectedItem?.wms_binid, tag);
+    // console.log('slectedItem:', selectedItem?.wms_binid, tag);
     await retagBIN(selectedItem?.wms_binid, tag ? tag : inputValue)
       .then(res => {
-        console.log('Retagging response:', res);
+        // console.log('Retagging response:', res);
 
         Alert.alert('Success', 'Item retagged successfully!');
-        console.log('Item retagged successfully:', res);
+        // console.log('Item retagged successfully:', res);
         setModalVisible(false);
         setInputValue('');
         setSearch('');

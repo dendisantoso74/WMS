@@ -57,7 +57,7 @@ const TagDetailScreen = () => {
   }, [activeFilter, datas, search]);
 
   useEffect(() => {
-    console.log('RFIDs from params:', PoNumber);
+    // console.log('RFIDs from params:', PoNumber);
 
     const fetchData = async () => {
       setLoading(true);
@@ -65,7 +65,7 @@ const TagDetailScreen = () => {
 
       scanPoWtag(PoNumber)
         .then((res: any) => {
-          console.log('RFIDs fetched successfully:', res.member);
+          // console.log('RFIDs fetched successfully:', res.member);
           if (res.member.length === 0) {
             navigation.goBack();
             Alert.alert(
