@@ -57,7 +57,7 @@ const MaterialIssueInspectScreen = () => {
           console.error('Error fetching work order details:', res.error);
         } else {
           // Check if the work order exists
-          console.log('scan wo issue', res);
+          // console.log('scan wo issue', res);
 
           setDatas(res.member);
 

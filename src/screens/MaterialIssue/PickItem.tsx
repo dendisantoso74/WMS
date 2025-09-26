@@ -77,7 +77,7 @@ const PickItemScreen = () => {
         invuselinenum: line.invuselinenum,
       }));
       setInvuseLine(filteredLines);
-      console.log(filteredLines);
+      // console.log(filteredLines);
     }
   }, []);
 
@@ -211,7 +211,7 @@ const PickItemScreen = () => {
     // const result = await findBinByTagCode(search);
     await getItemSNByTagCode(tagcode)
       .then(res => {
-        console.log('result get sn', res);
+        // console.log('result get sn', res);
         if (res.member[0].itemnum !== item?.itemnum) {
           ToastAndroid.show('Item not Match', ToastAndroid.SHORT);
         } else {
