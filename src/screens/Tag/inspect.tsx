@@ -38,10 +38,7 @@ const TagInspectScreen = () => {
   // RFID SCANNER
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
-  const [listRfid, setListRfid] = useState<string[]>([
-    '4C5071020190000000085461',
-    '4C5071020190000000085552',
-  ]);
+  const [listRfid, setListRfid] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
