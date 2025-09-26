@@ -24,6 +24,7 @@ import {
 import {debounce, uniq} from 'lodash';
 import {generateSerialNumber} from '../../utils/helpers';
 import {checkSerialNumber, taggingPo} from '../../services/materialRecive';
+import Loading from '../../compnents/Loading';
 
 const TagInspectScreen = () => {
   const navigation = useNavigation<any>();
@@ -37,7 +38,11 @@ const TagInspectScreen = () => {
   // RFID SCANNER
   const [listDevices, setListDevices] = useState<string[]>([]);
   const [listBarcodes, setListBarcodes] = useState<string[]>([]);
-  const [listRfid, setListRfid] = useState<string[]>([]);
+  const [listRfid, setListRfid] = useState<string[]>([
+    '4C5071020190000000085461',
+    '4C5071020190000000085552',
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     getListRfidDevices();
@@ -119,16 +124,21 @@ const TagInspectScreen = () => {
       //   item: item,
       //   tag: tag,
       // });
+      setIsLoading(true);
 
       await taggingPo(id, sn, tag)
         .then((res: any) => {
           // console.log('Tagging Response:', res);
-          Alert.alert('Success', `Tag ${tag} selected`);
+          // Alert.alert('Success', `Tag ${tag} selected`);
           navigation.navigate('Po Detail', {listrfid: poNumber});
+          ToastAndroid.show(`Tag ${tag} selected`, ToastAndroid.SHORT);
         })
         .catch(error => {
           // console.error('Error in tagging:', error.Error.message);
           ToastAndroid.show(error.Error.message, ToastAndroid.SHORT);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
 
       // navigation.goBack();
@@ -143,6 +153,7 @@ const TagInspectScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Loading visible={isLoading} text="Loading..." />
       <View className="flex-col p-2 bg-blue-400">
         <View className="flex-row items-start justify-start">
           <Text className="font-bold text-white">Material</Text>
