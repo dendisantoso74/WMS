@@ -134,9 +134,10 @@ export const scanPoWtag = async (poNum: string) => {
   const site = await getData('site');
   // const url = `/maximo/oslc/os/WMS_MXWTAG?lean=1&oslc.select=poid,ponum,siteid,orgid,vendor,orderdate,wms_serializeditem&oslc.where=wms_tagsiteid="${site}" and receipts!="NONE" and wms_serializeditem.serialnumber!="*" and wms_serializeditem.tagcode!="*" and status="APPR" and ponum="${poNum}"`;
 
-  const url = `/maximo/oslc/os/WMS_MXWTAG?lean=1&oslc.select=*&oslc.where=ponum="${poNum}" and status="APPR"`;
+  const url = `/maximo/oslc/os/WMS_MXWTAG?lean=1&oslc.select=*&oslc.where=ponum="${poNum}"`; //changes to ignore filter and status="APPR"
   try {
     const response = await api.get(url);
+    // console.log('API Response for scanPoWtag:', response);
     return response.data;
   } catch (error) {
     throw error;
@@ -172,7 +173,9 @@ export const taggingPo = async (
         'Content-Type': 'application/json',
       },
     });
-    // console.log('Tagging Response:', response.data);
+    console.log('Tagging Request id:', itemId);
+
+    console.log('Tagging Response:', response);
 
     return response.data;
   } catch (error) {
