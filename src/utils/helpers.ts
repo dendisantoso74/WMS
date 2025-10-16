@@ -174,18 +174,28 @@ export function formatDateTime(dateString: string): string {
 export const getReceiptQuantityByPoline = (
   wmsMatrectrans: any[] | undefined,
   polinenum: number,
+  wmsMatrectransReturn: any[] | undefined = [],
 ): number => {
   // Validate wmsMatrectrans is an array and not empty
   if (!Array.isArray(wmsMatrectrans) || wmsMatrectrans.length === 0) {
     return 0;
   }
-  // Sum receiptquantity for all entries with the same polinenum
-  return wmsMatrectrans
-    .filter(trans => trans.polinenum === polinenum)
+
+  const returnQty = wmsMatrectransReturn
+    ?.filter(trans => trans.polinenum === polinenum)
     .reduce(
       (sum, trans) => sum + (trans.receiptquantity - trans.rejectqty ?? 0),
       0,
     );
+  // Sum receiptquantity for all entries with the same polinenum
+  return (
+    wmsMatrectrans
+      .filter(trans => trans.polinenum === polinenum)
+      .reduce(
+        (sum, trans) => sum + (trans.receiptquantity - trans.rejectqty ?? 0),
+        0,
+      ) + returnQty
+  );
 };
 
 export const getQuantityByPolineInspect = (
