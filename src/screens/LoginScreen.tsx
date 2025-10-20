@@ -90,9 +90,15 @@ const LoginScreen = () => {
           storeData('user', username);
           storeData('MAXuser', res.member[0]?.maxuser[0]?.userid);
 
-          storeData('site', 'TJB56');
-          storeData('org', 'BJS');
+          // storeData('site', 'TJB56');
+          // storeData('org', 'BJS');
           storeData('loginDate', new Date().toISOString().split('T')[0]);
+          storeData('site', res.member[0].maxuser[0].defsite);
+          storeData(
+            'org',
+            res.member[0].maxuser[0].defsite === 'TJB56' ? 'BJS' : 'BJP',
+          );
+          storeData('userId', res.member[0].maxuser[0].maxuserid);
 
           setIsAuthenticated(true);
         })

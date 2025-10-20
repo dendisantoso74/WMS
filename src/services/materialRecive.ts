@@ -1,19 +1,6 @@
 import {getData} from '../utils/store';
 import api from './api';
 
-export const getPersonByLoginId = async (loginId: string) => {
-  const url =
-    '/maximo/oslc/os/oslcwmsperson?lean=1&oslc.select=*&oslc.where=maxuser{loginid="' +
-    loginId +
-    '"}';
-  try {
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 export const ScanPo = async (id: string) => {
   const site = await getData('site');
 
