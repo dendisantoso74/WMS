@@ -5,7 +5,8 @@ export type StorageKeyTypes =
   | 'org'
   | 'user'
   | 'apiUrl'
-  | 'loginDate';
+  | 'loginDate'
+  | 'userId';
 
 export type InputTypes = 'checkbox' | 'radio' | 'text' | 'number' | 'dropdown';
 

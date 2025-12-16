@@ -141,37 +141,42 @@ const MaterialIssueInspectScreen = () => {
         navigation.navigate('Material Issue Scan');
       });
     } else {
-      putToStage(invUse[invreserveIndex]?.invuseid).then(res => {
-        Alert.alert(
-          'Information',
-          'Status change to stage, you want to complete the issue?',
-          [
-            {
-              text: 'No',
-              style: 'cancel',
-              onPress: () => setLoadingChangeStatus(false),
-            },
-            {
-              text: 'Yes',
-              onPress: () => {
-                completeIssue(invUse[invreserveIndex]?.invuseid).then(res => {
-                  ToastAndroid.show(
-                    'Issue completed successfully',
-                    ToastAndroid.SHORT,
-                  );
-                  fetchWo();
-                  navigation.navigate('Material Issue Scan');
-                });
+      putToStage(invUse[invreserveIndex]?.invuseid)
+        .then(res => {
+          Alert.alert(
+            'Information',
+            'Status change to stage, you want to complete the issue?',
+            [
+              {
+                text: 'No',
+                style: 'cancel',
+                onPress: () => setLoadingChangeStatus(false),
               },
-            },
-          ],
-          {cancelable: false},
-        );
+              {
+                text: 'Yes',
+                onPress: () => {
+                  completeIssue(invUse[invreserveIndex]?.invuseid).then(res => {
+                    ToastAndroid.show(
+                      'Issue completed successfully',
+                      ToastAndroid.SHORT,
+                    );
+                    fetchWo();
+                    navigation.navigate('Material Issue Scan');
+                  });
+                },
+              },
+            ],
+            {cancelable: false},
+          );
 
-        ToastAndroid.show('Put to stage successfully', ToastAndroid.SHORT);
+          ToastAndroid.show('Put to stage successfully', ToastAndroid.SHORT);
 
-        fetchWo();
-      });
+          fetchWo();
+        })
+        .catch(res => {
+          ToastAndroid.show(res?.Error.message, ToastAndroid.SHORT);
+          fetchWo();
+        });
     }
   };
 

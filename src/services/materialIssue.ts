@@ -144,6 +144,7 @@ export const putToStage = async (invuseid: string, memo: string = '') => {
     );
     return response.data;
   } catch (error) {
+    console.error('Error in putToStage:', get(error, 'response.data', error));
     throw error;
   }
 };

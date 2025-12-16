@@ -36,6 +36,8 @@ const MaterialReceiveDetailScreen = () => {
   const [selectedData, setSelectedData] = useState<string | null>(null);
   const [poline, setPoline] = useState([]);
   const [wmsMatrectrans, setWmsMatrectrans] = useState([]);
+  const [wmsMatrectransReturn, setWmsMatrectransReturn] = useState([]);
+
   const [tempQuantity, setTempQuantity] = useState(0);
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'DONE' | 'NOT DONE'>(
     'NOT DONE',
@@ -87,6 +89,7 @@ const MaterialReceiveDetailScreen = () => {
 
   // Update handleReceive to support split logic:
   const handleReceive = async (quantity: number, item: any) => {
+    setLoading(true); // Start loading
     const site = await getData('site');
 
     if (split) {
@@ -108,6 +111,7 @@ const MaterialReceiveDetailScreen = () => {
         } catch (err) {
           console.error('Error in split ReceivePo:', err);
           Alert.alert('Error', 'Failed to receive material (split mode)');
+          setLoading(false); // Stop loading on error
           break;
         }
       }
@@ -118,9 +122,9 @@ const MaterialReceiveDetailScreen = () => {
       fetchData();
       setModalVisible(false);
       setTempQuantity(quantity);
+      setLoading(false); // Stop loading after split done
     } else {
       // Not split: existing logic
-
       ReceivePo([
         {
           inspected: 0,
@@ -148,6 +152,9 @@ const MaterialReceiveDetailScreen = () => {
         .catch(err => {
           console.error('Error in ReceivePo:', err);
           Alert.alert('Error', 'Failed to receive material');
+        })
+        .finally(() => {
+          setLoading(false); // Stop loading after transaction
         });
       setModalVisible(false);
       setTempQuantity(quantity);
@@ -199,6 +206,11 @@ const MaterialReceiveDetailScreen = () => {
         setDatas(res.member[0]);
         setPoline(res.member[0].poline);
         setWmsMatrectrans(res.member[0].wms_matrectrans);
+        setWmsMatrectransReturn(
+          (res.member[0].matrectrans || []).filter(
+            (m: any) => m.issuetype === 'RETURN',
+          ),
+        );
       })
       .finally(() => setLoading(false));
   };
@@ -216,12 +228,13 @@ const MaterialReceiveDetailScreen = () => {
         const receiptQty = getReceiptQuantityByPoline(
           wmsMatrectrans,
           item.polinenum,
+          wmsMatrectransReturn,
         );
         return receiptQty === item.orderqty;
       }).length;
       setTotalDoneItem(doneCount);
     }
-  }, [poline, wmsMatrectrans]);
+  }, [poline, wmsMatrectrans, wmsMatrectransReturn]);
 
   // Helper: check if all items are fully received (all sideBarColor would be green)
   const allReceived =
@@ -242,6 +255,7 @@ const MaterialReceiveDetailScreen = () => {
     const receiptQty = getReceiptQuantityByPoline(
       wmsMatrectrans,
       item.polinenum,
+      wmsMatrectransReturn,
     );
 
     // Filter by chip
@@ -262,6 +276,7 @@ const MaterialReceiveDetailScreen = () => {
     const receiptQty = getReceiptQuantityByPoline(
       wmsMatrectrans,
       item.item.polinenum,
+      wmsMatrectransReturn,
     );
     // Set sidebar color: green if fully received, otherwise gray
     const sideBarColor = receiptQty === item.item.orderqty ? '#A4DD00' : 'gray';
@@ -408,7 +423,11 @@ const MaterialReceiveDetailScreen = () => {
         }
         remainingQty={
           poline.find(item => item.polinenum === selectedData)?.orderqty -
-            getReceiptQuantityByPoline(wmsMatrectrans, selectedData) || ''
+            getReceiptQuantityByPoline(
+              wmsMatrectrans,
+              selectedData,
+              wmsMatrectransReturn,
+            ) || ''
         }
         total={0}
         onClose={() => {

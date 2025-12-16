@@ -15,7 +15,6 @@ import ButtonApp from '../../compnents/ButtonApp';
 import {Dropdown} from 'react-native-element-dropdown';
 import {getData} from '../../utils/store';
 import {inspectPo, ListRejectCode} from '../../services/materialRecive';
-import {getPersonByLoginId} from '../../services/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ModalApp from '../../compnents/ModalApp';
 

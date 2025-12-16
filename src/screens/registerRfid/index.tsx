@@ -12,6 +12,7 @@ import ButtonApp from '../../compnents/ButtonApp';
 import Icon from '../../compnents/Icon';
 import {useNavigation} from '@react-navigation/native';
 import {getListRfid} from '../../services/registerRfid';
+import PreventBackNavigate from '../../utils/preventBack';
 
 const RegisterRfidScreen = () => {
   const navigation = useNavigation<any>();
@@ -79,6 +80,8 @@ const RegisterRfidScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <PreventBackNavigate />
+
       <FlatList
         data={rfids}
         renderItem={renderItem}

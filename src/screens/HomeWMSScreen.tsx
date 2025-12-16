@@ -15,7 +15,6 @@ import MenuCard from '../compnents/MenuCard';
 import {StyleSheet} from 'react-native';
 import {getPersonByLoginId} from '../services/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PreventBackNavigate from '../utils/preventBack';
 
 const HomeWMSScreen = () => {
   const navigation = useNavigation<any>();
