@@ -89,6 +89,7 @@ const MaterialReceiveDetailScreen = () => {
 
   // Update handleReceive to support split logic:
   const handleReceive = async (quantity: number, item: any) => {
+    setLoading(true); // Start loading
     const site = await getData('site');
 
     if (split) {
@@ -110,6 +111,7 @@ const MaterialReceiveDetailScreen = () => {
         } catch (err) {
           console.error('Error in split ReceivePo:', err);
           Alert.alert('Error', 'Failed to receive material (split mode)');
+          setLoading(false); // Stop loading on error
           break;
         }
       }
@@ -120,9 +122,9 @@ const MaterialReceiveDetailScreen = () => {
       fetchData();
       setModalVisible(false);
       setTempQuantity(quantity);
+      setLoading(false); // Stop loading after split done
     } else {
       // Not split: existing logic
-
       ReceivePo([
         {
           inspected: 0,
@@ -150,6 +152,9 @@ const MaterialReceiveDetailScreen = () => {
         .catch(err => {
           console.error('Error in ReceivePo:', err);
           Alert.alert('Error', 'Failed to receive material');
+        })
+        .finally(() => {
+          setLoading(false); // Stop loading after transaction
         });
       setModalVisible(false);
       setTempQuantity(quantity);
